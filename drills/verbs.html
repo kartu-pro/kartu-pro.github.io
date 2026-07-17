@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verbs | Kartu Pro Drills</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        html,
+        body {
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: 'Noto Sans Georgian', -apple-system, sans-serif;
+            background-color: #f8f5f0;
+        }
+
+        [v-cloak] {
+            display: none !important;
+        }
+
+        @keyframes pulse-red {
+            0% {
+                box-shadow: 0 0 0 0 rgba(167, 0, 7, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(167, 0, 7, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(167, 0, 7, 0);
+            }
+        }
+
+        .btn-next-active {
+            background-color: #A70007 !important;
+            color: white !important;
+            animation: pulse-red 2s infinite;
+        }
+
+        /* Diffing Styles */
+        .diff-char {
+            font-size: 1.4rem;
+            letter-spacing: 1px;
+        }
+
+        .diff-deletion {
+            color: #A70007;
+            text-decoration: line-through;
+            opacity: 0.6;
+        }
+
+        .diff-insertion {
+            color: #166534;
+            background: #dcfce7;
+            border-bottom: 2px solid #166534;
+            padding: 0 1px;
+            border-radius: 2px;
+        }
+
+        .diff-match {
+            color: #334155;
+        }
+
+        /* Shared Component Styles */
+        .btn-primary {
+            padding: 0.85rem 1rem;
+            background-color: #1e293b;
+            color: white;
+            font-weight: 700;
+            border-radius: 0.75rem;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background-color: #0f172a;
+        }
+
+        .btn-primary:disabled {
+            background-color: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            padding: 0.35rem 0.75rem;
+            font-size: 0.85rem;
+            font-weight: 700;
+            border: 1px solid #d1d5db;
+            background-color: white;
+            color: #1e293b;
+            border-radius: 0.5rem;
+            transition: all 0.15s;
+        }
+
+        .btn-secondary:hover {
+            background-color: #f3f4f6;
+        }
+
+        .card-box {
+            background-color: white;
+            padding: 1.25rem;
+            border-radius: 0.75rem;
+            border: 2px solid #e5e7eb;
+        }
+
+        .filter-chip {
+            padding: 0.25rem 0.65rem;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid #d1d5db;
+            background-color: #f3f4f6;
+            user-select: none;
+            transition: all 0.15s;
+        }
+
+        .filter-chip:hover {
+            background-color: #e5e7eb;
+        }
+
+        .filter-chip.active {
+            background-color: #1e293b;
+            color: white;
+            border-color: #1e293b;
+        }
+
+        .input-text {
+            width: 100%;
+            padding: 0.6rem 0.8rem;
+            border-radius: 0.5rem;
+            border: 1px solid #d1d5db;
+            background-color: white;
+            outline: none;
+        }
+
+        .input-text:focus {
+            border-color: #1e293b;
+        }
+    </style>
+</head>
+
+<body class="text-slate-800">
+
+    <div id="app" v-cloak class="h-screen max-h-screen flex flex-col">
+
+        <!-- NAVIGATION -->
+        <header class="bg-slate-800 text-white flex-none border-b-4 border-[#A70007]">
+            <div class="max-w-3xl mx-auto flex justify-between items-center px-4 py-3">
+                <a href="/drills" class="font-bold text-lg text-white no-underline flex items-center gap-2">🇬🇪 Kartu Pro / Drills</a>
+                <button class="btn-secondary" @click="showSettings = true">
+                    ⚙️ Settings
+                </button>
+            </div>
+        </header>
+
+        <main class="w-full max-w-3xl mx-auto p-4 flex-1 flex flex-col min-h-0 overflow-hidden">
+
+            <!-- STATE: LOADING SETUP -->
+            <div v-if="appState === 'loading'" class="text-center py-12 flex-1 flex items-center justify-center">
+                <h2 class="text-2xl font-bold">Loading...</h2>
+            </div>
+
+            <!-- STATE: SETUP UI -->
+            <div v-else-if="appState === 'setup'" class="flex-1 flex flex-col min-h-0 overflow-hidden">
+
+                <div class="flex justify-between items-center mb-3 flex-none">
+                    <h2 class="text-xl font-bold m-0">Configure Drill</h2>
+                    <span class="text-xs font-bold bg-slate-200 px-3 py-1 rounded-full text-slate-700">
+                        Selected: {{ selectedUuids.length }} Verbs | {{ selectedScreeves.length }} Screeves
+                    </span>
+                </div>
+
+                <div class="flex-1 overflow-y-auto pr-1 flex flex-col gap-4">
+                    <!-- Verbs Section -->
+                    <div class="card-box">
+                        <div class="flex justify-between items-center border-b border-gray-100 pb-2 mb-3">
+                            <h3 class="text-base font-bold m-0">Select Verbs ({{ selectedUuids.length }}/{{
+                                allMasdars.length }})</h3>
+                            <div class="flex gap-1.5">
+                                <button class="btn-secondary text-xs" @click="selectVisibleVerbs">Select
+                                    Visible</button>
+                                <button class="btn-secondary text-xs" @click="deselectVisibleVerbs">Deselect
+                                    Visible</button>
+                            </div>
+                        </div>
+
+                        <!-- Search Box -->
+                        <div class="relative mb-3">
+                            <input type="text" v-model="searchQuery" placeholder="Type to search verbs..."
+                                class="input-text pr-8 text-sm">
+                            <button v-if="searchQuery" @click="searchQuery = ''"
+                                class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 font-bold px-1">✕</button>
+                        </div>
+
+                        <!-- Class Filters -->
+                        <div class="mb-2">
+                            <div class="text-xs font-bold text-gray-500 mb-1">Filter by Class:</div>
+                            <div class="flex flex-wrap gap-1.5">
+                                <div v-for="cls in availableClasses" :key="cls" class="filter-chip"
+                                    :class="{ 'active': selectedClassFilter === cls }"
+                                    @click="selectedClassFilter = selectedClassFilter === cls ? null : cls">
+                                    Class {{ cls }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tag Filters -->
+                        <div class="mb-3">
+                            <div class="text-xs font-bold text-gray-500 mb-1">Filter by Tags:</div>
+                            <div class="flex flex-wrap gap-1.5">
+                                <div v-for="tag in availableTags" :key="tag" class="filter-chip"
+                                    :class="{ 'active': selectedTagFilter === tag }"
+                                    @click="selectedTagFilter = selectedTagFilter === tag ? null : tag">
+                                    {{ tag }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Active Filters Status Bar -->
+                        <div v-if="searchQuery || selectedClassFilter !== null || selectedTagFilter !== null"
+                            class="flex items-center justify-between text-xs bg-slate-100 px-3 py-1.5 rounded mb-2 font-semibold text-slate-700">
+                            <span>Showing {{ filteredMasdars.length }} of {{ allMasdars.length }} verbs</span>
+                            <button class="text-[#A70007] hover:underline" @click="clearVerbFilters">Clear filters
+                                ✕</button>
+                        </div>
+
+                        <div
+                            class="max-h-48 overflow-y-auto border border-gray-200 p-2 rounded bg-gray-50 flex flex-col gap-1">
+                            <div v-if="filteredMasdars.length === 0" class="text-center py-4 text-gray-400 text-sm">
+                                No matching verbs found.
+                            </div>
+                            <label v-for="verb in filteredMasdars" :key="verb.uuid"
+                                class="flex items-center gap-3 p-1.5 border-b border-gray-100 last:border-0 cursor-pointer hover:bg-gray-100 text-sm">
+                                <input type="checkbox" :value="verb.uuid" v-model="selectedUuids"
+                                    class="scale-110 cursor-pointer">
+                                <span><strong>{{ verb.masdar }}</strong> - {{ verb.en }}</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Screeves Section -->
+                    <div class="card-box">
+                        <div class="flex justify-between items-center border-b border-gray-100 pb-2 mb-3">
+                            <h3 class="text-base font-bold m-0">Select Screeves ({{ selectedScreeves.length }}/{{
+                                totalScreevesCount }})</h3>
+                            <div class="flex gap-1.5">
+                                <button class="btn-secondary text-xs" @click="selectAllScreeves">Select All</button>
+                                <button class="btn-secondary text-xs" @click="deselectAllScreeves">Deselect All</button>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col gap-3">
+                            <div v-for="(row, idx) in screeveRows" :key="idx"
+                                class="border-b border-gray-100 pb-2 last:border-0 last:pb-0">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <input type="checkbox" :checked="isRowFullySelected(row)"
+                                        @change="toggleScreeveRow(row, $event.target.checked)"
+                                        class="scale-110 cursor-pointer">
+                                    <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">{{ row.name
+                                        }}</span>
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pl-6">
+                                    <label v-for="sc in row.items" :key="sc.id"
+                                        class="flex items-center gap-2 text-sm cursor-pointer select-none">
+                                        <input type="checkbox" :value="sc.id" v-model="selectedScreeves"
+                                            class="scale-100 cursor-pointer">
+                                        <span>{{ sc.label }}</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-3 flex-none">
+                    <button class="btn-primary w-full text-lg" @click="startDrill"
+                        :disabled="selectedUuids.length === 0 || selectedScreeves.length === 0">
+                        {{ startButtonText }}
+                    </button>
+                </div>
+            </div>
+
+            <!-- STATE: QUIZ UI -->
+            <div v-else-if="appState === 'quiz'" class="flex-1 flex flex-col min-h-0 justify-between">
+
+                <div class="flex justify-between items-center mb-2 flex-none">
+                    <span class="text-gray-500 text-sm font-bold">Studying {{ totalFormsCount }} forms with {{
+                        totalCardsCount }} translations</span>
+                    <div class="flex gap-2">
+                        <button class="btn-secondary" @click="showStats = true">📊 Stats</button>
+                        <button class="btn-secondary" @click="endDrill">Quit Drill</button>
+                    </div>
+                </div>
+
+                <div class="card-box flex flex-col items-center justify-center text-center my-auto py-6 flex-none"
+                    v-if="currentCard">
+                    <h2 class="m-0 text-3xl font-bold whitespace-pre-line">{{ currentCard.prompt.text }}</h2>
+                    <p v-if="settings.showGrammar && currentCard.prompt.subtext"
+                        class="text-gray-500 mt-2 text-xs font-bold uppercase tracking-wider">
+                        {{ currentCard.prompt.subtext }}
+                    </p>
+                </div>
+
+                <div class="flex-1 flex flex-col justify-center my-2" v-if="currentCard">
+
+                    <div
+                        class="min-h-[40px] text-center mb-3 font-bold flex flex-col items-center justify-center flex-none">
+                        <div v-if="feedback.msg"
+                            :class="{'text-green-600': feedback.type === 'success', 'text-[#A70007]': feedback.type === 'error'}">
+                            {{ feedback.msg }}
+                        </div>
+                        <div v-if="feedback.type === 'error' && feedback.diff" class="mt-1">
+                            <span v-for="(part, i) in feedback.diff" :key="i" :class="'diff-' + part.type"
+                                class="diff-char">{{ part.char }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Multiple Choice -->
+                    <div v-if="currentCard.response?.choices" class="grid grid-cols-2 gap-3">
+                        <div v-for="(choice, i) in currentCard.response.choices" :key="i"
+                            class="relative border-2 rounded-xl flex flex-col items-center justify-center p-4 cursor-pointer bg-white text-center font-bold transition-transform text-base select-none"
+                            :class="{
+                                'border-green-500 bg-green-50 text-green-800': isAnswerSubmitted && choice.isCorrect, 
+                                'border-[#A70007] bg-red-50 text-red-800': isAnswerSubmitted && selectedIndex === i && !choice.isCorrect,
+                                'border-gray-200 hover:border-gray-300 active:scale-95': !isAnswerSubmitted
+                             }" @click="selectCard(i, choice.isCorrect)">
+                            <span class="absolute top-2 left-3 text-xs text-gray-400">{{ i + 1 }}</span>
+                            <div>{{ choice.text }}</div>
+                        </div>
+                    </div>
+
+                    <!-- Text Input -->
+                    <div v-if="currentCard.response?.textAnswers" class="flex flex-col gap-3">
+                        <input type="text" ref="textInputRef" v-model="textInput" @input="handleTextInput"
+                            placeholder="Type answer..."
+                            class="w-full p-3 border-2 border-gray-300 rounded-xl text-xl text-center outline-none focus:border-[#A70007] transition-colors"
+                            @keyup.enter="handlePrimaryAction" autocomplete="off" autocorrect="off" autocapitalize="off"
+                            spellcheck="false" :disabled="isAnswerSubmitted">
+                    </div>
+                </div>
+
+                <!-- Merged Action Button -->
+                <div class="pt-2 flex-none">
+                    <button class="btn-primary w-full text-lg" :class="{ 'btn-next-active': isAnswerSubmitted }"
+                        @click="handlePrimaryAction" :disabled="isActionButtonDisabled">
+                        {{ primaryButtonText }}
+                    </button>
+                </div>
+            </div>
+
+            <!-- STATE: FINISHED -->
+            <div v-else-if="appState === 'finished'"
+                class="text-center py-16 flex-1 flex flex-col items-center justify-center">
+                <h2 class="text-3xl font-bold mb-2">Drill Complete! 🎉</h2>
+                <p class="text-gray-600 mb-6">You successfully mastered all {{ totalCardsCount }} conjugations.</p>
+                <div class="flex gap-3">
+                    <button class="btn-secondary px-6 py-3 text-base" @click="showStats = true">📊 View Stats</button>
+                    <button class="btn-primary px-8" @click="appState = 'setup'">Back to Setup</button>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- SETTINGS MODAL -->
+        <div v-if="showSettings" class="fixed inset-0 bg-black/60 flex justify-center items-center z-[2000] p-4"
+            @click.self="showSettings = false">
+            <div class="bg-white p-6 rounded-2xl w-full max-w-md shadow-2xl">
+                <div class="flex justify-between items-center mb-5">
+                    <h2 class="text-xl font-bold m-0">Settings</h2>
+                    <button class="text-gray-400 hover:text-gray-700 font-bold" @click="showSettings = false">✕</button>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block font-bold mb-1 text-sm text-gray-700">Direction</label>
+                    <select v-model="settings.direction" class="input-text">
+                        <option value="en-ka">English 🇬🇧 ➔ Georgian 🇬🇪</option>
+                        <option value="ka-en">Georgian 🇬🇪 ➔ English 🇬🇧</option>
+                        <option value="both">Both Directions (English 🇬🇧 ⇄ Georgian 🇬🇪)</option>
+                    </select>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block font-bold mb-1 text-sm text-gray-700">Input Mode</label>
+                    <select v-model="settings.mode" class="input-text">
+                        <option value="type">Type Answer</option>
+                        <option value="mc">Multiple Choice</option>
+                    </select>
+                </div>
+
+                <div class="mb-6">
+                    <label class="flex items-center gap-2 cursor-pointer font-bold text-sm text-gray-700">
+                        <input type="checkbox" v-model="settings.showGrammar" class="scale-110">
+                        Show Grammar Data
+                    </label>
+                </div>
+
+                <button class="btn-primary w-full" @click="showSettings = false">Save & Close</button>
+            </div>
+        </div>
+
+        <!-- STATS MODAL -->
+        <div v-if="showStats" class="fixed inset-0 bg-black/60 flex justify-center items-center z-[2000] p-4"
+            @click.self="showStats = false">
+            <div class="bg-white p-6 rounded-2xl w-full max-w-lg shadow-2xl flex flex-col max-h-[80vh]">
+                <div class="flex justify-between items-center mb-4 flex-none">
+                    <h2 class="text-xl font-bold m-0">Drill Statistics</h2>
+                    <button class="text-gray-400 hover:text-gray-700 font-bold" @click="showStats = false">✕</button>
+                </div>
+
+                <div class="overflow-y-auto flex-1 mb-4 border border-gray-200 rounded-lg">
+                    <table class="w-full text-left border-collapse text-sm">
+                        <thead class="bg-slate-100 sticky top-0 border-b border-gray-200 text-slate-700">
+                            <tr>
+                                <th class="p-2.5 font-bold">Screeve</th>
+                                <th class="p-2.5 font-bold text-center">Attempts</th>
+                                <th class="p-2.5 font-bold text-center">Correct</th>
+                                <th class="p-2.5 font-bold text-right">Accuracy</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="stat in sortedScreeveStats" :key="stat.name"
+                                class="border-b border-gray-100 last:border-0 hover:bg-slate-50">
+                                <td class="p-2.5 font-medium capitalize">{{ stat.name }}</td>
+                                <td class="p-2.5 text-center">{{ stat.attempts }}</td>
+                                <td class="p-2.5 text-center text-green-700 font-medium">{{ stat.correct }}</td>
+                                <td class="p-2.5 text-right font-bold">
+                                    <span class="px-2.5 py-1 rounded-full text-xs border font-bold"
+                                        :class="stat.colorClass">
+                                        {{ stat.attempts > 0 ? stat.acc + '%' : 'N/A' }}
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr v-if="sortedScreeveStats.length === 0">
+                                <td colspan="4" class="p-4 text-center text-gray-400">No data collected yet.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <button class="btn-primary w-full flex-none" @click="showStats = false">Close</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const API_BASE = "https://script.google.com/macros/s/AKfycbyQTa7K9O9Smv6D0lXq1uyfulFwPl8FBkfbvWyniFSZgaIcz3lIMIkaEPiwVo046EGq7A/exec";
+
+        // Character mappings for QWERTY <-> Georgian auto-switching
+        const enToKaMap = {
+            'a': 'ა', 'b': 'ბ', 'c': 'ც', 'C': 'ჩ', 'd': 'დ', 'D': 'ძ',
+            'e': 'ე', 'f': 'ფ', 'g': 'გ', 'h': 'ჰ', 'i': 'ი', 'j': 'ჯ',
+            'k': 'კ', 'l': 'ლ', 'm': 'მ', 'n': 'ნ', 'o': 'ო', 'p': 'პ',
+            'q': 'ქ', 'r': 'რ', 'R': 'ღ', 's': 'ს', 'S': 'შ', 't': 'ტ',
+            'T': 'თ', 'u': 'უ', 'v': 'ვ', 'w': 'წ', 'W': 'ჭ', 'x': 'ხ',
+            'y': 'ყ', 'z': 'ზ', 'Z': 'ჟ'
+        };
+
+        const kaToEnMap = {
+            'ა': 'a', 'ბ': 'b', 'ც': 'c', 'ჩ': 'c', 'დ': 'd', 'ძ': 'd',
+            'ე': 'e', 'ფ': 'f', 'გ': 'g', 'ჰ': 'h', 'ი': 'i', 'ჯ': 'j',
+            'კ': 'k', 'ლ': 'l', 'მ': 'm', 'ნ': 'n', 'ო': 'o', 'პ': 'p',
+            'ქ': 'q', 'რ': 'r', 'ღ': 'r', 'ს': 's', 'შ': 's', 'ტ': 't',
+            'თ': 't', 'უ': 'u', 'ვ': 'v', 'წ': 'w', 'ჭ': 'w', 'ხ': 'x',
+            'ყ': 'y', 'ზ': 'z', 'ჟ': 'z'
+        };
+
+        const {createApp, ref, computed, watch, nextTick, onMounted, onUnmounted} = Vue;
+
+        createApp({
+            setup() {
+                const appState = ref('loading');
+                const showSettings = ref(false);
+                const showStats = ref(false);
+                const errorMessage = ref('');
+
+                const allMasdars = ref([]);
+                const quizCards = ref([]);
+                const activeQueue = ref([]);
+                const totalCardsCount = ref(0);
+                const totalFormsCount = ref(0);
+                const screeveStats = ref({});
+
+                const selectedUuids = ref([]);
+                const selectedScreeves = ref(['pres', 'imp', 'fut', 'aor', 'opt', 'perf']);
+                const settings = ref({direction: 'en-ka', mode: 'type', showGrammar: true});
+
+                const searchQuery = ref('');
+                const selectedClassFilter = ref(null);
+                const selectedTagFilter = ref(null);
+
+                const currentCardObj = ref(null);
+                const currentCard = ref(null);
+                const selectedIndex = ref(null);
+                const textInput = ref('');
+                const textInputRef = ref(null);
+                const feedback = ref({msg: '', type: '', diff: null});
+                const isAnswerSubmitted = ref(false);
+
+                const screeveRows = [
+                    {
+                        name: 'Series I (Present)',
+                        items: [{id: 'pres', label: 'Present'}, {id: 'imp', label: 'Imperfect'}, {id: 'pres-subj', label: 'Present Subjunctive'}]
+                    },
+                    {
+                        name: 'Series I (Future)',
+                        items: [{id: 'fut', label: 'Future'}, {id: 'cond', label: 'Conditional'}, {id: 'fut-subj', label: 'Future Subjunctive'}]
+                    },
+                    {
+                        name: 'Series II',
+                        items: [{id: 'aor', label: 'Aorist'}, {id: 'opt', label: 'Optative'}]
+                    },
+                    {
+                        name: 'Series III',
+                        items: [{id: 'perf', label: 'Perfective'}, {id: 'pluperf', label: 'Pluperfect'}, {id: 'perf-subj', label: 'Perfect Subjunctive'}]
+                    }
+                ];
+
+                const totalScreevesCount = computed(() => {
+                    return screeveRows.reduce((acc, row) => acc + row.items.length, 0);
+                });
+
+                const availableClasses = computed(() => {
+                    const classes = new Set(allMasdars.value.map(m => m.class));
+                    return Array.from(classes).sort((a, b) => a - b);
+                });
+
+                const availableTags = computed(() => {
+                    const tags = new Set();
+                    allMasdars.value.forEach(m => {
+                        if (m.tags) m.tags.split(',').forEach(t => tags.add(t.trim()));
+                    });
+                    return Array.from(tags).sort();
+                });
+
+                const filteredMasdars = computed(() => {
+                    return allMasdars.value.filter(m => {
+                        const q = searchQuery.value.trim().toLowerCase();
+                        const matchesSearch = !q || m.masdar.toLowerCase().includes(q) || (m.en && m.en.toLowerCase().includes(q));
+                        const matchesClass = selectedClassFilter.value === null || m.class === selectedClassFilter.value;
+                        const matchesTag = selectedTagFilter.value === null || (m.tags && m.tags.split(',').map(t => t.trim()).includes(selectedTagFilter.value));
+                        return matchesSearch && matchesClass && matchesTag;
+                    });
+                });
+
+                const startButtonText = computed(() => {
+                    const vCount = selectedUuids.value.length;
+                    const sCount = selectedScreeves.value.length;
+                    const vText = `${vCount} ${vCount === 1 ? 'verb' : 'verbs'}`;
+                    const sText = `${sCount} ${sCount === 1 ? 'screeve' : 'screeves'}`;
+                    return `Start Drill (${vText}, ${sText})`;
+                });
+
+                const sortedScreeveStats = computed(() => {
+                    const list = Object.entries(screeveStats.value).map(([name, stat]) => {
+                        const acc = stat.attempts > 0 ? Math.round((stat.correct / stat.attempts) * 100) : 0;
+                        let colorClass = 'bg-red-100 text-red-800 border-red-300';
+                        if (stat.attempts === 0) {
+                            colorClass = 'bg-gray-100 text-gray-600 border-gray-300';
+                        } else if (acc >= 80) {
+                            colorClass = 'bg-green-100 text-green-800 border-green-300';
+                        } else if (acc >= 60) {
+                            colorClass = 'bg-yellow-100 text-yellow-800 border-yellow-300';
+                        } else if (acc >= 40) {
+                            colorClass = 'bg-orange-100 text-orange-800 border-orange-300';
+                        }
+                        return {name, attempts: stat.attempts, correct: stat.correct, acc, colorClass};
+                    });
+
+                    return list.sort((a, b) => b.acc - a.acc || b.attempts - a.attempts);
+                });
+
+                const clearVerbFilters = () => {
+                    searchQuery.value = '';
+                    selectedClassFilter.value = null;
+                    selectedTagFilter.value = null;
+                };
+
+                const selectVisibleVerbs = () => {
+                    const visibleUuids = filteredMasdars.value.map(m => m.uuid);
+                    const newSet = new Set([...selectedUuids.value, ...visibleUuids]);
+                    selectedUuids.value = Array.from(newSet);
+                };
+
+                const deselectVisibleVerbs = () => {
+                    const visibleUuids = filteredMasdars.value.map(m => m.uuid);
+                    selectedUuids.value = selectedUuids.value.filter(id => !visibleUuids.includes(id));
+                };
+
+                const selectAllScreeves = () => {
+                    const allIds = [];
+                    screeveRows.forEach(row => row.items.forEach(i => allIds.push(i.id)));
+                    selectedScreeves.value = allIds;
+                };
+
+                const deselectAllScreeves = () => {
+                    selectedScreeves.value = [];
+                };
+
+                const isRowFullySelected = (row) => {
+                    return row.items.every(item => selectedScreeves.value.includes(item.id));
+                };
+
+                const toggleScreeveRow = (row, shouldSelect) => {
+                    const rowIds = row.items.map(i => i.id);
+                    if (shouldSelect) {
+                        const newSet = new Set([...selectedScreeves.value, ...rowIds]);
+                        selectedScreeves.value = Array.from(newSet);
+                    } else {
+                        selectedScreeves.value = selectedScreeves.value.filter(id => !rowIds.includes(id));
+                    }
+                };
+
+                const fetchMasdars = async () => {
+                    try {
+                        const res = await fetch(`${API_BASE}?action=masdars`);
+                        const json = await res.json();
+                        if (json.success) {
+                            allMasdars.value = json.data;
+
+                            // Auto-select the first verb if available
+                            if (json.data.length > 0) {
+                                selectedUuids.value = [json.data[0].uuid];
+                            }
+
+                            appState.value = 'setup';
+                        } else {throw new Error(json.error);}
+                    } catch (e) {
+                        errorMessage.value = "Error loading data.";
+                        alert(errorMessage.value);
+                    }
+                };
+
+                const startDrill = async () => {
+                    appState.value = 'loading';
+                    try {
+                        const url = `${API_BASE}?action=quiz&uuids=${selectedUuids.value.join(',')}&screeves=${selectedScreeves.value.join(',')}`;
+                        const res = await fetch(url);
+                        const json = await res.json();
+
+                        if (json.success && json.cards && json.cards.length > 0) {
+                            const validCards = json.cards.filter(card => {
+                                const hasGeorgian = card.georgianForm && card.georgianForm.trim().length > 0;
+                                const hasEnglish = Array.isArray(card.englishTranslations) &&
+                                    card.englishTranslations.length > 0 &&
+                                    card.englishTranslations.some(t => t && t.trim().length > 0);
+                                return hasGeorgian && hasEnglish;
+                            });
+
+                            if (validCards.length > 0) {
+                                quizCards.value = validCards;
+
+                                // Flatten cards so each English translation is tracked independently
+                                const expandedQueue = [];
+                                validCards.forEach(c => {
+                                    c.englishTranslations.forEach(translation => {
+                                        expandedQueue.push({
+                                            ...c,
+                                            targetEn: translation, // Specific translation for this card instance
+                                            hits: 0
+                                        });
+                                    });
+                                });
+
+                                expandedQueue.sort(() => 0.5 - Math.random());
+                                activeQueue.value = expandedQueue;
+
+                                totalFormsCount.value = validCards.length;
+                                totalCardsCount.value = expandedQueue.length;
+
+                                const statsMap = {};
+                                validCards.forEach(c => {
+                                    const sc = c.screeve || 'Unknown';
+                                    if (!statsMap[sc]) {
+                                        statsMap[sc] = {attempts: 0, correct: 0};
+                                    }
+                                });
+                                screeveStats.value = statsMap;
+
+                                appState.value = 'quiz';
+                                currentCardObj.value = null;
+                                pickNextCard();
+                            } else {
+                                alert("No valid cards found for this combination.");
+                                appState.value = 'setup';
+                            }
+                        } else {
+                            alert("No conjugations found for this combination.");
+                            appState.value = 'setup';
+                        }
+                    } catch (e) {
+                        alert("Failed to generate quiz.");
+                        appState.value = 'setup';
+                    }
+                };
+
+                const endDrill = () => {
+                    if (confirm("Are you sure you want to quit this drill?")) {
+                        appState.value = 'setup';
+                    }
+                };
+
+                const pickNextCard = () => {
+                    if (currentCardObj.value) {
+                        const card = currentCardObj.value;
+                        const queueIdx = activeQueue.value.indexOf(card);
+                        if (queueIdx !== -1) {
+                            activeQueue.value.splice(queueIdx, 1);
+                        }
+
+                        if (card.hits < 2) {
+                            const delay = Math.floor(Math.random() * 3) + 3; // 3, 4, or 5
+                            const insertIdx = Math.min(activeQueue.value.length, delay);
+                            activeQueue.value.splice(insertIdx, 0, card);
+                        }
+                    }
+
+                    if (activeQueue.value.length === 0) {
+                        appState.value = 'finished';
+                        return;
+                    }
+
+                    currentCardObj.value = activeQueue.value[0];
+                    isAnswerSubmitted.value = false;
+                    loadCardIntoView();
+                };
+
+                const loadCardIntoView = () => {
+                    if (!currentCardObj.value || appState.value !== 'quiz') return;
+
+                    const rawCard = currentCardObj.value;
+
+                    let isKaToEn;
+                    if (settings.value.direction === 'both') {
+                        if (!isAnswerSubmitted.value || !currentCard.value) {
+                            isKaToEn = Math.random() < 0.5;
+                        } else {
+                            isKaToEn = currentCard.value.isKaToEn;
+                        }
+                    } else {
+                        isKaToEn = settings.value.direction === 'ka-en';
+                    }
+
+                    let promptText, validTextAnswers;
+                    const grammarSubtext = `Screeve: ${rawCard.screeve} | Subject: ${rawCard.grammar.subjPron} | Recipient: ${rawCard.grammar.ioPron || '-'}`;
+
+                    if (isKaToEn) {
+                        promptText = rawCard.georgianForm;
+                        validTextAnswers = rawCard.englishTranslations;
+                    } else {
+                        promptText = rawCard.targetEn; // Uses the specific English prompt instead of index [0]
+                        validTextAnswers = [rawCard.georgianForm];
+                    }
+
+                    const mappedCard = {
+                        prompt: {text: promptText, subtext: grammarSubtext},
+                        response: {},
+                        isKaToEn
+                    };
+
+                    if (settings.value.mode === 'type') {
+                        mappedCard.response.textAnswers = validTextAnswers;
+                    } else {
+                        const correctText = isKaToEn ? rawCard.englishTranslations[0] : rawCard.georgianForm;
+                        const choices = [{text: correctText, isCorrect: true}];
+
+                        const distractors = quizCards.value.filter(c => c.georgianForm !== rawCard.georgianForm && c.uuid === rawCard.uuid);
+                        distractors.sort(() => 0.5 - Math.random());
+
+                        for (let i = 0; i < Math.min(3, distractors.length); i++) {
+                            const dText = isKaToEn ? (distractors[i].targetEn || distractors[i].englishTranslations[0]) : distractors[i].georgianForm;
+                            if (!choices.some(c => c.text === dText)) {
+                                choices.push({text: dText, isCorrect: false});
+                            }
+                        }
+
+                        mappedCard.response.choices = choices.sort(() => 0.5 - Math.random());
+                    }
+
+                    currentCard.value = mappedCard;
+                    selectedIndex.value = null;
+                    if (!isAnswerSubmitted.value) {
+                        textInput.value = '';
+                        feedback.value = {msg: '', type: '', diff: null};
+                    }
+
+                    if (settings.value.mode === 'type' && !isAnswerSubmitted.value) {
+                        nextTick(() => textInputRef.value?.focus());
+                    }
+                };
+
+                const handleTextInput = (e) => {
+                    if (!currentCard.value || isAnswerSubmitted.value) return;
+                    const expectingGeorgian = !currentCard.value.isKaToEn;
+                    const inputVal = e.target.value;
+
+                    let converted = '';
+                    if (expectingGeorgian) {
+                        for (let char of inputVal) {
+                            converted += enToKaMap[char] || char;
+                        }
+                    } else {
+                        for (let char of inputVal) {
+                            converted += kaToEnMap[char] || char;
+                        }
+                    }
+                    textInput.value = converted;
+                };
+
+                watch(settings, () => {
+                    if (appState.value === 'quiz') {
+                        loadCardIntoView();
+                    }
+                }, {deep: true});
+
+                const handleAnswerSubmission = (isCorrect, diff = null) => {
+                    isAnswerSubmitted.value = true;
+
+                    const sc = currentCardObj.value.screeve || 'Unknown';
+                    if (!screeveStats.value[sc]) {
+                        screeveStats.value[sc] = {attempts: 0, correct: 0};
+                    }
+                    screeveStats.value[sc].attempts++;
+
+                    if (isCorrect) {
+                        screeveStats.value[sc].correct++;
+                        currentCardObj.value.hits = (currentCardObj.value.hits || 0) + 1;
+                        feedback.value = {msg: '✅ Correct!', type: 'success', diff: null};
+                    } else {
+                        currentCardObj.value.hits = 0;
+                        feedback.value = {msg: '❌ Not quite.', type: 'error', diff};
+                    }
+                };
+
+                const selectCard = (idx, isCorrect) => {
+                    if (isAnswerSubmitted.value) return;
+                    selectedIndex.value = idx;
+                    handleAnswerSubmission(isCorrect);
+                };
+
+                const getDiff = (input, expected) => {
+                    const n = input.length;
+                    const m = expected.length;
+                    const dp = Array(n + 1).fill(0).map(() => Array(m + 1).fill(0));
+
+                    for (let i = 1; i <= n; i++) {
+                        for (let j = 1; j <= m; j++) {
+                            if (input[i - 1] === expected[j - 1]) dp[i][j] = dp[i - 1][j - 1] + 1;
+                            else dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+                        }
+                    }
+
+                    let i = n, j = m;
+                    const result = [];
+                    while (i > 0 || j > 0) {
+                        if (i > 0 && j > 0 && input[i - 1] === expected[j - 1]) {
+                            result.unshift({char: input[i - 1], type: 'match'});
+                            i--; j--;
+                        } else if (j > 0 && (i === 0 || dp[i][j - 1] >= dp[i - 1][j])) {
+                            result.unshift({char: expected[j - 1], type: 'insertion'});
+                            j--;
+                        } else if (i > 0 && (j === 0 || dp[i][j - 1] < dp[i - 1][j])) {
+                            result.unshift({char: input[i - 1], type: 'deletion'});
+                            i--;
+                        }
+                    }
+                    return result;
+                };
+
+                const checkText = () => {
+                    const input = textInput.value.trim();
+                    const validAnswers = currentCard.value?.response?.textAnswers || [];
+                    if (!input) return;
+
+                    const isCorrect = validAnswers.some(ans => ans.toLowerCase() === input.toLowerCase());
+                    const diff = isCorrect ? null : getDiff(input, validAnswers[0]);
+                    handleAnswerSubmission(isCorrect, diff);
+                };
+
+                const handlePrimaryAction = () => {
+                    if (settings.value.mode === 'type') {
+                        if (!isAnswerSubmitted.value) {
+                            checkText();
+                        } else {
+                            pickNextCard();
+                        }
+                    } else {
+                        if (isAnswerSubmitted.value) {
+                            pickNextCard();
+                        }
+                    }
+                };
+
+                const primaryButtonText = computed(() => {
+                    if (settings.value.mode === 'type') {
+                        if (!isAnswerSubmitted.value) return 'Check Answer';
+                        return 'Next (Enter)';
+                    } else {
+                        return 'Next (Enter)';
+                    }
+                });
+
+                const isActionButtonDisabled = computed(() => {
+                    if (settings.value.mode === 'type') {
+                        return !textInput.value.trim() && !isAnswerSubmitted.value;
+                    } else {
+                        return !isAnswerSubmitted.value;
+                    }
+                });
+
+                const handleKeydown = (e) => {
+                    if (appState.value !== 'quiz') return;
+
+                    if (currentCard.value?.response?.choices && !isAnswerSubmitted.value) {
+                        const num = parseInt(e.key);
+                        if (!isNaN(num) && num >= 1 && num <= currentCard.value.response.choices.length) {
+                            selectCard(num - 1, currentCard.value.response.choices[num - 1].isCorrect);
+                        }
+                    }
+
+                    if (e.key === 'Enter') {
+                        handlePrimaryAction();
+                    }
+                };
+
+                onMounted(() => {
+                    fetchMasdars();
+                    window.addEventListener('keydown', handleKeydown);
+                });
+
+                onUnmounted(() => {
+                    window.removeEventListener('keydown', handleKeydown);
+                });
+
+                return {
+                    appState, showSettings, showStats, errorMessage,
+                    allMasdars, availableClasses, availableTags, screeveRows, totalScreevesCount,
+                    selectedUuids, selectedScreeves, settings,
+                    searchQuery, selectedClassFilter, selectedTagFilter, filteredMasdars,
+                    clearVerbFilters, selectVisibleVerbs, deselectVisibleVerbs,
+                    selectAllScreeves, deselectAllScreeves, isRowFullySelected, toggleScreeveRow,
+                    startDrill, endDrill, startButtonText,
+                    currentCard, activeQueue, totalFormsCount, totalCardsCount, sortedScreeveStats,
+                    selectedIndex, textInput, textInputRef, feedback, isAnswerSubmitted,
+                    selectCard, handlePrimaryAction, primaryButtonText, isActionButtonDisabled, handleTextInput
+                };
+            }
+        }).mount('#app');
+    </script>
+
+</body>
+
+</html>
