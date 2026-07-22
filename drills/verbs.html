@@ -715,19 +715,37 @@
                         if (queueIdx !== -1) {
                             activeQueue.value.splice(queueIdx, 1);
                         }
-
+                
+                        // Only re-insert if the card hasn't reached 2 correct hits
                         if (card.hits < 2) {
-                            const delay = Math.floor(Math.random() * 3) + 3; // 3, 4, or 5
-                            const insertIdx = Math.min(activeQueue.value.length, delay);
+                            let insertIdx;
+                
+                            if (card.wasLastCorrect) {
+                                // Random position starting at least 6 cards away (or end of queue if < 6)
+                                const minDistance = 6;
+                                const maxDistance = activeQueue.value.length;
+                            
+                                if (maxDistance <= minDistance) {
+                                    insertIdx = maxDistance; // Queue is short, put at the end
+                                } else {
+                                    // Random index between 6 and maxDistance (inclusive)
+                                    insertIdx = minDistance + Math.floor(Math.random() * (maxDistance - minDistance + 1));
+                                }
+                            } else {
+                                // Wrong answer: 3 to 6 cards away
+                                const delay = Math.floor(Math.random() * 4) + 3; // 3, 4, 5, or 6
+                                insertIdx = Math.min(activeQueue.value.length, delay);
+                            }
+                
                             activeQueue.value.splice(insertIdx, 0, card);
                         }
                     }
-
+                
                     if (activeQueue.value.length === 0) {
                         appState.value = 'finished';
                         return;
                     }
-
+                
                     currentCardObj.value = activeQueue.value[0];
                     isAnswerSubmitted.value = false;
                     loadCardIntoView();
@@ -823,19 +841,22 @@
 
                 const handleAnswerSubmission = (isCorrect, diff = null) => {
                     isAnswerSubmitted.value = true;
-
+                
                     const sc = currentCardObj.value.screeve || 'Unknown';
                     if (!screeveStats.value[sc]) {
                         screeveStats.value[sc] = {attempts: 0, correct: 0};
                     }
                     screeveStats.value[sc].attempts++;
-
+                
+                    // Track state for queue positioning
+                    currentCardObj.value.wasLastCorrect = isCorrect;
+                
                     if (isCorrect) {
                         screeveStats.value[sc].correct++;
                         currentCardObj.value.hits = (currentCardObj.value.hits || 0) + 1;
                         feedback.value = {msg: '✅ Correct!', type: 'success', diff: null};
                     } else {
-                        currentCardObj.value.hits = 0;
+                        currentCardObj.value.hits = 0; // Reset progress on wrong answer
                         feedback.value = {msg: '❌ Not quite.', type: 'error', diff};
                     }
                 };
