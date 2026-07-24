@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloze Deletion Drill | Georgian Verbs</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans Georgian', -apple-system, sans-serif;
+            background-color: #f8f5f0;
+        }
+
+        [v-cloak] {
+            display: none !important;
+        }
+
+        @keyframes pulse-red {
+            0% {
+                box-shadow: 0 0 0 0 rgba(167, 0, 7, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(167, 0, 7, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(167, 0, 7, 0);
+            }
+        }
+
+        .btn-next-active {
+            background-color: #A70007 !important;
+            color: white !important;
+            animation: pulse-red 2s infinite;
+        }
+
+        /* Diffing Styles */
+        .diff-char {
+            font-size: 1.4rem;
+            letter-spacing: 1px;
+        }
+
+        .diff-deletion {
+            color: #A70007;
+            text-decoration: line-through;
+            opacity: 0.6;
+        }
+
+        .diff-insertion {
+            color: #166534;
+            background: #dcfce7;
+            border-bottom: 2px solid #166534;
+            padding: 0 1px;
+            border-radius: 2px;
+        }
+
+        .diff-match {
+            color: #334155;
+        }
+
+        .btn-primary {
+            padding: 0.85rem 1rem;
+            background-color: #1e293b;
+            color: white;
+            font-weight: 700;
+            border-radius: 0.75rem;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background-color: #0f172a;
+        }
+
+        .btn-primary:disabled {
+            background-color: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            padding: 0.35rem 0.75rem;
+            font-size: 0.85rem;
+            font-weight: 700;
+            border: 1px solid #d1d5db;
+            background-color: white;
+            color: #1e293b;
+            border-radius: 0.5rem;
+            transition: all 0.15s;
+        }
+
+        .btn-secondary:hover {
+            background-color: #f3f4f6;
+        }
+
+        .card-box {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            border: 2px solid #e5e7eb;
+        }
+    </style>
+</head>
+
+<body class="text-slate-800">
+
+    <div id="app" v-cloak class="min-h-screen flex flex-col">
+
+        <!-- HEADER -->
+        <header class="bg-slate-800 text-white flex-none border-b-4 border-[#A70007]">
+            <div class="max-w-2xl mx-auto flex justify-between items-center px-4 py-3">
+                <div class="font-bold text-lg text-white">🇬🇪 Kartu Pro / Cloze Drill</div>
+                <div class="text-xs bg-slate-700 px-3 py-1 rounded-full text-slate-200">
+                    Sentence {{ currentIndex + 1 }} / {{ sentences.length }}
+                </div>
+            </div>
+        </header>
+
+        <main class="w-full max-w-2xl mx-auto p-4 flex-1 flex flex-col justify-between">
+
+            <!-- SENTENCE & CLOZE CARD -->
+            <div class="card-box my-auto flex flex-col items-center justify-center text-center">
+
+                <!-- Cloze Sentence Display -->
+                <div class="text-2xl font-bold leading-relaxed mb-4">
+                    <span>{{ currentCard.prefix }}</span>
+                    <button @click="showMetadata = !showMetadata"
+                        class="inline-block px-3 py-0.5 mx-1 bg-amber-100 border-2 border-dashed border-amber-500 text-amber-900 rounded font-bold hover:bg-amber-200 transition-colors"
+                        title="Click to toggle grammar hint">
+                        <span v-if="isAnswerSubmitted" class="text-green-700 underline">{{ currentCard.target }}</span>
+                        <span v-else>[ ? ]</span>
+                    </button>
+                    <span>{{ currentCard.suffix }}</span>
+                </div>
+
+                <!-- Grammar Metadata (Shown on clicking Cloze) -->
+                <div v-if="showMetadata"
+                    class="bg-amber-50 border border-amber-200 text-amber-900 text-xs px-3 py-2 rounded-lg mb-3">
+                    <span class="font-bold">Grammar Hint:</span>
+                    Screeve: <span class="uppercase font-semibold">{{ currentCard.screeve }}</span> |
+                    Subj: <span class="font-semibold">{{ currentCard.subj || '-' }}</span> |
+                    DO: <span class="font-semibold">{{ currentCard.do || '-' }}</span> |
+                    Meaning: <span class="italic">{{ currentCard.en_form }}</span>
+                </div>
+
+                <!-- English Translation Section -->
+                <div class="mt-2">
+                    <button class="btn-secondary text-xs" @click="showTranslation = !showTranslation">
+                        {{ showTranslation ? ' Hide English' : '👁️ Show English Translation' }}
+                    </button>
+                    <p v-if="showTranslation" class="text-gray-600 mt-2 text-sm italic">
+                        "{{ currentCard.en }}"
+                    </p>
+                </div>
+
+            </div>
+
+            <!-- FEEDBACK & INPUT SECTION -->
+            <div class="flex flex-col gap-3 my-4">
+
+                <!-- Feedback Display -->
+                <div class="min-h-[40px] text-center font-bold flex flex-col items-center justify-center">
+                    <div v-if="feedback.msg"
+                        :class="{'text-green-600': feedback.type === 'success', 'text-[#A70007]': feedback.type === 'error'}">
+                        {{ feedback.msg }}
+                    </div>
+                    <div v-if="feedback.type === 'error' && feedback.diff" class="mt-1">
+                        <span v-for="(part, i) in feedback.diff" :key="i" :class="'diff-' + part.type"
+                            class="diff-char">{{ part.char }}</span>
+                    </div>
+                </div>
+
+                <!-- Text Input -->
+                <input type="text" ref="textInputRef" v-model="textInput" @input="handleTextInput"
+                    placeholder="Type the missing Georgian verb form..."
+                    class="w-full p-3 border-2 border-gray-300 rounded-xl text-xl text-center outline-none focus:border-[#A70007] transition-colors disabled:opacity-50"
+                    @keyup.enter="handlePrimaryAction" autocomplete="off" autocorrect="off" autocapitalize="off"
+                    spellcheck="false" :readonly="isAnswerSubmitted">
+
+                <!-- Primary Action Button -->
+                <button class="btn-primary w-full text-lg" :class="{ 'btn-next-active': isAnswerSubmitted }"
+                    @click="handlePrimaryAction" :disabled="!textInput.trim() && !isAnswerSubmitted">
+                    {{ isAnswerSubmitted ? 'Next Sentence (Enter)' : 'Check Answer' }}
+                </button>
+            </div>
+
+        </main>
+
+    </div>
+
+    <script>
+        // QWERTY to Georgian map
+        const enToKaMap = {
+            'a': 'ა', 'b': 'ბ', 'c': 'ც', 'C': 'ჩ', 'd': 'დ', 'D': 'ძ',
+            'e': 'ე', 'f': 'ფ', 'g': 'გ', 'h': 'ჰ', 'i': 'ი', 'j': 'ჯ',
+            'k': 'კ', 'l': 'ლ', 'm': 'მ', 'n': 'ნ', 'o': 'ო', 'p': 'პ',
+            'q': 'ქ', 'r': 'რ', 'R': 'ღ', 's': 'ს', 'S': 'შ', 't': 'ტ',
+            'T': 'თ', 'u': 'უ', 'v': 'ვ', 'w': 'წ', 'W': 'ჭ', 'x': 'ხ',
+            'y': 'ყ', 'z': 'ზ', 'Z': 'ჟ'
+        };
+
+        // Hardcoded filtered dataset for forms of "to do/make"
+        const dataset = [
+            {"ka": "მარიამმა გემრიელი სადილი გააკეთა.", "en": "Mariam made a delicious dinner.", "target": "გააკეთა", "screeve": "aor", "subj": "3s", "do": "3s", "en_form": "made/did"},
+            {"ka": "მან თავისი საქმე კარგად გააკეთა.", "en": "He did his job well.", "target": "გააკეთა", "screeve": "aor", "subj": "3s", "do": "3s", "en_form": "made/did"},
+            {"ka": "ბავშვმა დიდი შეცდომა გააკეთა.", "en": "The child made a big mistake.", "target": "გააკეთა", "screeve": "aor", "subj": "3s", "do": "3s", "en_form": "made/did"},
+            {"ka": "მან სწორი არჩევანი გააკეთა.", "en": "She made the right choice.", "target": "გააკეთა", "screeve": "aor", "subj": "3s", "do": "3s", "en_form": "made/did"},
+            {"ka": "მანქანამ მოულოდნელი პაუზა გააკეთა.", "en": "The car made an unexpected pause.", "target": "გააკეთა", "screeve": "aor", "subj": "3s", "do": "3s", "en_form": "made/did"},
+            {"ka": "ის ხვალ ამ საქმეს გააკეთებს.", "en": "He will do this job tomorrow.", "target": "გააკეთებს", "screeve": "fut", "subj": "3s", "do": "3s", "en_form": "will do/make"},
+            {"ka": "გიორგი გემრიელ სადილს გააკეთებს.", "en": "Giorgi will make a delicious dinner.", "target": "გააკეთებს", "screeve": "fut", "subj": "3s", "do": "3s", "en_form": "will do/make"},
+            {"ka": "მოსწავლე დავალებას სწრაფად გააკეთებს.", "en": "The student will do the assignment quickly.", "target": "გააკეთებს", "screeve": "fut", "subj": "3s", "do": "3s", "en_form": "will do/make"},
+            {"ka": "ოსტატი ავეჯს კარგად გააკეთებს.", "en": "The craftsman will make the furniture well.", "target": "გააკეთებს", "screeve": "fut", "subj": "3s", "do": "3s", "en_form": "will do/make"},
+            {"ka": "ანა ყველაფერს გააკეთებს წარმატებისთვის.", "en": "Ana will do everything for success.", "target": "გააკეთებს", "screeve": "fut", "subj": "3s", "do": "3s", "en_form": "will do/make"},
+            {"ka": "ის ყოველთვის თავის საქმეს აკეთებს.", "en": "He always does his work.", "target": "აკეთებს", "screeve": "pres", "subj": "3s", "do": "3s", "en_form": "makes/does"},
+            {"ka": "დედა გემრიელ სადილს აკეთებს.", "en": "Mom is making a delicious dinner.", "target": "აკეთებს", "screeve": "pres", "subj": "3s", "do": "3s", "en_form": "makes/does"},
+            {"ka": "ბავშვი საშინაო დავალებას აკეთებს.", "en": "The child is doing homework.", "target": "აკეთებს", "screeve": "pres", "subj": "3s", "do": "3s", "en_form": "makes/does"},
+            {"ka": "ოსტატი ახალ მაგიდას აკეთებს.", "en": "The master is making a new table.", "target": "აკეთებს", "screeve": "pres", "subj": "3s", "do": "3s", "en_form": "makes/does"},
+            {"ka": "ის ამ პროექტს ყურადღებით აკეთებს.", "en": "He is doing this project carefully.", "target": "აკეთებს", "screeve": "pres", "subj": "3s", "do": "3s", "en_form": "makes/does"},
+            {"ka": "ის გუშინ მთელი დღე ამ საქმეს აკეთებდა.", "en": "He was doing this work all day yesterday.", "target": "აკეთებდა", "screeve": "imp", "subj": "3s", "do": "3s", "en_form": "was doing / used to make"},
+            {"ka": "მარიამი სადილს აკეთებდა, როცა სტუმრები მოვიდნენ.", "en": "Mariam was making dinner when the guests arrived.", "target": "აკეთებდა", "screeve": "imp", "subj": "3s", "do": "3s", "en_form": "was doing / used to make"},
+            {"ka": "მოსწავლე დავალებას აკეთებდა მთელი საღამო.", "en": "The student was doing homework all evening.", "target": "აკეთებდა", "screeve": "imp", "subj": "3s", "do": "3s", "en_form": "was doing / used to make"},
+            {"ka": "ოსტატი ავეჯს აკეთებდა თავის სახელოსნოში.", "en": "The craftsman was making furniture in his workshop.", "target": "აკეთებდა", "screeve": "imp", "subj": "3s", "do": "3s", "en_form": "was doing / used to make"},
+            {"ka": "ის ყოველთვის გულმოდგინედ აკეთებდა თავის საქმეს.", "en": "He used to do his job diligently.", "target": "აკეთებდა", "screeve": "imp", "subj": "3s", "do": "3s", "en_form": "was doing / used to make"},
+            {"ka": "მნიშვნელოვანია, რომ მან ეს საქმე გააკეთოს.", "en": "It is important that he do this work.", "target": "გააკეთოს", "screeve": "opt", "subj": "3s", "do": "3s", "en_form": "should do / make"},
+            {"ka": "მას სურს, რომ სტუდენტმა დავალება გააკეთოს.", "en": "She wants the student to do the assignment.", "target": "გააკეთოს", "screeve": "opt", "subj": "3s", "do": "3s", "en_form": "should do / make"},
+            {"ka": "საჭიროა, ოსტატმა მაგიდა კარგად გააკეთოს.", "en": "It is necessary that the craftsman make the table well.", "target": "გააკეთოს", "screeve": "opt", "subj": "3s", "do": "3s", "en_form": "should do / make"},
+            {"ka": "მან ეს საქმე უკვე გაუკეთებია.", "en": "He has apparently already done this work.", "target": "გაუკეთებია", "screeve": "perf", "subj": "3s", "do": "3s", "en_form": "has done/made (apparently)"},
+            {"ka": "მარიამს გემრიელი სადილი გაუკეთებია.", "en": "Mariam has made a delicious dinner (apparently).", "target": "გაუკეთებია", "screeve": "perf", "subj": "3s", "do": "3s", "en_form": "has done/made (apparently)"},
+            {"ka": "მას ეს საქმე ადრე გაეკეთებინა.", "en": "He had done this work earlier.", "target": "გაეკეთებინა", "screeve": "pluperf", "subj": "3s", "do": "3s", "en_form": "had done / should have done"}
+        ];
+
+        const {createApp, ref, computed, nextTick, onMounted} = Vue;
+
+        createApp({
+            setup() {
+                const sentences = ref([...dataset].sort(() => 0.5 - Math.random()));
+                const currentIndex = ref(0);
+                const showTranslation = ref(false);
+                const showMetadata = ref(false);
+                const textInput = ref('');
+                const textInputRef = ref(null);
+                const isAnswerSubmitted = ref(false);
+                const feedback = ref({msg: '', type: '', diff: null});
+
+                const currentCard = computed(() => {
+                    const raw = sentences.value[currentIndex.value];
+                    const parts = raw.ka.split(raw.target);
+                    return {
+                        ...raw,
+                        prefix: parts[0] || '',
+                        suffix: parts[1] || ''
+                    };
+                });
+
+                const handleTextInput = (e) => {
+                    if (isAnswerSubmitted.value) return;
+                    let converted = '';
+                    for (let char of e.target.value) {
+                        converted += enToKaMap[char] || char;
+                    }
+                    textInput.value = converted;
+                };
+
+                const getDiff = (input, expected) => {
+                    const n = input.length, m = expected.length;
+                    const dp = Array(n + 1).fill(0).map(() => Array(m + 1).fill(0));
+
+                    for (let i = 1; i <= n; i++) {
+                        for (let j = 1; j <= m; j++) {
+                            if (input[i - 1] === expected[j - 1]) dp[i][j] = dp[i - 1][j - 1] + 1;
+                            else dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+                        }
+                    }
+
+                    let i = n, j = m;
+                    const result = [];
+                    while (i > 0 || j > 0) {
+                        if (i > 0 && j > 0 && input[i - 1] === expected[j - 1]) {
+                            result.unshift({char: input[i - 1], type: 'match'});
+                            i--; j--;
+                        } else if (j > 0 && (i === 0 || dp[i][j - 1] >= dp[i - 1][j])) {
+                            result.unshift({char: expected[j - 1], type: 'insertion'});
+                            j--;
+                        } else if (i > 0 && (j === 0 || dp[i][j - 1] < dp[i - 1][j])) {
+                            result.unshift({char: input[i - 1], type: 'deletion'});
+                            i--;
+                        }
+                    }
+                    return result;
+                };
+
+                const checkAnswer = () => {
+                    const input = textInput.value.trim();
+                    if (!input) return;
+
+                    const expected = currentCard.value.target;
+                    const isCorrect = input === expected;
+                    isAnswerSubmitted.value = true;
+
+                    if (isCorrect) {
+                        feedback.value = {msg: '✅ Correct!', type: 'success', diff: null};
+                    } else {
+                        feedback.value = {msg: '❌ Incorrect', type: 'error', diff: getDiff(input, expected)};
+                    }
+                };
+
+                const nextSentence = () => {
+                    currentIndex.value = (currentIndex.value + 1) % sentences.value.length;
+                    textInput.value = '';
+                    isAnswerSubmitted.value = false;
+                    showTranslation.value = false;
+                    showMetadata.value = false;
+                    feedback.value = {msg: '', type: '', diff: null};
+                    nextTick(() => textInputRef.value?.focus());
+                };
+
+                const handlePrimaryAction = () => {
+                    if (!isAnswerSubmitted.value) {
+                        checkAnswer();
+                    } else {
+                        nextSentence();
+                    }
+                };
+
+                onMounted(() => {
+                    nextTick(() => textInputRef.value?.focus());
+                });
+
+                return {
+                    sentences, currentIndex, currentCard, showTranslation, showMetadata,
+                    textInput, textInputRef, isAnswerSubmitted, feedback,
+                    handleTextInput, handlePrimaryAction
+                };
+            }
+        }).mount('#app');
+    </script>
+
+</body>
+
+</html>
