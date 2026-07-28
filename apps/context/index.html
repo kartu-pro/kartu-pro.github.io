@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content">
+  <title>KartuContext</title>
+
+  <!-- Global & App Styles -->
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="context.css">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;700&display=swap" rel="stylesheet">
+
+  <!-- External Scripts -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body>
+
+  <!-- Compact Sub-App Header -->
+  <header class="app-header">
+    <a href="/" class="app-back-link">
+      <div class="logo-circle-sm">
+        <img src="/assets/logo.png" alt="Kartu Pro">
+      </div>
+      <span>← Home</span>
+    </a>
+  </header>
+
+  <div id="app" v-cloak class="app-container flex flex-col flex-1">
+
+    <main class="w-full max-w-3xl mx-auto flex-1 flex flex-col min-h-0">
+
+      <!-- LOADING -->
+      <div v-if="appState === 'loading'" class="text-center py-12 flex-1 flex items-center justify-center">
+        <h2 class="text-2xl font-bold">Loading...</h2>
+      </div>
+
+      <!-- SETUP UI -->
+      <div v-else-if="appState === 'setup'" class="flex-1 flex flex-col min-h-0">
+        <div class="mb-4">
+          <span class="badge">Grammar in Context</span>
+          <h1 class="text-2xl sm:text-3xl font-extrabold mt-1">What do you want to study?</h1>
+        </div>
+
+        <div class="flex-1 overflow-y-auto pr-1 flex flex-col gap-4">
+
+          <!-- Topic Selection -->
+          <div class="card-box">
+            <label class="block font-bold text-sm mb-2">Part of Speech</label>
+            <select v-model="filters.topic" @change="resetPosFilters" class="input-text">
+              <option value="" disabled>Select a topic...</option>
+              <option value="verb">Verbs</option>
+              <option value="noun">Nouns</option>
+              <option value="pronoun">Pronouns</option>
+              <option value="adj">Adjectives</option>
+            </select>
+          </div>
+
+          <!-- Vocabulary Filters -->
+          <div v-if="filters.topic" class="card-box">
+            <h3 class="font-bold text-sm border-b border-[var(--color-border)] pb-2 mb-3">Vocabulary Filters</h3>
+
+            <!-- Words -->
+            <div class="mb-4 relative">
+              <label class="block text-xs font-bold text-secondary mb-1">Words</label>
+              <div class="flex flex-wrap gap-1.5 mb-2" v-if="filters.words.length">
+                <span v-for="word in filters.words" :key="word.uuid"
+                  class="inline-flex items-center px-2 py-1 bg-[var(--color-surface)] text-xs font-bold rounded border border-[var(--color-border)]">
+                  {{ word.lemma }}
+                  <button @click="removeWord(word)"
+                    class="ml-1.5 text-secondary hover:text-[var(--color-accent)]">✕</button>
+                </span>
+              </div>
+              <input type="text" v-model="wordSearch" @focus="showWordDropdown = true" placeholder="Type to search..."
+                class="input-text text-sm">
+
+              <div v-if="showWordDropdown && filteredDictionary.length"
+                class="absolute z-10 w-full bg-[var(--color-bg)] border border-[var(--color-border)] rounded shadow-lg max-h-40 overflow-y-auto mt-1">
+                <div v-for="item in filteredDictionary" :key="item.uuid" @click="addWord(item)"
+                  class="p-2 hover:bg-[var(--color-surface)] cursor-pointer text-sm flex justify-between border-b border-[var(--color-border)]">
+                  <span class="font-bold">{{ item.lemma }}</span>
+                  <span class="text-secondary">{{ item.en }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tags -->
+            <div v-if="availableTags.length">
+              <label class="block text-xs font-bold text-secondary mb-1">Tags</label>
+              <div class="flex flex-wrap gap-1.5">
+                <div v-for="tag in availableTags" :key="tag" class="filter-chip"
+                  :class="{ 'active': filters.tags.includes(tag) }" @click="toggleArrayItem(filters.tags, tag)">
+                  {{ tag }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Grammar Filters -->
+          <div v-if="filters.topic" class="card-box">
+            <h3 class="font-bold text-sm border-b border-[var(--color-border)] pb-2 mb-3">Grammar Filters</h3>
+
+            <!-- VERBS -->
+            <template v-if="filters.topic === 'verb'">
+              <div class="mb-3">
+                <div class="flex justify-between text-xs font-bold text-secondary mb-1">
+                  <span>Screeve</span>
+                  <div class="flex gap-2">
+                    <button class="text-secondary hover:underline" @click="filters.scr = []">None</button>
+                    <button class="text-[var(--color-accent)] hover:underline"
+                      @click="selectAll(filters.scr, Object.keys(CONFIG.scr))">All</button>
+                  </div>
+                </div>
+                <div class="flex flex-wrap gap-1.5">
+                  <div v-for="(label, val) in CONFIG.scr" :key="val" class="filter-chip"
+                    :class="{'active': filters.scr.includes(val)}" @click="toggleArrayItem(filters.scr, val)">{{ label
+                    }}</div>
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <div class="flex justify-between text-xs font-bold text-secondary mb-1">
+                  <span>Logical Subject</span>
+                  <div class="flex gap-2">
+                    <button class="text-secondary hover:underline" @click="filters.subj = []">None</button>
+                    <button class="text-[var(--color-accent)] hover:underline"
+                      @click="selectAll(filters.subj, CONFIG.personNum.filter(p => p !== 'none'))">All</button>
+                  </div>
+                </div>
+                <div class="flex flex-wrap gap-1.5">
+                  <template v-for="p in CONFIG.personNum" :key="p">
+                    <div class="filter-chip" :class="{'active': filters.subj.includes(p)}"
+                      @click="toggleArrayItem(filters.subj, p)">{{ p }}</div>
+                  </template>
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <h3 class="font-bold text-sm text-secondary mb-2">Object Markers</h3>
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" v-model="filters.includeObjs" class="w-4 h-4 accent-[var(--color-accent)]">
+                  <span class="text-sm font-bold">Focus on explicitly object marked forms (e.g. გაძლევ)</span>
+                </label>
+              </div>
+            </template>
+
+            <!-- CASES -->
+            <template v-if="['noun', 'pronoun', 'adj'].includes(filters.topic)">
+              <div class="mb-3">
+                <div class="flex justify-between text-xs font-bold text-secondary mb-1">
+                  <span>Case</span>
+                  <div class="flex gap-2">
+                    <button class="text-secondary hover:underline" @click="filters.case = []">None</button>
+                    <button class="text-[var(--color-accent)] hover:underline"
+                      @click="selectAll(filters.case, Object.keys(CONFIG.cases))">All</button>
+                  </div>
+                </div>
+                <div class="flex flex-wrap gap-1.5">
+                  <div v-for="(label, val) in CONFIG.cases" :key="val" class="filter-chip"
+                    :class="{'active': filters.case.includes(val)}" @click="toggleArrayItem(filters.case, val)">{{ label
+                    }}</div>
+                </div>
+              </div>
+            </template>
+
+            <!-- QTY -->
+            <template v-if="['noun', 'pronoun'].includes(filters.topic)">
+              <div class="mb-3">
+                <label class="block text-xs font-bold text-secondary mb-1">Quantity</label>
+                <div class="flex flex-wrap gap-1.5">
+                  <div v-for="(label, val) in CONFIG.qty" :key="val" class="filter-chip"
+                    :class="{'active': filters.qty.includes(val)}" @click="toggleArrayItem(filters.qty, val)">{{ label
+                    }}</div>
+                </div>
+              </div>
+            </template>
+
+            <!-- POSTPOSITIONS -->
+            <template v-if="['noun'].includes(filters.topic)">
+              <div class="mb-3">
+                <div class="flex justify-between text-xs font-bold text-secondary mb-1">
+                  <span>Postpositions</span>
+                  <div class="flex gap-2">
+                    <button class="text-secondary hover:underline" @click="filters.pp = []">None</button>
+                    <button class="text-[var(--color-accent)] hover:underline"
+                      @click="selectAll(filters.pp, CONFIG.pp)">All</button>
+                  </div>
+                </div>
+                <div class="flex flex-wrap gap-1.5">
+                  <div v-for="p in CONFIG.pp" :key="p" class="filter-chip" :class="{'active': filters.pp.includes(p)}"
+                    @click="toggleArrayItem(filters.pp, p)">
+                    {{ p }}
+                  </div>
+                </div>
+              </div>
+            </template>
+
+          </div>
+        </div>
+
+        <div v-if="validationErrors.length > 0"
+          class="my-3 p-3 bg-[var(--color-surface)] border-l-4 border-[var(--color-accent)] text-[var(--color-accent)] rounded text-sm font-semibold">
+          <ul class="list-disc ml-4">
+            <li v-for="err in validationErrors" :key="err">{{ err }}</li>
+          </ul>
+        </div>
+
+        <button class="btn-primary w-full text-lg mt-2" @click="startDrill" :disabled="validationErrors.length > 0">
+          Start
+        </button>
+
+      </div>
+
+      <!-- QUIZ UI -->
+      <div v-else-if="appState === 'quiz'" class="flex-1 flex flex-col min-h-0 justify-between">
+        <div class="flex justify-between items-center mb-2 flex-none">
+          <span class="text-secondary text-sm font-bold">Remaining: {{ activeQueue.length }}</span>
+          <button
+            class="text-sm font-bold bg-[var(--color-surface)] border border-[var(--color-border)] px-3 py-1 rounded"
+            @click="appState = 'setup'">Quit</button>
+        </div>
+
+        <!-- Quiz Card Container -->
+        <div class="card-box flex-1 flex flex-col items-center justify-center text-center my-2" v-if="currentCard">
+
+          <!-- Feedback Diff -->
+          <div class="min-h-[40px] text-center mb-4 font-bold flex flex-col items-center justify-center">
+            <div v-if="feedback.msg"
+              :class="{'text-emerald-600 dark:text-emerald-400': feedback.type === 'success', 'text-[var(--color-accent)]': feedback.type === 'error'}">
+              {{ feedback.msg }}
+            </div>
+            <div v-if="feedback.type === 'error' && feedback.diff" class="mt-1">
+              <span v-for="(part, i) in feedback.diff" :key="i" :class="'diff-' + part.type" class="diff-char">{{
+                part.char }}</span>
+            </div>
+          </div>
+
+          <!-- Cloze Sentence -->
+          <div class="text-2xl sm:text-3xl font-bold flex flex-wrap items-center justify-center gap-1 leading-loose">
+            <span>{{ currentCard.prefix }}</span>
+
+            <input type="text" ref="clozeInput" v-model="textInput" @input="handleTextInput"
+              @keyup.enter="handlePrimaryAction" :readonly="isAnswerSubmitted" class="cloze-input text-2xl sm:text-3xl"
+              autocomplete="off" autocorrect="off" spellcheck="false" :placeholder="`[${currentCard.hint}]`"
+              :style="{ width: Math.max(textInput.length + 2, currentCard.hint.length + 4) + 'ch' }">
+
+            <span>{{ currentCard.suffix }}</span>
+          </div>
+
+        </div>
+
+        <div class="pt-2 flex-none">
+          <button class="btn-primary w-full text-lg" :class="{ 'btn-next-active': isAnswerSubmitted }"
+            @click="handlePrimaryAction" :disabled="!isAnswerSubmitted && !textInput.trim()">
+            {{ isAnswerSubmitted ? 'Next (Enter)' : 'Check Answer (Enter)' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- FINISHED UI -->
+      <div v-else-if="appState === 'finished'" class="text-center flex-1 flex flex-col items-center justify-center">
+        <h2 class="text-3xl font-bold mb-2">Review Complete! 🎉</h2>
+        <p class="text-secondary mb-6 font-semibold">Great practice session.</p>
+
+        <div class="flex flex-col sm:flex-row gap-3 w-full max-w-xs">
+          <button class="btn-primary flex-1 py-3" @click="startDrill">
+            🔄 Load More
+          </button>
+          <button
+            class="bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-primary)] font-bold flex-1 py-3 rounded-lg hover:opacity-80 transition"
+            @click="appState = 'setup'">
+            ⚙️ Setup
+          </button>
+        </div>
+      </div>
+
+    </main>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+
+</html>
