@@ -12,6 +12,7 @@
   --color-accent: #A70007;
   --color-border: #e5e7eb;
   --color-border-dark: #d1d5db;
+  color-scheme: light;
   
   /* Typography */
   --font-heading: 'Helvetica Neue', Arial, sans-serif;
@@ -20,21 +21,25 @@
   /* Layout & Utility */
   --radius-sm: 0.5rem;
   --radius-md: 0.75rem;
-  --transition: all 0.2s ease-in-out;
+  --transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out, opacity 0.2s ease-in-out;
 }
 
-* {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
+
 
 body {
   background-color: var(--color-bg);
   color: var(--color-text-primary);
   font-family: var(--font-body);
   line-height: 1.6;
-  min-height: 100vh;
+  min-height: 100vh; /* fallback */
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   padding: 2rem 1.5rem;
@@ -63,6 +68,11 @@ footer {
   border-top: 1px solid var(--color-border);
 }
 
+img, svg {
+  max-width: 100%;
+  display: block;
+}
+
 /* Brand & Typography */
 .brand-link {
   display: inline-flex;
@@ -83,8 +93,7 @@ footer {
   width: 52px;
   height: 52px;
   border-radius: 50%;
-  border: 1px solid var(--color-border);
-  background-color: #FFFFFF;
+  border: 2px solid var(--color-border);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -144,18 +153,24 @@ p.subtitle {
   flex-wrap: wrap;
 }
 
-.btn-primary {
-  display: inline-block;
-  background-color: var(--color-text-primary);
-  color: #FFFFFF;
-  border: none;
-  padding: 0.85rem 1.25rem;
+/* Base Button */
+.btn, .btn-primary, .btn-secondary, .btn-accent {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   font-weight: 700;
-  border-radius: var(--radius-md);
   text-decoration: none;
   cursor: pointer;
-  text-align: center;
   transition: var(--transition);
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1.25rem;
+  border: none;
+}
+
+/* Modifiers */
+.btn-primary {
+  background-color: var(--color-text-primary);
+  color: #FFFFFF;
 }
 
 .btn-primary:hover:not(:disabled) {
@@ -168,17 +183,12 @@ p.subtitle {
 }
 
 .btn-secondary {
-  display: inline-block;
   background-color: var(--color-surface);
   color: var(--color-text-primary);
   border: 1px solid var(--color-border-dark);
-  padding: 0.5rem 1rem;
-  font-weight: 700;
-  font-size: 0.85rem;
   border-radius: var(--radius-sm);
-  text-decoration: none;
-  cursor: pointer;
-  transition: var(--transition);
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
 }
 
 .btn-secondary:hover {
@@ -186,20 +196,18 @@ p.subtitle {
 }
 
 .btn-accent {
-  display: inline-block;
   background-color: var(--color-accent);
   color: #FFFFFF;
-  border: none;
-  padding: 0.85rem 1.25rem;
-  font-weight: 700;
-  border-radius: var(--radius-md);
-  text-decoration: none;
-  cursor: pointer;
-  transition: var(--transition);
 }
 
 .btn-accent:hover {
   opacity: 0.9;
+}
+
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
 }
 
 
