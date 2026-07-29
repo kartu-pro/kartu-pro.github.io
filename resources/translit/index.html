@@ -94,6 +94,7 @@
         <button type="button" class="btn-accent" onclick="toLatin()">To Latin</button>
         <button type="button" class="btn-primary" onclick="toGeorgian()">To Georgian</button>
         <button type="button" class="btn-secondary" onclick="copyText()">Copy Text</button>
+        <button type="button" class="btn-secondary" onclick="clearText()">Clear</button>
       </div>
     </div>
 
@@ -263,10 +264,20 @@
 
       function toGeorgian() {
         let text = document.getElementById('inputText').value;
-        Object.keys(latinToGeorgianMap).sort((a, b) => b.length - a.length).forEach(latin => {
-          text = text.split(latin).join(latinToGeorgianMap[latin]);
+        const keys = Object.keys(latinToGeorgianMap).sort((a, b) => b.length - a.length);
+
+        keys.forEach(latin => {
+          const pattern = latin.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/['’]/g, "['’]");
+          const regex = new RegExp(pattern, 'gi');
+          text = text.replace(regex, latinToGeorgianMap[latin]);
         });
+
         document.getElementById('inputText').value = text;
+      }
+
+      function clearText() {
+        document.getElementById('inputText').value = '';
+        document.getElementById('inputText').focus();
       }
 
       async function copyText() {
