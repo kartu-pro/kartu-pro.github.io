@@ -18,21 +18,21 @@
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body>
+<body class="h-dvh overflow-hidden">
 
   <!-- Compact Sub-App Header -->
-  <header class="app-header">
+  <header class="app-header flex-none">
     <a href="/" class="app-back-link">
       <div class="logo-circle-sm">
         <img src="/assets/logo.png" alt="Kartu Pro">
       </div>
-      <span>← Home</span>
+      <span>← Apps</span>
     </a>
   </header>
 
-  <div id="app" v-cloak class="app-container flex flex-col flex-1">
+  <div id="app" v-cloak class="app-container flex flex-col flex-1 min-h-0">
 
-    <main class="w-full max-w-3xl mx-auto flex-1 flex flex-col min-h-0">
+    <main class="w-full max-w-3xl mx-auto flex-1 flex flex-col min-h-0 my-0">
 
       <!-- LOADING -->
       <div v-if="appState === 'loading'" class="text-center py-12 flex-1 flex items-center justify-center">
@@ -41,12 +41,15 @@
 
       <!-- SETUP UI -->
       <div v-else-if="appState === 'setup'" class="flex-1 flex flex-col min-h-0">
-        <div class="mb-4">
+
+        <!-- Fixed Header -->
+        <div class="flex-none mb-4">
           <span class="badge">Grammar in Context</span>
           <h1 class="text-2xl sm:text-3xl font-extrabold mt-1">What do you want to study?</h1>
         </div>
 
-        <div class="flex-1 overflow-y-auto pr-1 flex flex-col gap-4">
+        <!-- Scrollable Filters Container -->
+        <div class="flex-1 overflow-y-auto pr-1 flex flex-col gap-4 min-h-0">
 
           <!-- Topic Selection -->
           <div class="card-box">
@@ -202,16 +205,22 @@
           </div>
         </div>
 
-        <div v-if="validationErrors.length > 0"
-          class="my-3 p-3 bg-[var(--color-surface)] border-l-4 border-[var(--color-accent)] text-[var(--color-accent)] rounded text-sm font-semibold">
-          <ul class="list-disc ml-4">
-            <li v-for="err in validationErrors" :key="err">{{ err }}</li>
-          </ul>
-        </div>
 
-        <button class="btn-primary w-full text-lg mt-2" @click="startDrill" :disabled="validationErrors.length > 0">
-          Start
-        </button>
+        <!-- Fixed Bottom Bar -->
+        <!-- Validation Errors -->
+        <div class="flex-none pt-3 border-t border-[var(--color-border)] mt-2">
+          <div v-if="validationErrors.length > 0"
+            class="mb-3 p-3 bg-[var(--color-surface)] border-l-4 border-[var(--color-accent)] text-[var(--color-accent)] rounded text-sm font-semibold">
+            <ul class="list-disc ml-4">
+              <li v-for="err in validationErrors" :key="err">{{ err }}</li>
+            </ul>
+          </div>
+
+          <button class="btn-primary w-full text-lg" @click="startDrill" :disabled="validationErrors.length > 0">
+            Start
+          </button>
+
+        </div>
 
       </div>
 
@@ -228,9 +237,10 @@
         <div class="card-box flex-1 flex flex-col items-center justify-center text-center my-2" v-if="currentCard">
 
           <!-- Feedback Diff -->
+          <!-- Feedback Diff -->
           <div class="min-h-[40px] text-center mb-4 font-bold flex flex-col items-center justify-center">
             <div v-if="feedback.msg"
-              :class="{'text-emerald-600 dark:text-emerald-400': feedback.type === 'success', 'text-[var(--color-accent)]': feedback.type === 'error'}">
+              :class="{'text-success': feedback.type === 'success', 'text-[var(--color-accent)]': feedback.type === 'error'}">
               {{ feedback.msg }}
             </div>
             <div v-if="feedback.type === 'error' && feedback.diff" class="mt-1">
@@ -246,7 +256,7 @@
             <input type="text" ref="clozeInput" v-model="textInput" @input="handleTextInput"
               @keyup.enter="handlePrimaryAction" :readonly="isAnswerSubmitted" class="cloze-input text-2xl sm:text-3xl"
               autocomplete="off" autocorrect="off" spellcheck="false" :placeholder="`[${currentCard.hint}]`"
-              :style="{ width: Math.max(textInput.length + 2, currentCard.hint.length + 4) + 'ch' }">
+              :style="{ width: Math.max((currentCard.answer?.length || textInput.length) + 3, currentCard.hint.length + 4) + 'ch' }">
 
             <span>{{ currentCard.suffix }}</span>
           </div>
