@@ -26,7 +26,7 @@ jobs:
         run: |
           python -c "
           import os
-          from datetime import datetime
+          from datetime import datetime, timezone
 
           SITE_URL = 'https://kartu-pro.github.io'
           urls = []
@@ -36,7 +36,6 @@ jobs:
                   continue
               
               for file in files:
-                  # Ignore Google verification HTML files
                   if file.startswith('google') or not file.endswith('.html'):
                       continue
 
@@ -54,11 +53,17 @@ jobs:
                       url_path = '/' + url_path
                   
                   full_url = f'{SITE_URL}{url_path}'
+
+                  # Ensure root home URL and directory paths end with /
                   if not full_url.endswith('/') and not '.' in os.path.basename(full_url):
                       full_url += '/'
 
+                  # Handle edge case where root URL comes out as 'https://kartu-pro.github.io'
+                  if full_url == SITE_URL:
+                      full_url = SITE_URL + '/'
+
                   mtime = os.path.getmtime(full_path)
-                  lastmod = datetime.utcfromtimestamp(mtime).strftime('%Y-%m-%d')
+                  lastmod = datetime.fromtimestamp(mtime, tz=timezone.utc).strftime('%Y-%m-%d')
 
                   urls.append((full_url, lastmod))
 
@@ -76,7 +81,7 @@ jobs:
               
           xml.append('</urlset>')
 
-          with open('sitemap.xml', 'w') as f:
+          with open('sitemap.xml', 'w', encoding='utf-8') as f:
               f.write('\n'.join(xml))
           "
 
