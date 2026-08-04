@@ -3,25 +3,86 @@ name: Generate Sitemap
 on:
   push:
     branches:
-      - main  # change to 'master' if that is your main branch
+      - main  # Change to 'master' if your default branch is master
 
 jobs:
   sitemap_job:
     runs-on: ubuntu-latest
     name: Generate Sitemap
     permissions:
-      contents: write  # Gives the workflow permission to commit changes
+      contents: write
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Required so lastmod dates use git commit history
+          fetch-depth: 0
 
-      - name: Generate SW / XML Sitemap
-        uses: cicirello/generate-sitemap@v1
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          base-url-path: https://kartu-pro.github.io/
-          drop-html-extension: true
+          python-version: '3.x'
+
+      - name: Generate Sitemap XML
+        run: |
+          python -c "
+          import os
+          from datetime import datetime
+
+          SITE_URL = 'https://kartu-pro.github.io'
+          urls = []
+
+          for root, dirs, files in os.walk('.'):
+              # Skip hidden directories like .git or .github
+              if '/.' in root or root.startswith('./.'):
+                  continue
+              
+              for file in files:
+                  if file.endswith('.html'):
+                      full_path = os.path.join(root, file)
+                      # Clean path formatting
+                      clean_path = os.path.normpath(full_path)
+                      
+                      # Convert file path to URL path
+                      if clean_path == 'index.html':
+                          url_path = ''
+                      elif clean_path.endswith('index.html'):
+                          url_path = clean_path[:-10]  # Strip 'index.html'
+                      else:
+                          url_path = clean_path[:-5]   # Strip '.html'
+
+                      # Ensure leading slash
+                      if url_path and not url_path.startswith('/'):
+                          url_path = '/' + url_path
+                      
+                      # Format final URL trailing slash
+                      full_url = f'{SITE_URL}{url_path}'
+                      if not full_url.endswith('/') and not '.' in os.path.basename(full_url):
+                          full_url += '/'
+
+                      # Get last modified date from file
+                      mtime = os.path.getmtime(full_path)
+                      lastmod = datetime.utcfromtimestamp(mtime).strftime('%Y-%m-%d')
+
+                      urls.append((full_url, lastmod))
+
+          # Build XML output
+          xml = ['<?xml version=\"1.0\" encoding=\"UTF-8\"?>']
+          xml.append('<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">')
+          
+          for url, lastmod in sorted(set(urls)):
+              priority = '1.0' if url == SITE_URL + '/' else '0.8'
+              xml.append('  <url>')
+              xml.append(f'    <loc>{url}</loc>')
+              xml.append(f'    <lastmod>{lastmod}</lastmod>')
+              xml.append('    <changefreq>weekly</changefreq>')
+              xml.append(f'    <priority>{priority}</priority>')
+              xml.append('  </url>')
+              
+          xml.append('</urlset>')
+
+          with open('sitemap.xml', 'w') as f:
+              f.write('\n'.join(xml))
+          "
 
       - name: Commit and Push Sitemap
         run: |
