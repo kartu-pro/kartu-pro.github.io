@@ -32,40 +32,36 @@ jobs:
           urls = []
 
           for root, dirs, files in os.walk('.'):
-              # Skip hidden directories like .git or .github
               if '/.' in root or root.startswith('./.'):
                   continue
               
               for file in files:
-                  if file.endswith('.html'):
-                      full_path = os.path.join(root, file)
-                      # Clean path formatting
-                      clean_path = os.path.normpath(full_path)
-                      
-                      # Convert file path to URL path
-                      if clean_path == 'index.html':
-                          url_path = ''
-                      elif clean_path.endswith('index.html'):
-                          url_path = clean_path[:-10]  # Strip 'index.html'
-                      else:
-                          url_path = clean_path[:-5]   # Strip '.html'
+                  # Ignore Google verification HTML files
+                  if file.startswith('google') or not file.endswith('.html'):
+                      continue
 
-                      # Ensure leading slash
-                      if url_path and not url_path.startswith('/'):
-                          url_path = '/' + url_path
-                      
-                      # Format final URL trailing slash
-                      full_url = f'{SITE_URL}{url_path}'
-                      if not full_url.endswith('/') and not '.' in os.path.basename(full_url):
-                          full_url += '/'
+                  full_path = os.path.join(root, file)
+                  clean_path = os.path.normpath(full_path)
+                  
+                  if clean_path == 'index.html':
+                      url_path = ''
+                  elif clean_path.endswith('index.html'):
+                      url_path = clean_path[:-10]
+                  else:
+                      url_path = clean_path[:-5]
 
-                      # Get last modified date from file
-                      mtime = os.path.getmtime(full_path)
-                      lastmod = datetime.utcfromtimestamp(mtime).strftime('%Y-%m-%d')
+                  if url_path and not url_path.startswith('/'):
+                      url_path = '/' + url_path
+                  
+                  full_url = f'{SITE_URL}{url_path}'
+                  if not full_url.endswith('/') and not '.' in os.path.basename(full_url):
+                      full_url += '/'
 
-                      urls.append((full_url, lastmod))
+                  mtime = os.path.getmtime(full_path)
+                  lastmod = datetime.utcfromtimestamp(mtime).strftime('%Y-%m-%d')
 
-          # Build XML output
+                  urls.append((full_url, lastmod))
+
           xml = ['<?xml version=\"1.0\" encoding=\"UTF-8\"?>']
           xml.append('<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">')
           
