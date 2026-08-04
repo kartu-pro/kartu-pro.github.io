@@ -3,15 +3,19 @@ name: Generate Sitemap
 on:
   push:
     branches:
-      - main  # or 'master' depending on your default branch name
+      - main  # change to 'master' if that is your main branch
 
 jobs:
   sitemap_job:
     runs-on: ubuntu-latest
     name: Generate Sitemap
+    permissions:
+      contents: write  # Gives the workflow permission to commit changes
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Required so lastmod dates use git commit history
 
       - name: Generate SW / XML Sitemap
         uses: cicirello/generate-sitemap@v1
@@ -19,8 +23,14 @@ jobs:
           base-url-path: https://kartu-pro.github.io/
           drop-html-extension: true
 
-      - name: Commit and Push Sitemap Changes
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "chore: auto-update sitemap.xml [skip ci]"
-          file_pattern: 'sitemap.xml'
+      - name: Commit and Push Sitemap
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add sitemap.xml
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: auto-update sitemap.xml [skip ci]"
+            git push
+          else
+            echo "No changes in sitemap.xml to commit."
+          fi
