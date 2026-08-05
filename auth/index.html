@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KartuPro | Verifying Login</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <style>
+    .status-msg {
+      font-size: 1rem;
+      color: var(--color-text-secondary);
+      margin-top: 0.5rem;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <a href="/" class="brand-link">
+      <div class="logo-circle">
+        <img src="/assets/logo.svg" alt="KartuPro - Georgian Language Learning Logo">
+      </div>
+      <span class="brand-title">KartuPro</span>
+    </a>
+
+    <nav class="nav-links">
+      <a href="/apps/">Apps</a>
+      <a href="/resources/">Resources</a>
+      <a href="/about/">About</a>
+      <a href="/contact/">Contact</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="card-box">
+      <h2>Logging you in...</h2>
+      <p id="status" class="status-msg">Hang tight while we confirm your details.</p>
+    </div>
+  </main>
+
+  <footer>
+    &copy; KartuPro.
+  </footer>
+
+  <script src="/api.js"></script>
+  <script>
+    async function verifyToken() {
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get('token');
+      const redirectTo = params.get('redirectTo') || '/';
+      const statusElement = document.getElementById('status');
+
+      if (!token) {
+        statusElement.style.color = 'var(--color-accent)';
+        statusElement.innerHTML = 'This sign-in link is missing key information. <a href="/login">Request a new link</a>.';
+        return;
+      }
+
+      try {
+        const data = await apiPost('/auth/verify', {
+          token: token,
+          redirectTo: redirectTo
+        });
+
+        statusElement.style.color = 'var(--color-success)';
+        statusElement.innerText = 'You’re signed in! Taking you to your page...';
+
+        localStorage.setItem('sessionToken', data.sessionToken);
+
+        setTimeout(() => {
+          window.location.href = data.redirectTo || redirectTo;
+        }, 10);
+      } catch (err) {
+        statusElement.style.color = 'var(--color-accent)';
+        statusElement.innerHTML = 'This sign-in link is invalid or has expired. <a href="/login">Request a new link</a>.';
+      }
+    }
+
+    verifyToken();
+  </script>
+
+</body>
+
+</html>

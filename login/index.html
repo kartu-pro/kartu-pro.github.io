@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KartuPro | Login</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <style>
+    .auth-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      font-family: inherit;
+      font-size: 1rem;
+      border: 1px solid var(--color-border-dark);
+      border-radius: var(--radius-sm);
+      background-color: var(--color-surface);
+      color: var(--color-text-primary);
+      transition: var(--transition);
+    }
+
+    .form-input:focus {
+      outline: 2px solid var(--color-accent);
+      outline-offset: 1px;
+    }
+
+    .status-msg {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <a href="/" class="brand-link">
+      <div class="logo-circle">
+        <img src="/assets/logo.svg" alt="KartuPro - Georgian Language Learning Logo">
+      </div>
+      <span class="brand-title">KartuPro</span>
+    </a>
+
+    <nav class="nav-links">
+      <a href="/apps/">Apps</a>
+      <a href="/resources/">Resources</a>
+      <a href="/about/">About</a>
+      <a href="/contact/">Contact</a>
+    </nav>
+  </header>
+
+  <main>
+    <div id="app" class="card-box"></div>
+  </main>
+
+  <footer>
+    &copy; KartuPro.
+  </footer>
+
+  <script src="/api.js"></script>
+  <script>
+    const sessionToken = localStorage.getItem('sessionToken');
+    const appElement = document.getElementById('app');
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetRedirect = urlParams.get('redirectTo') || '/';
+
+    if (sessionToken) {
+      appElement.innerHTML = `
+        <h2>You're already signed in!</h2>
+        <p>You're ready to continue using your KartuPro account.</p>
+        <button onclick="logout()" class="btn-secondary" style="margin-top: 1.25rem;">Log Out</button>
+      `;
+    } else {
+      appElement.innerHTML = `
+        <h2>Welcome Back</h2>
+        <p class="subtitle" style="margin-bottom: 1rem; font-size: 1rem;">
+          Enter your email and we'll send you a link to sign in instantly.
+        </p>
+        <form class="auth-form" onsubmit="sendLink(event)">
+          <input type="email" id="email" class="form-input" placeholder="name@example.com" required />
+          <button type="submit" class="btn-accent">Send Magic Link →</button>
+        </form>
+        <p id="status" class="status-msg"></p>
+      `;
+    }
+
+    async function sendLink(event) {
+      event.preventDefault();
+      const email = document.getElementById('email').value;
+      const status = document.getElementById('status');
+
+      status.style.color = 'var(--color-text-secondary)';
+      status.innerText = 'Sending your sign-in link...';
+
+      try {
+        await apiPost('/auth/magic-link', {
+          email: email,
+          redirectTo: targetRedirect,
+          frontendUrl: window.location.origin
+        });
+        status.style.color = 'var(--color-success)';
+        status.innerText = 'We just sent a magic link to your email! Click it to sign in.';
+      } catch (err) {
+        status.style.color = 'var(--color-accent)';
+        status.innerText = err.message || 'We couldn’t send the link. Please check your email address and try again.';
+      }
+    }
+
+    async function logout() {
+      try {
+        await apiPost('/auth/logout');
+      } catch (err) {
+        console.warn('Backend logout warning:', err.message);
+      } finally {
+        localStorage.removeItem('sessionToken');
+        window.location.reload();
+      }
+    }
+  </script>
+
+</body>
+
+</html>
