@@ -1,4 +1,7 @@
 import { apiGet } from '../../js/api.js';
+import PosSelect from '../../js/components/PosSelect.js';
+import WordFilter from '../../js/components/WordFilter.js';
+import ChipMultiSelectFilter from '../../js/components/ChipMultiSelectFilter.js';
 
 const CONFIG = {
   personNum: ['1s', '2s', '3s', '1p', '2p', '3p'],
@@ -10,9 +13,14 @@ const CONFIG = {
 
 const enToKaMap = { 'a': 'ა', 'b': 'ბ', 'c': 'ც', 'C': 'ჩ', 'd': 'დ', 'D': 'ძ', 'e': 'ე', 'f': 'ფ', 'g': 'გ', 'h': 'ჰ', 'i': 'ი', 'j': 'ჯ', 'k': 'კ', 'l': 'ლ', 'm': 'მ', 'n': 'ნ', 'o': 'ო', 'p': 'პ', 'q': 'ქ', 'r': 'რ', 'R': 'ღ', 's': 'ს', 'S': 'შ', 't': 'ტ', 'T': 'თ', 'u': 'უ', 'v': 'ვ', 'w': 'წ', 'W': 'ჭ', 'x': 'ხ', 'y': 'ყ', 'z': 'ზ', 'Z': 'ჟ' };
 
-const { createApp, ref, computed, nextTick, onMounted, onUnmounted } = Vue;
+const { createApp, ref, computed, nextTick, onMounted, watch } = Vue;
 
 createApp({
+  components: {
+    'pos-select': PosSelect,
+    'word-filter': WordFilter,
+    'chip-multi-select-filter': ChipMultiSelectFilter,
+  },
   setup() {
     const appState = ref('setup');
     const dictionary = ref([]);
@@ -20,7 +28,6 @@ createApp({
     const currentCard = ref(null);
 
     const wordSearch = ref('');
-    const showWordDropdown = ref(false);
     const textInput = ref('');
     const isAnswerSubmitted = ref(false);
     const feedback = ref({ msg: '', type: '', diff: null });
@@ -40,23 +47,12 @@ createApp({
       } finally {
         appState.value = 'setup';
       }
-      window.addEventListener('click', closeDropdowns);
     });
 
-    onUnmounted(() => window.removeEventListener('click', closeDropdowns));
-
-    const closeDropdowns = (e) => {
-      if (!e.target.closest('.relative')) showWordDropdown.value = false;
-    };
-
-    const filteredDictionary = computed(() => {
-      if (!wordSearch.value) return [];
-      const q = wordSearch.value.toLowerCase();
-      return dictionary.value.filter(w =>
-        w.pos === filters.value.topic &&
-        !filters.value.words.some(sw => sw.uuid === w.uuid) &&
-        (w.lemma.toLowerCase().includes(q) || w.en.toLowerCase().includes(q))
-      );
+    watch(() => filters.value.topic, (newTopic, oldTopic) => {
+      if (newTopic !== oldTopic) {
+        resetPosFilters(newTopic);
+      }
     });
 
     const availableTags = computed(() => {
@@ -65,7 +61,7 @@ createApp({
       return Array.from(tags).sort();
     });
 
-    const resetPosFilters = () => {
+    const resetPosFilters = (newTopic) => {
       filters.value.words = [];
       filters.value.tags = [];
       filters.value.scr = [];
@@ -75,31 +71,27 @@ createApp({
       filters.value.qty = [];
       filters.value.pp = [];
 
-      if (filters.value.topic === 'verb') {
+      if (newTopic === 'verb') {
         filters.value.scr = ['pres', 'fut', 'aor'];
         filters.value.subj = [...CONFIG.personNum];
-      } else if (filters.value.topic === 'noun') {
+      } else if (newTopic === 'noun') {
         filters.value.case = Object.keys(CONFIG.cases);
         filters.value.qty = Object.keys(CONFIG.qty);
-      } else if (filters.value.topic === 'pronoun') {
+      } else if (newTopic === 'pron') {
         filters.value.case = ['nom', 'erg', 'dat'];
         filters.value.qty = Object.keys(CONFIG.qty);
-      } else if (filters.value.topic === 'adj') {
+      } else if (newTopic === 'adj') {
         filters.value.case = Object.keys(CONFIG.cases);
       }
     };
 
-    const toggleArrayItem = (arr, item) => {
-      const idx = arr.indexOf(item);
-      idx > -1 ? arr.splice(idx, 1) : arr.push(item);
+    const addWordToFilters = (w) => {
+      filters.value.words.push(w);
+      wordSearch.value = ''; // Clear search input in app.js
     };
-
-    const selectAll = (arr, items) => {
-      arr.splice(0, arr.length, ...items);
+    const removeWordFromFilters = (w) => {
+      filters.value.words = filters.value.words.filter(x => x.uuid !== w.uuid);
     };
-
-    const addWord = (w) => { filters.value.words.push(w); wordSearch.value = ''; showWordDropdown.value = false; };
-    const removeWord = (w) => { filters.value.words = filters.value.words.filter(x => x.uuid !== w.uuid); };
 
     const validationErrors = computed(() => {
       const errors = [];
@@ -113,7 +105,7 @@ createApp({
       if (f.topic === 'verb') {
         if (f.scr.length === 0) errors.push("Select at least one Screeve");
         if (f.subj.length === 0) errors.push("Select at least one Logical Subject");
-      } else if (f.topic === 'noun' || f.topic === 'pronoun') {
+      } else if (f.topic === 'noun' || f.topic === 'pron') {
         if (f.case.length === 0) errors.push("Select at least one Case");
         if (f.qty.length === 0) errors.push("Select at least one Quantity");
       } else if (f.topic === 'adj') {
@@ -144,7 +136,7 @@ createApp({
         if (filters.value.case.length) requestPayload.cases = filters.value.case;
         if (filters.value.qty.length) requestPayload.qtys = filters.value.qty;
         if (filters.value.pp.length) requestPayload.pps = filters.value.pp;
-      } else if (filters.value.topic === 'pronoun' || filters.value.topic === 'adj') {
+      } else if (filters.value.topic === 'pron' || filters.value.topic === 'adj') {
         if (filters.value.case.length) requestPayload.cases = filters.value.case;
       }
 
@@ -167,7 +159,6 @@ createApp({
 
       try {
         const rawCards = await apiGet(`/context?${queryString}`);
-        console.log(rawCards)
 
         activeQueue.value = rawCards.map(c => {
           const targetPos = c.sentence.indexOf(c.target);
@@ -253,10 +244,11 @@ createApp({
     };
 
     return {
-      appState, dictionary, CONFIG, filters, wordSearch, showWordDropdown, filteredDictionary, availableTags,
-      resetPosFilters, toggleArrayItem, selectAll, addWord, removeWord, validationErrors, startDrill,
+      appState, dictionary, CONFIG, filters, wordSearch, availableTags,
+      validationErrors, startDrill,
       activeQueue, currentCard, textInput, isAnswerSubmitted, feedback, clozeInput,
-      handleTextInput, handlePrimaryAction
+      handleTextInput, handlePrimaryAction,
+      addWordToFilters, removeWordFromFilters
     };
   }
 }).mount('#app');

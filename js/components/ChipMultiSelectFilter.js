@@ -1,0 +1,55 @@
+const ChipMultiSelectFilter = {
+  props: {
+    label: String,
+    items: Array, // e.g., ['pres', 'fut', 'aor'] or ['1s', '2s']
+    modelValue: Array, // currently selected items, e.g., filters.value.scr
+    itemMap: Object, // optional map for display names, e.g., CONFIG.scr
+    disabled: {
+      type: Boolean,
+      default: false
+    }
+  },
+  emits: ['update:modelValue'],
+  methods: {
+    toggleItem(item) {
+      if (this.disabled) return;
+      const currentSelection = [...this.modelValue];
+      const idx = currentSelection.indexOf(item);
+      if (idx > -1) {
+        currentSelection.splice(idx, 1);
+      } else {
+        currentSelection.push(item);
+      }
+      this.$emit('update:modelValue', currentSelection);
+    },
+    selectAll() {
+      if (this.disabled) return;
+      this.$emit('update:modelValue', [...this.items]);
+    },
+    selectNone() {
+      if (this.disabled) return;
+      this.$emit('update:modelValue', []);
+    }
+  },
+  template: `
+    <div class="mb-3">
+      <div class="flex justify-between text-xs font-bold text-secondary mb-1">
+        <span>{{ label }}</span>
+        <div class="flex gap-2">
+          <button class="text-secondary hover:underline" @click="selectNone" :disabled="disabled">None</button>
+          <button class="text-[var(--color-accent)] hover:underline" @click="selectAll" :disabled="disabled">All</button>
+        </div>
+      </div>
+      <div class="flex flex-wrap gap-1.5">
+        <div v-for="item in items" :key="item"
+             class="filter-chip"
+             :class="{ 'active': modelValue.includes(item), 'disabled': disabled }"
+             @click="toggleItem(item)">
+          {{ itemMap ? itemMap[item] : item }}
+        </div>
+      </div>
+    </div>
+  `
+};
+
+export default ChipMultiSelectFilter;

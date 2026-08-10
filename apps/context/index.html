@@ -51,57 +51,19 @@
         <!-- Scrollable Filters Container -->
         <div class="flex-1 overflow-y-auto pr-1 flex flex-col gap-4 min-h-0">
 
-          <!-- Topic Selection -->
-          <div class="card-box">
-            <label class="block font-bold text-sm mb-2">Part of Speech</label>
-            <select v-model="filters.topic" @change="resetPosFilters" class="input-text">
-              <option value="" disabled>Select a topic...</option>
-              <option value="verb">Verbs</option>
-              <option value="noun">Nouns</option>
-              <option value="pronoun">Pronouns</option>
-              <option value="adj">Adjectives</option>
-            </select>
-          </div>
+          <pos-select v-model="filters.topic"></pos-select>
 
-          <!-- Vocabulary Filters -->
           <div v-if="filters.topic" class="card-box">
             <h3 class="font-bold text-sm border-b border-[var(--color-border)] pb-2 mb-3">Vocabulary Filters</h3>
+            <word-filter v-model="wordSearch" :dictionary="dictionary" :topic="filters.topic"
+              :selected-words="filters.words" @add-word="addWordToFilters" @remove-word="removeWordFromFilters"
+              :disabled="!filters.topic">
+            </word-filter>
 
-            <!-- Words -->
-            <div class="mb-4 relative">
-              <label class="block text-xs font-bold text-secondary mb-1">Words</label>
-              <div class="flex flex-wrap gap-1.5 mb-2" v-if="filters.words.length">
-                <span v-for="word in filters.words" :key="word.uuid"
-                  class="inline-flex items-center px-2 py-1 bg-[var(--color-surface)] text-xs font-bold rounded border border-[var(--color-border)]">
-                  {{ word.lemma }}
-                  <button @click="removeWord(word)"
-                    class="ml-1.5 text-secondary hover:text-[var(--color-accent)]">✕</button>
-                </span>
-              </div>
-              <input type="text" v-model="wordSearch" @focus="showWordDropdown = true" placeholder="Type to search..."
-                class="input-text text-sm">
-
-              <div v-if="showWordDropdown && filteredDictionary.length"
-                class="absolute z-10 w-full bg-[var(--color-bg)] border border-[var(--color-border)] rounded shadow-lg max-h-40 overflow-y-auto mt-1">
-                <div v-for="item in filteredDictionary" :key="item.uuid" @click="addWord(item)"
-                  class="p-2 hover:bg-[var(--color-surface)] cursor-pointer text-sm flex justify-between border-b border-[var(--color-border)]">
-                  <span class="font-bold">{{ item.lemma }}</span>
-                  <span class="text-secondary">{{ item.en }}</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Tags -->
-            <div v-if="availableTags.length">
-              <label class="block text-xs font-bold text-secondary mb-1">Tags</label>
-              <div class="flex flex-wrap gap-1.5">
-                <div v-for="tag in availableTags" :key="tag" class="filter-chip"
-                  :class="{ 'active': filters.tags.includes(tag) }" @click="toggleArrayItem(filters.tags, tag)">
-                  {{ tag }}
-                </div>
-              </div>
-            </div>
+            <chip-multi-select-filter label="Tags" :items="availableTags" v-model="filters.tags"
+              :disabled="!filters.topic"></chip-multi-select-filter>
           </div>
+
 
           <!-- Grammar Filters -->
           <div v-if="filters.topic" class="card-box">
@@ -109,97 +71,29 @@
 
             <!-- VERBS -->
             <template v-if="filters.topic === 'verb'">
-              <div class="mb-3">
-                <div class="flex justify-between text-xs font-bold text-secondary mb-1">
-                  <span>Screeve</span>
-                  <div class="flex gap-2">
-                    <button class="text-secondary hover:underline" @click="filters.scr = []">None</button>
-                    <button class="text-[var(--color-accent)] hover:underline"
-                      @click="selectAll(filters.scr, Object.keys(CONFIG.scr))">All</button>
-                  </div>
-                </div>
-                <div class="flex flex-wrap gap-1.5">
-                  <div v-for="(label, val) in CONFIG.scr" :key="val" class="filter-chip"
-                    :class="{'active': filters.scr.includes(val)}" @click="toggleArrayItem(filters.scr, val)">{{ label
-                    }}</div>
-                </div>
-              </div>
+              <chip-multi-select-filter label="Screeve" :items="Object.keys(CONFIG.scr)" v-model="filters.scr"
+                :item-map="CONFIG.scr"></chip-multi-select-filter>
 
-              <div class="mb-3">
-                <div class="flex justify-between text-xs font-bold text-secondary mb-1">
-                  <span>Logical Subject</span>
-                  <div class="flex gap-2">
-                    <button class="text-secondary hover:underline" @click="filters.subj = []">None</button>
-                    <button class="text-[var(--color-accent)] hover:underline"
-                      @click="selectAll(filters.subj, CONFIG.personNum.filter(p => p !== 'none'))">All</button>
-                  </div>
-                </div>
-                <div class="flex flex-wrap gap-1.5">
-                  <template v-for="p in CONFIG.personNum" :key="p">
-                    <div class="filter-chip" :class="{'active': filters.subj.includes(p)}"
-                      @click="toggleArrayItem(filters.subj, p)">{{ p }}</div>
-                  </template>
-                </div>
-              </div>
-
-              <div class="mb-3">
-                <h3 class="font-bold text-sm text-secondary mb-2">Object Markers</h3>
-                <label class="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" v-model="filters.includeObjs" class="w-4 h-4 accent-[var(--color-accent)]">
-                  <span class="text-sm font-bold">Focus on explicitly object marked forms (e.g. გაძლევ)</span>
-                </label>
-              </div>
+              <chip-multi-select-filter label="Subject" :items="CONFIG.personNum" v-model="filters.subj"
+                :item-map="{ '1s': '1s', '2s': '2s', '3s': '3s', '1p': '1p', '2p': '2p', '3p': '3p' }"></chip-multi-select-filter>
             </template>
 
             <!-- CASES -->
-            <template v-if="['noun', 'pronoun', 'adj'].includes(filters.topic)">
-              <div class="mb-3">
-                <div class="flex justify-between text-xs font-bold text-secondary mb-1">
-                  <span>Case</span>
-                  <div class="flex gap-2">
-                    <button class="text-secondary hover:underline" @click="filters.case = []">None</button>
-                    <button class="text-[var(--color-accent)] hover:underline"
-                      @click="selectAll(filters.case, Object.keys(CONFIG.cases))">All</button>
-                  </div>
-                </div>
-                <div class="flex flex-wrap gap-1.5">
-                  <div v-for="(label, val) in CONFIG.cases" :key="val" class="filter-chip"
-                    :class="{'active': filters.case.includes(val)}" @click="toggleArrayItem(filters.case, val)">{{ label
-                    }}</div>
-                </div>
-              </div>
+            <template v-if="['noun', 'pron', 'adj'].includes(filters.topic)">
+              <chip-multi-select-filter label="Case" :items="Object.keys(CONFIG.cases)" v-model="filters.case"
+                :item-map="CONFIG.cases"></chip-multi-select-filter>
             </template>
 
             <!-- QTY -->
-            <template v-if="['noun', 'pronoun'].includes(filters.topic)">
-              <div class="mb-3">
-                <label class="block text-xs font-bold text-secondary mb-1">Quantity</label>
-                <div class="flex flex-wrap gap-1.5">
-                  <div v-for="(label, val) in CONFIG.qty" :key="val" class="filter-chip"
-                    :class="{'active': filters.qty.includes(val)}" @click="toggleArrayItem(filters.qty, val)">{{ label
-                    }}</div>
-                </div>
-              </div>
+            <template v-if="['noun', 'pron'].includes(filters.topic)">
+              <chip-multi-select-filter label="Quantity" :items="Object.keys(CONFIG.qty)" v-model="filters.qty"
+                :item-map="CONFIG.qty"></chip-multi-select-filter>
             </template>
 
             <!-- POSTPOSITIONS -->
             <template v-if="['noun'].includes(filters.topic)">
-              <div class="mb-3">
-                <div class="flex justify-between text-xs font-bold text-secondary mb-1">
-                  <span>Postpositions</span>
-                  <div class="flex gap-2">
-                    <button class="text-secondary hover:underline" @click="filters.pp = []">None</button>
-                    <button class="text-[var(--color-accent)] hover:underline"
-                      @click="selectAll(filters.pp, CONFIG.pp)">All</button>
-                  </div>
-                </div>
-                <div class="flex flex-wrap gap-1.5">
-                  <div v-for="p in CONFIG.pp" :key="p" class="filter-chip" :class="{'active': filters.pp.includes(p)}"
-                    @click="toggleArrayItem(filters.pp, p)">
-                    {{ p }}
-                  </div>
-                </div>
-              </div>
+              <chip-multi-select-filter label="Postpositions" :items="CONFIG.pp"
+                v-model="filters.pp"></chip-multi-select-filter>
             </template>
 
           </div>
