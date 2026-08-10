@@ -2,16 +2,8 @@ import { apiGet } from '../../js/api.js';
 import PosSelect from '../../js/components/PosSelect.js';
 import WordFilter from '../../js/components/WordFilter.js';
 import ChipMultiSelectFilter from '../../js/components/ChipMultiSelectFilter.js';
-
-const CONFIG = {
-  personNum: ['1s', '2s', '3s', '1p', '2p', '3p'],
-  qty: { 's': 'Singular', 'p': 'Plural' },
-  cases: { 'nom': 'Nom', 'dat': 'Dat/Acc', 'erg': 'Erg', 'gen': 'Gen', 'ins': 'Ins', 'adv': 'Adv', 'voc': 'Voc' },
-  scr: { 'pres': 'Present', 'imp': 'Imperfect', 'pres-subj': 'Pres. Subj.', 'fut': 'Future', 'cond': 'Conditional', 'fut-subj': 'Fut. Subj.', 'aor': 'Aorist', 'opt': 'Optative', 'perf': 'Perfect', 'pluperf': 'Pluperfect', 'perf-subj': 'Perf. Subj.' },
-  pp: ['-თან', '-გან', '-თვის', '-ზე', '-კენ', '-ში']
-};
-
-const enToKaMap = { 'a': 'ა', 'b': 'ბ', 'c': 'ც', 'C': 'ჩ', 'd': 'დ', 'D': 'ძ', 'e': 'ე', 'f': 'ფ', 'g': 'გ', 'h': 'ჰ', 'i': 'ი', 'j': 'ჯ', 'k': 'კ', 'l': 'ლ', 'm': 'მ', 'n': 'ნ', 'o': 'ო', 'p': 'პ', 'q': 'ქ', 'r': 'რ', 'R': 'ღ', 's': 'ს', 'S': 'შ', 't': 'ტ', 'T': 'თ', 'u': 'უ', 'v': 'ვ', 'w': 'წ', 'W': 'ჭ', 'x': 'ხ', 'y': 'ყ', 'z': 'ზ', 'Z': 'ჟ' };
+import { transliterate, computeDiff } from '../../js/utils.js';
+import { PERSON_NUM, QUANTITIES, CASES, SCREEVES, POSTPOSITIONS } from '../../js/constants.js';
 
 const { createApp, ref, computed, nextTick, onMounted, watch } = Vue;
 
@@ -26,6 +18,7 @@ createApp({
     const dictionary = ref([]);
     const activeQueue = ref([]);
     const currentCard = ref(null);
+    const isLoadingDictionary = ref(true); // New ref for dictionary loading state
 
     const wordSearch = ref('');
     const textInput = ref('');
@@ -34,26 +27,34 @@ createApp({
     const clozeInput = ref(null);
 
     const filters = ref({
-      topic: '', words: [], tags: [], scr: [], subj: [], includeObjs: false, case: [], qty: [], pp: []
+      topic: 'verb', // Initialize topic to 'verb'
+      words: [], tags: [], scr: [], subj: [], includeObjs: false, case: [], qty: [], pp: []
     });
 
-    onMounted(async () => {
-      appState.value = 'loading';
-      try {
-        const words = await apiGet('/words');
-        dictionary.value = words;
-      } catch (err) {
-        console.error("Failed to load words", err);
-      } finally {
-        appState.value = 'setup';
-      }
+    onMounted(() => {
+      // Load dictionary in the background, non-blocking
+      apiGet('/words')
+        .then(words => {
+          dictionary.value = words;
+        })
+        .catch(err => {
+          console.error("Failed to load words", err);
+          // Optionally show an error message to the user
+        })
+        .finally(() => {
+          isLoadingDictionary.value = false;
+        });
+
+      // Initialize POS-specific filters for the default 'verb' topic
+      resetPosFilters('verb');
     });
 
     watch(() => filters.value.topic, (newTopic, oldTopic) => {
+      // Only reset filters if the topic actually changed by user interaction, not initial setup
       if (newTopic !== oldTopic) {
         resetPosFilters(newTopic);
       }
-    });
+    }, { immediate: false }); // Do not run immediately on component mount, handled by onMounted
 
     const availableTags = computed(() => {
       const tags = new Set();
@@ -73,15 +74,15 @@ createApp({
 
       if (newTopic === 'verb') {
         filters.value.scr = ['pres', 'fut', 'aor'];
-        filters.value.subj = [...CONFIG.personNum];
+        filters.value.subj = Object.keys(PERSON_NUM);
       } else if (newTopic === 'noun') {
-        filters.value.case = Object.keys(CONFIG.cases);
-        filters.value.qty = Object.keys(CONFIG.qty);
+        filters.value.case = Object.keys(CASES);
+        filters.value.qty = Object.keys(QUANTITIES);
       } else if (newTopic === 'pron') {
         filters.value.case = ['nom', 'erg', 'dat'];
-        filters.value.qty = Object.keys(CONFIG.qty);
+        filters.value.qty = Object.keys(QUANTITIES);
       } else if (newTopic === 'adj') {
-        filters.value.case = Object.keys(CONFIG.cases);
+        filters.value.case = Object.keys(CASES);
       }
     };
 
@@ -192,27 +193,7 @@ createApp({
 
     const handleTextInput = (e) => {
       if (isAnswerSubmitted.value) return;
-      let converted = '';
-      for (let char of e.target.value) converted += enToKaMap[char] || char;
-      textInput.value = converted;
-    };
-
-    const getDiff = (input, expected) => {
-      const n = input.length, m = expected.length;
-      const dp = Array(n + 1).fill(0).map(() => Array(m + 1).fill(0));
-      for (let i = 1; i <= n; i++) {
-        for (let j = 1; j <= m; j++) {
-          if (input[i - 1] === expected[j - 1]) dp[i][j] = dp[i - 1][j - 1] + 1;
-          else dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
-        }
-      }
-      let i = n, j = m, result = [];
-      while (i > 0 || j > 0) {
-        if (i > 0 && j > 0 && input[i - 1] === expected[j - 1]) { result.unshift({ char: input[i - 1], type: 'match' }); i--; j--; }
-        else if (j > 0 && (i === 0 || dp[i][j - 1] >= dp[i - 1][j])) { result.unshift({ char: expected[j - 1], type: 'insertion' }); j--; }
-        else if (i > 0 && (j === 0 || dp[i][j - 1] < dp[i - 1][j])) { result.unshift({ char: input[i - 1], type: 'deletion' }); i--; }
-      }
-      return result;
+      textInput.value = transliterate(e.target.value);
     };
 
     const handlePrimaryAction = () => {
@@ -223,7 +204,7 @@ createApp({
         if (isCorrect) {
           feedback.value = { msg: '✅ Correct!', type: 'success', diff: null };
         } else {
-          feedback.value = { msg: '❌ Not quite.', type: 'error', diff: getDiff(textInput.value.trim(), currentCard.value.ans) };
+          feedback.value = { msg: '❌ Not quite.', type: 'error', diff: computeDiff(textInput.value.trim(), currentCard.value.ans) };
           currentCard.value.needsReinsert = true;
         }
       } else if (isAnswerSubmitted.value) {
@@ -244,8 +225,8 @@ createApp({
     };
 
     return {
-      appState, dictionary, CONFIG, filters, wordSearch, availableTags,
-      validationErrors, startDrill,
+      appState, dictionary, isLoadingDictionary, filters, PERSON_NUM, QUANTITIES, CASES, SCREEVES, POSTPOSITIONS,
+      wordSearch, availableTags, validationErrors, startDrill,
       activeQueue, currentCard, textInput, isAnswerSubmitted, feedback, clozeInput,
       handleTextInput, handlePrimaryAction,
       addWordToFilters, removeWordFromFilters

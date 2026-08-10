@@ -53,16 +53,6 @@
 
           <pos-select v-model="filters.topic"></pos-select>
 
-          <div v-if="filters.topic" class="card-box">
-            <h3 class="font-bold text-sm border-b border-[var(--color-border)] pb-2 mb-3">Vocabulary Filters</h3>
-            <word-filter v-model="wordSearch" :dictionary="dictionary" :topic="filters.topic"
-              :selected-words="filters.words" @add-word="addWordToFilters" @remove-word="removeWordFromFilters"
-              :disabled="!filters.topic">
-            </word-filter>
-
-            <chip-multi-select-filter label="Tags" :items="availableTags" v-model="filters.tags"
-              :disabled="!filters.topic"></chip-multi-select-filter>
-          </div>
 
 
           <!-- Grammar Filters -->
@@ -71,31 +61,45 @@
 
             <!-- VERBS -->
             <template v-if="filters.topic === 'verb'">
-              <chip-multi-select-filter label="Screeve" :items="Object.keys(CONFIG.scr)" v-model="filters.scr"
-                :item-map="CONFIG.scr"></chip-multi-select-filter>
+              <chip-multi-select-filter label="Screeve" :items="Object.keys(SCREEVES)" v-model="filters.scr"
+                :item-map="SCREEVES"></chip-multi-select-filter>
 
-              <chip-multi-select-filter label="Subject" :items="CONFIG.personNum" v-model="filters.subj"
-                :item-map="{ '1s': '1s', '2s': '2s', '3s': '3s', '1p': '1p', '2p': '2p', '3p': '3p' }"></chip-multi-select-filter>
+              <chip-multi-select-filter label="Subject" :items="Object.keys(PERSON_NUM)" v-model="filters.subj"
+                :item-map="PERSON_NUM"></chip-multi-select-filter>
             </template>
 
             <!-- CASES -->
             <template v-if="['noun', 'pron', 'adj'].includes(filters.topic)">
-              <chip-multi-select-filter label="Case" :items="Object.keys(CONFIG.cases)" v-model="filters.case"
-                :item-map="CONFIG.cases"></chip-multi-select-filter>
+              <chip-multi-select-filter label="Case" :items="Object.keys(CASES)" v-model="filters.case"
+                :item-map="CASES"></chip-multi-select-filter>
             </template>
 
             <!-- QTY -->
             <template v-if="['noun', 'pron'].includes(filters.topic)">
-              <chip-multi-select-filter label="Quantity" :items="Object.keys(CONFIG.qty)" v-model="filters.qty"
-                :item-map="CONFIG.qty"></chip-multi-select-filter>
+              <chip-multi-select-filter label="Quantity" :items="Object.keys(QUANTITIES)" v-model="filters.qty"
+                :item-map="QUANTITIES"></chip-multi-select-filter>
             </template>
 
             <!-- POSTPOSITIONS -->
             <template v-if="['noun'].includes(filters.topic)">
-              <chip-multi-select-filter label="Postpositions" :items="CONFIG.pp"
-                v-model="filters.pp"></chip-multi-select-filter>
+              <chip-multi-select-filter label="Postpositions" :items="Object.keys(POSTPOSITIONS)" v-model="filters.pp"
+                :item-map="POSTPOSITIONS"></chip-multi-select-filter>
             </template>
 
+          </div>
+
+          <!-- Vocab Filters -->
+          <div v-if="filters.topic" class="card-box">
+            <h3 class="font-bold text-sm border-b border-[var(--color-border)] pb-2 mb-3">
+              {{ isLoadingDictionary ? 'Loading Vocab Filters...' : 'Word Filters' }}
+            </h3>
+            <word-filter v-model="wordSearch" :dictionary="dictionary" :topic="filters.topic"
+              :selected-words="filters.words" @add-word="addWordToFilters" @remove-word="removeWordFromFilters"
+              :disabled="isLoadingDictionary || !filters.topic">
+            </word-filter>
+
+            <chip-multi-select-filter label="Tags" :items="availableTags" v-model="filters.tags"
+              :disabled="isLoadingDictionary || !filters.topic"></chip-multi-select-filter>
           </div>
         </div>
 
