@@ -127,20 +127,47 @@ createApp({
     const startDrill = async () => {
       appState.value = 'loading';
 
-      const params = new URLSearchParams({ pos: filters.value.topic });
-      if (filters.value.words.length) params.append('uuids', filters.value.words.map(w => w.uuid).join(','));
-      if (filters.value.tags.length) params.append('tags', filters.value.tags.join(','));
-      if (filters.value.includeObjs) params.append('includeObjs', 'true');
+      /** @type {import('../../01_types.js').ContextRequest} */
+      const requestPayload = { pos: filters.value.topic };
 
-      ['scr', 'subj', 'case', 'qty', 'pp'].forEach(key => {
-        if (filters.value[key].length) params.append(key, filters.value[key].join(','));
-      });
+      if (filters.value.words.length) {
+        requestPayload.uuids = filters.value.words.map(w => w.uuid);
+      }
+      if (filters.value.tags.length) {
+        requestPayload.tags = filters.value.tags;
+      }
 
-      const queryString = params.toString(); // apiGet will handle encoding of spaces
+      // Add POS-specific filters
+      if (filters.value.topic === 'verb') {
+        if (filters.value.scr.length) requestPayload.screeves = filters.value.scr;
+        if (filters.value.subj.length) requestPayload.subjects = filters.value.subj;
+      } else if (filters.value.topic === 'noun') {
+        if (filters.value.case.length) requestPayload.cases = filters.value.case;
+        if (filters.value.qty.length) requestPayload.qtys = filters.value.qty;
+        if (filters.value.pp.length) requestPayload.pps = filters.value.pp;
+      } else if (filters.value.topic === 'pronoun' || filters.value.topic === 'adj') {
+        if (filters.value.case.length) requestPayload.cases = filters.value.case;
+      }
+
+      // Convert arrays in the payload to comma-separated strings for URLSearchParams
+      const params = new URLSearchParams();
+      for (const key in requestPayload) {
+        if (Array.isArray(requestPayload[key])) {
+          params.append(key, requestPayload[key].join(','));
+        } else {
+          params.append(key, requestPayload[key]);
+        }
+      }
+
+      // Add includeObjs if present, as it might be an additional endpoint parameter
+      if (filters.value.includeObjs) {
+        params.append('includeObjs', 'true');
+      }
+
+      const queryString = params.toString();
 
       try {
         const rawCards = await apiGet(`/context?${queryString}`);
-        console.log(rawCards)
 
         if (!Array.isArray(rawCards) || rawCards.length === 0) {
           throw new Error("No sentences found matching your filters.");
