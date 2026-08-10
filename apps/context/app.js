@@ -3,7 +3,14 @@ import PosSelect from '../../js/components/PosSelect.js';
 import WordFilter from '../../js/components/WordFilter.js';
 import ChipMultiSelectFilter from '../../js/components/ChipMultiSelectFilter.js';
 import { transliterate, computeDiff } from '../../js/utils.js';
-import { PERSON_NUM, QUANTITIES, CASES, SCREEVES, POSTPOSITIONS } from '../../js/constants.js';
+import {
+  POS, POS_LABELS,
+  PERSON_NUM, PERSON_NUM_LABELS,
+  QTY, QTY_LABELS,
+  CASE, CASE_LABELS,
+  SCREEVE, SCREEVE_LABELS,
+  POSTPOSITION, POSTPOSITION_LABELS
+} from '../../js/constants.js'; // Adjust relative path as needed
 
 const { createApp, ref, computed, nextTick, onMounted, watch } = Vue;
 
@@ -27,8 +34,8 @@ createApp({
     const clozeInput = ref(null);
 
     const filters = ref({
-      topic: 'verb', // Initialize topic to 'verb'
-      words: [], tags: [], scr: [], subj: [], includeObjs: false, case: [], qty: [], pp: []
+      topic: POS.VERB, // Initialize topic to 'verb'
+      words: [], tags: [], scr: [], subj: [], case: [], qty: [], pp: []
     });
 
     onMounted(() => {
@@ -46,7 +53,7 @@ createApp({
         });
 
       // Initialize POS-specific filters for the default 'verb' topic
-      resetPosFilters('verb');
+      resetPosFilters(POS.VERB);
     });
 
     watch(() => filters.value.topic, (newTopic, oldTopic) => {
@@ -61,28 +68,28 @@ createApp({
       dictionary.value.filter(w => w.pos === filters.value.topic).forEach(w => w.tags.forEach(t => tags.add(t)));
       return Array.from(tags).sort();
     });
-
+ 
     const resetPosFilters = (newTopic) => {
       filters.value.words = [];
       filters.value.tags = [];
       filters.value.scr = [];
       filters.value.subj = [];
-      filters.value.includeObjs = false;
       filters.value.case = [];
       filters.value.qty = [];
       filters.value.pp = [];
 
-      if (newTopic === 'verb') {
-        filters.value.scr = ['pres', 'fut', 'aor'];
-        filters.value.subj = Object.keys(PERSON_NUM);
-      } else if (newTopic === 'noun') {
-        filters.value.case = Object.keys(CASES);
-        filters.value.qty = Object.keys(QUANTITIES);
-      } else if (newTopic === 'pron') {
-        filters.value.case = ['nom', 'erg', 'dat'];
-        filters.value.qty = Object.keys(QUANTITIES);
-      } else if (newTopic === 'adj') {
-        filters.value.case = Object.keys(CASES);
+      if (newTopic === POS.VERB) {
+        filters.value.scr = [SCREEVE.PRES, SCREEVE.FUT, SCREEVE.AOR];
+        filters.value.subj = Object.values(PERSON_NUM);
+      } else if (newTopic === POS.NOUN) {
+        filters.value.case = Object.values(CASE);
+        filters.value.qty = Object.values(QTY);
+        filters.value.pp = [POSTPOSITION.NONE];
+      } else if (newTopic === POS.PRON) {
+        filters.value.case = [CASE.NOM, CASE.ERG, CASE.DAT];
+        filters.value.qty = Object.values(QTY);
+      } else if (newTopic === POS.ADJ) {
+        filters.value.case = Object.values(CASE);
       }
     };
 
@@ -103,13 +110,13 @@ createApp({
         return errors;
       }
 
-      if (f.topic === 'verb') {
+      if (f.topic === POS.VERB) {
         if (f.scr.length === 0) errors.push("Select at least one Screeve");
         if (f.subj.length === 0) errors.push("Select at least one Logical Subject");
-      } else if (f.topic === 'noun' || f.topic === 'pron') {
+      } else if (f.topic === POS.NOUN || f.topic === POS.PRON) {
         if (f.case.length === 0) errors.push("Select at least one Case");
         if (f.qty.length === 0) errors.push("Select at least one Quantity");
-      } else if (f.topic === 'adj') {
+      } else if (f.topic === POS.ADJ) {
         if (f.case.length === 0) errors.push("Select at least one Case");
       }
 
@@ -130,14 +137,14 @@ createApp({
       }
 
       // Add POS-specific filters
-      if (filters.value.topic === 'verb') {
+      if (filters.value.topic === POS.VERB) {
         if (filters.value.scr.length) requestPayload.screeves = filters.value.scr;
         if (filters.value.subj.length) requestPayload.subjects = filters.value.subj;
-      } else if (filters.value.topic === 'noun') {
+      } else if (filters.value.topic === POS.NOUN) {
         if (filters.value.case.length) requestPayload.cases = filters.value.case;
         if (filters.value.qty.length) requestPayload.qtys = filters.value.qty;
         if (filters.value.pp.length) requestPayload.pps = filters.value.pp;
-      } else if (filters.value.topic === 'pron' || filters.value.topic === 'adj') {
+      } else if (filters.value.topic === POS.PRON || filters.value.topic === POS.ADJ) {
         if (filters.value.case.length) requestPayload.cases = filters.value.case;
       }
 
@@ -149,11 +156,6 @@ createApp({
         } else {
           params.append(key, requestPayload[key]);
         }
-      }
-
-      // Add includeObjs if present, as it might be an additional endpoint parameter
-      if (filters.value.includeObjs) {
-        params.append('includeObjs', 'true');
       }
 
       const queryString = params.toString();
@@ -170,7 +172,6 @@ createApp({
             prefix,
             suffix,
             ans: c.answer,
-            hint: c.hint || '',
             needsReinsert: false
           };
         }).sort(() => 0.5 - Math.random());
@@ -225,11 +226,17 @@ createApp({
     };
 
     return {
-      appState, dictionary, isLoadingDictionary, filters, PERSON_NUM, QUANTITIES, CASES, SCREEVES, POSTPOSITIONS,
+      appState, dictionary, isLoadingDictionary, filters, 
       wordSearch, availableTags, validationErrors, startDrill,
       activeQueue, currentCard, textInput, isAnswerSubmitted, feedback, clozeInput,
       handleTextInput, handlePrimaryAction,
-      addWordToFilters, removeWordFromFilters
+      addWordToFilters, removeWordFromFilters,
+      POS, POS_LABELS,
+      PERSON_NUM, PERSON_NUM_LABELS,
+      QTY, QTY_LABELS,
+      CASE, CASE_LABELS,
+      SCREEVE, SCREEVE_LABELS,
+      POSTPOSITION, POSTPOSITION_LABELS,
     };
   }
 }).mount('#app');
