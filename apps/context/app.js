@@ -1,4 +1,4 @@
-const API_BASE = "https://script.google.com/macros/s/AKfycbyljFij1xEybLTJCzO1Dx9rAH_zM1r_G7E7Kd-AeUxAsnCb5W33MbyVgceMCo3CBoZyHw/exec";
+import { apiGet } from '../../js/api.js';
 
 const CONFIG = {
   personNum: ['1s', '2s', '3s', '1p', '2p', '3p'],
@@ -33,9 +33,9 @@ createApp({
     onMounted(async () => {
       appState.value = 'loading';
       try {
-        const res = await fetch(`${API_BASE}?action=words`);
-        const json = await res.json();
-        dictionary.value = json.data;
+        /** @type {import('../../01_types.js').Word[]} */
+        const words = await apiGet('/words');
+        dictionary.value = words;
       } catch (err) {
         console.error("Failed to load dictionary", err);
       } finally {
@@ -136,12 +136,11 @@ createApp({
         if (filters.value[key].length) params.append(key, filters.value[key].join(','));
       });
 
-      const queryString = params.toString().replace(/\+/g, '%20');
+      const queryString = params.toString(); // apiGet will handle encoding of spaces
 
       try {
-        const res = await fetch(`${API_BASE}?${queryString}`);
-        const response = await res.json();
-        const rawCards = response.data || response;
+        /** @type {import('../../01_types.js').ContextItem[]} */
+        const rawCards = await apiGet(`/clozes?${queryString}`);
 
         if (!Array.isArray(rawCards) || rawCards.length === 0) {
           throw new Error("No sentences found matching your filters.");
