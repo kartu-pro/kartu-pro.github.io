@@ -127,7 +127,7 @@ createApp({
     const startDrill = async () => {
       appState.value = 'loading';
 
-      const params = new URLSearchParams({ action: 'clozes', topic: filters.value.topic });
+      const params = new URLSearchParams({ pos: filters.value.topic });
       if (filters.value.words.length) params.append('uuids', filters.value.words.map(w => w.uuid).join(','));
       if (filters.value.tags.length) params.append('tags', filters.value.tags.join(','));
       if (filters.value.includeObjs) params.append('includeObjs', 'true');
@@ -139,8 +139,8 @@ createApp({
       const queryString = params.toString(); // apiGet will handle encoding of spaces
 
       try {
-        /** @type {import('../../01_types.js').ContextItem[]} */
-        const rawCards = await apiGet(`/clozes?${queryString}`);
+        const rawCards = await apiGet(`/context?${queryString}`);
+        console.log(rawCards)
 
         if (!Array.isArray(rawCards) || rawCards.length === 0) {
           throw new Error("No sentences found matching your filters.");
