@@ -33,11 +33,10 @@ createApp({
     onMounted(async () => {
       appState.value = 'loading';
       try {
-        /** @type {import('../../01_types.js').Word[]} */
         const words = await apiGet('/words');
         dictionary.value = words;
       } catch (err) {
-        console.error("Failed to load dictionary", err);
+        console.error("Failed to load words", err);
       } finally {
         appState.value = 'setup';
       }
@@ -168,20 +167,17 @@ createApp({
 
       try {
         const rawCards = await apiGet(`/context?${queryString}`);
-
-        if (!Array.isArray(rawCards) || rawCards.length === 0) {
-          throw new Error("No sentences found matching your filters.");
-        }
+        console.log(rawCards)
 
         activeQueue.value = rawCards.map(c => {
-          const targetPos = c.ka.indexOf(c.target);
-          const prefix = targetPos !== -1 ? c.ka.slice(0, targetPos) : c.ka;
-          const suffix = targetPos !== -1 ? c.ka.slice(targetPos + c.target.length) : '';
+          const targetPos = c.sentence.indexOf(c.target);
+          const prefix = targetPos !== -1 ? c.sentence.slice(0, targetPos) : c.sentence;
+          const suffix = targetPos !== -1 ? c.sentence.slice(targetPos + c.target.length) : '';
 
           return {
             prefix,
             suffix,
-            ans: c.target,
+            ans: c.answer,
             hint: c.hint || '',
             needsReinsert: false
           };
