@@ -10,7 +10,7 @@ import {
   CASE, CASE_LABELS,
   SCREEVE, SCREEVE_LABELS,
   POSTPOSITION, POSTPOSITION_LABELS
-} from '../../js/constants.js'; // Adjust relative path as needed
+} from '../../js/constants.js';
 
 const { createApp, ref, computed, nextTick, onMounted, watch } = Vue;
 
@@ -25,7 +25,7 @@ createApp({
     const dictionary = ref([]);
     const activeQueue = ref([]);
     const currentCard = ref(null);
-    const isLoadingDictionary = ref(true); // New ref for dictionary loading state
+    const isLoadingDictionary = ref(true);
 
     const wordSearch = ref('');
     const textInput = ref('');
@@ -34,11 +34,59 @@ createApp({
     const clozeInput = ref(null);
 
     const filters = ref({
-      topic: POS.VERB, // Initialize topic to 'verb'
+      topic: POS.VERB, 
       words: [], tags: [], scr: [], subj: [], case: [], qty: [], pp: []
     });
 
+    const parseAndApplyQueryParams = () => {
+      const params = new URLSearchParams(window.location.search);
+      if (params.toString() === '') {
+        return false; // No query parameters found
+      }
+
+      // Set topic first to trigger the watcher and reset POS-specific filters
+      const posParam = params.get('pos');
+      if (posParam && Object.values(POS).includes(posParam)) {
+        filters.value.topic = posParam;
+      }
+
+      // Apply other filters, overriding any defaults set by resetPosFilters
+      const uuidsParam = params.get('uuids');
+      if (uuidsParam) {
+        const uuidList = uuidsParam.split(',');
+        filters.value.words = dictionary.value.filter(word => uuidList.includes(word.uuid));
+      }
+
+      const tagsParam = params.get('tags');
+      if (tagsParam) filters.value.tags = tagsParam.split(',');
+
+      // Apply POS-specific filters
+      if (filters.value.topic === POS.VERB) {
+        const screevesParam = params.get('screeves');
+        if (screevesParam) filters.value.scr = screevesParam.split(',');
+        const subjectsParam = params.get('subjects');
+        if (subjectsParam) filters.value.subj = subjectsParam.split(',');
+      } else if (filters.value.topic === POS.NOUN) {
+        const casesParam = params.get('cases');
+        if (casesParam) filters.value.case = casesParam.split(',');
+        const qtysParam = params.get('qtys');
+        if (qtysParam) filters.value.qty = qtysParam.split(',');
+        const ppsParam = params.get('pps');
+        if (ppsParam) filters.value.pp = ppsParam.split(',');
+      } else if (filters.value.topic === POS.PRON || filters.value.topic === POS.ADJ) {
+        const casesParam = params.get('cases');
+        if (casesParam) filters.value.case = casesParam.split(',');
+        if (filters.value.topic === POS.PRON) {
+          const qtysParam = params.get('qtys');
+          if (qtysParam) filters.value.qty = qtysParam.split(',');
+        }
+      }
+      return true; // Query parameters were found and applied
+    };
+
     onMounted(() => {
+      resetPosFilters(POS.VERB);
+      parseAndApplyQueryParams();
       // Load dictionary in the background, non-blocking
       apiGet('/words')
         .then(words => {
@@ -51,9 +99,6 @@ createApp({
         .finally(() => {
           isLoadingDictionary.value = false;
         });
-
-      // Initialize POS-specific filters for the default 'verb' topic
-      resetPosFilters(POS.VERB);
     });
 
     watch(() => filters.value.topic, (newTopic, oldTopic) => {
@@ -159,6 +204,9 @@ createApp({
       }
 
       const queryString = params.toString();
+
+      // Update URL without reloading the page
+      history.pushState({}, '', `?${queryString}`);
 
       try {
         const rawCards = await apiGet(`/context?${queryString}`);
