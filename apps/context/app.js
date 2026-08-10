@@ -171,7 +171,7 @@ createApp({
           return {
             prefix,
             suffix,
-            ans: c.answer,
+            answer: c.answer,
             needsReinsert: false
           };
         }).sort(() => 0.5 - Math.random());
@@ -179,7 +179,7 @@ createApp({
         appState.value = 'quiz';
         loadNextCard();
       } catch (e) {
-        alert(e.message || "Failed to load cards.");
+        console.log(e.message || "Failed to load cards.");
         appState.value = 'setup';
       }
     };
@@ -194,18 +194,33 @@ createApp({
 
     const handleTextInput = (e) => {
       if (isAnswerSubmitted.value) return;
-      textInput.value = transliterate(e.target.value);
+
+      const input = e.target;
+      const cursorStart = input.selectionStart;
+      const lengthBefore = input.value.length;
+
+      // Transliterate text
+      const transformed = transliterate(input.value);
+      textInput.value = transformed;
+
+      // Preserve caret position after Vue updates DOM
+      nextTick(() => {
+        // Calculate new position accounting for length differences (e.g., 'sh' -> 'შ')
+        const lengthDiff = transformed.length - lengthBefore;
+        const newPos = Math.max(0, cursorStart + lengthDiff);
+        input.setSelectionRange(newPos, newPos);
+      });
     };
 
     const handlePrimaryAction = () => {
       if (!isAnswerSubmitted.value && textInput.value.trim()) {
-        const isCorrect = textInput.value.trim() === currentCard.value.ans;
+        const isCorrect = textInput.value.trim() === currentCard.value.answer;
         isAnswerSubmitted.value = true;
 
         if (isCorrect) {
           feedback.value = { msg: '✅ Correct!', type: 'success', diff: null };
         } else {
-          feedback.value = { msg: '❌ Not quite.', type: 'error', diff: computeDiff(textInput.value.trim(), currentCard.value.ans) };
+          feedback.value = { msg: '❌ Not quite.', type: 'error', diff: computeDiff(textInput.value.trim(), currentCard.value.answer) };
           currentCard.value.needsReinsert = true;
         }
       } else if (isAnswerSubmitted.value) {
