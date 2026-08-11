@@ -2,7 +2,10 @@ import { apiGet } from '../../js/api.js';
 import PosSelect from '../../js/components/PosSelect.js';
 import WordFilter from '../../js/components/WordFilter.js';
 import ChipMultiSelectFilter from '../../js/components/ChipMultiSelectFilter.js';
-import { transliterate, computeDiff } from '../../js/utils.js';
+import SettingsModal from '../../js/components/SettingsModal.js';
+import QuizTypeForm from '../../js/components/QuizTypeForm.js';
+import QuizChooseForm from '../../js/components/QuizChooseForm.js';
+import QuizFindMistake from '../../js/components/QuizFindMistake.js';
 import {
   POS, POS_LABELS,
   PERSON_NUM, PERSON_NUM_LABELS,
@@ -12,13 +15,17 @@ import {
   POSTPOSITION, POSTPOSITION_LABELS
 } from '../../js/constants.js';
 
-const { createApp, ref, computed, nextTick, onMounted, watch } = Vue;
+const { createApp, ref, computed, onMounted, watch } = Vue;
 
 createApp({
   components: {
     'pos-select': PosSelect,
     'word-filter': WordFilter,
     'chip-multi-select-filter': ChipMultiSelectFilter,
+    'settings-modal': SettingsModal,
+    'quiz-type-form': QuizTypeForm,
+    'quiz-choose-form': QuizChooseForm,
+    'quiz-find-mistake': QuizFindMistake,
   },
   setup() {
     const appState = ref('setup');
@@ -27,11 +34,13 @@ createApp({
     const currentCard = ref(null);
     const isLoadingDictionary = ref(true);
 
+    const gameMode = ref('type');
+    const showSettingsModal = ref(false);
+    const typeFormRef = ref(null);
+
     const wordSearch = ref('');
-    const textInput = ref('');
     const isAnswerSubmitted = ref(false);
     const feedback = ref({ msg: '', type: '', diff: null });
-    const clozeInput = ref(null);
 
     const filters = ref({
       topic: POS.VERB, 
@@ -170,8 +179,6 @@ createApp({
 
     const startDrill = async () => {
       appState.value = 'loading';
-
-      /** @type {import('../../01_types.js').ContextRequest} */
       const requestPayload = { pos: filters.value.topic };
 
       if (filters.value.words.length) {
@@ -210,19 +217,14 @@ createApp({
 
       try {
         const rawCards = await apiGet(`/context?${queryString}`);
-
-        activeQueue.value = rawCards.map(c => {
-          const targetPos = c.sentence.indexOf(c.target);
-          const prefix = targetPos !== -1 ? c.sentence.slice(0, targetPos) : c.sentence;
-          const suffix = targetPos !== -1 ? c.sentence.slice(targetPos + c.target.length) : '';
-
-          return {
-            prefix,
-            suffix,
-            answer: c.answer,
-            needsReinsert: false
-          };
-        }).sort(() => 0.5 - Math.random());
+        activeQueue.value = rawCards.map(c => ({
+          sentence: c.sentence,
+          answer: c.answer,
+          hint: c.hint,
+          target: c.target,
+          distractors: c.distractors || [],
+          needsReinsert: false
+        })).sort(() => 0.5 - Math.random());
 
         appState.value = 'quiz';
         loadNextCard();
@@ -235,45 +237,20 @@ createApp({
     const loadNextCard = () => {
       currentCard.value = activeQueue.value[0];
       isAnswerSubmitted.value = false;
-      textInput.value = '';
       feedback.value = { msg: '', type: '', diff: null };
-      nextTick(() => clozeInput.value?.focus());
     };
 
-    const handleTextInput = (e) => {
-      if (isAnswerSubmitted.value) return;
-
-      const input = e.target;
-      const cursorStart = input.selectionStart;
-      const lengthBefore = input.value.length;
-
-      // Transliterate text
-      const transformed = transliterate(input.value);
-      textInput.value = transformed;
-
-      // Preserve caret position after Vue updates DOM
-      nextTick(() => {
-        // Calculate new position accounting for length differences (e.g., 'sh' -> 'შ')
-        const lengthDiff = transformed.length - lengthBefore;
-        const newPos = Math.max(0, cursorStart + lengthDiff);
-        input.setSelectionRange(newPos, newPos);
-      });
+    const handleAnswerSubmitted = ({ isCorrect, feedbackMsg, diff }) => {
+      isAnswerSubmitted.value = true;
+      feedback.value = { msg: feedbackMsg, type: isCorrect ? 'success' : 'error', diff };
+      if (!isCorrect && currentCard.value) {
+        currentCard.value.needsReinsert = true;
+      }
     };
 
     const handlePrimaryAction = () => {
-      if (!isAnswerSubmitted.value && textInput.value.trim()) {
-        const isCorrect = textInput.value.trim() === currentCard.value.answer;
-        isAnswerSubmitted.value = true;
-
-        if (isCorrect) {
-          feedback.value = { msg: '✅ Correct!', type: 'success', diff: null };
-        } else {
-          feedback.value = { msg: '❌ Not quite.', type: 'error', diff: computeDiff(textInput.value.trim(), currentCard.value.answer) };
-          currentCard.value.needsReinsert = true;
-        }
-      } else if (isAnswerSubmitted.value) {
+      if (isAnswerSubmitted.value) {
         const card = activeQueue.value.shift();
-
         if (card && card.needsReinsert) {
           card.needsReinsert = false;
           const insertIdx = Math.min(activeQueue.value.length, Math.floor(Math.random() * 5) + 4);
@@ -285,21 +262,21 @@ createApp({
         } else {
           loadNextCard();
         }
+      } else if (gameMode.value === 'type') {
+        typeFormRef.value?.submitAnswer();
       }
     };
 
     return {
       appState, dictionary, isLoadingDictionary, filters, 
       wordSearch, availableTags, validationErrors, startDrill,
-      activeQueue, currentCard, textInput, isAnswerSubmitted, feedback, clozeInput,
-      handleTextInput, handlePrimaryAction,
+      activeQueue, currentCard, isAnswerSubmitted, feedback,
+      gameMode, showSettingsModal, typeFormRef,
+      handleAnswerSubmitted, handlePrimaryAction,
       addWordToFilters, removeWordFromFilters,
-      POS, POS_LABELS,
-      PERSON_NUM, PERSON_NUM_LABELS,
-      QTY, QTY_LABELS,
-      CASE, CASE_LABELS,
-      SCREEVE, SCREEVE_LABELS,
-      POSTPOSITION, POSTPOSITION_LABELS,
+      POS, POS_LABELS, PERSON_NUM, PERSON_NUM_LABELS, QTY, QTY_LABELS,
+      CASE, CASE_LABELS, SCREEVE, SCREEVE_LABELS, POSTPOSITION, POSTPOSITION_LABELS,
     };
+
   }
 }).mount('#app');

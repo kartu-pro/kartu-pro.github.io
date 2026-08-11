@@ -8,6 +8,7 @@
 
   <!-- Global & App Styles -->
   <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/components.css">
   <link rel="stylesheet" href="context.css">
 
   <!-- Fonts -->
@@ -19,18 +20,23 @@
 </head>
 
 <body class="h-dvh overflow-hidden">
-
-  <!-- Compact Sub-App Header -->
-  <header class="app-header flex-none">
-    <a href="/apps" class="app-back-link">
-      <div class="logo-circle-sm">
-        <img src="/assets/logo.svg" alt="KartuPro - Georgian Language Learning Logo">
-      </div>
-      <span>← Apps</span>
-    </a>
-  </header>
-
   <div id="app" v-cloak class="app-container flex flex-col flex-1 min-h-0">
+
+    <!-- Compact Sub-App Header -->
+    <header class="app-header flex-none">
+      <a href="/apps" class="app-back-link">
+        <div class="logo-circle-sm">
+          <img src="/assets/logo.svg" alt="KartuPro - Georgian Language Learning Logo">
+        </div>
+        <span>← Apps</span>
+      </a>
+      <button @click="showSettingsModal = true"
+        class="text-sm font-bold bg-[var(--color-surface)] border border-[var(--color-border)] px-3 py-1.5 rounded transition-colors hover:bg-[var(--color-surface-hover)]">
+        ⚙️ Settings
+      </button>
+    </header>
+
+    <settings-modal v-model="gameMode" :show="showSettingsModal" @close="showSettingsModal = false"></settings-modal>
 
     <main class="w-full max-w-3xl mx-auto flex-1 flex flex-col min-h-0 my-0">
 
@@ -127,15 +133,12 @@
         <div class="flex justify-between items-center mb-2 flex-none">
           <span class="text-secondary text-sm font-bold">Remaining: {{ activeQueue.length }}</span>
           <button
-            class="text-sm font-bold bg-[var(--color-surface)] border border-[var(--color-border)] px-3 py-1 rounded"
+            class="text-sm font-bold bg-[var(--color-surface)] border border-[var(--color-border)] px-3 py-1 rounded transition-colors hover:bg-[var(--color-surface-hover)]"
             @click="appState = 'setup'">Quit</button>
         </div>
 
-        <!-- Quiz Card Container -->
         <div class="card-box flex-1 flex flex-col items-center justify-center text-center my-2" v-if="currentCard">
-
-          <!-- Feedback Diff -->
-          <!-- Feedback Diff -->
+          <!-- Shared Feedback Header -->
           <div class="min-h-[40px] text-center mb-4 font-bold flex flex-col items-center justify-center">
             <div v-if="feedback.msg"
               :class="{'text-success': feedback.type === 'success', 'text-[var(--color-accent)]': feedback.type === 'error'}">
@@ -147,24 +150,23 @@
             </div>
           </div>
 
-          <!-- Cloze Sentence -->
-          <div class="text-2xl sm:text-3xl font-bold flex flex-wrap items-center justify-center gap-1 leading-loose">
-            <span>{{ currentCard.prefix }}</span>
+          <!-- Dynamic Game Modes -->
+          <quiz-type-form v-if="gameMode === 'type'" ref="typeFormRef" :card="currentCard"
+            :is-submitted="isAnswerSubmitted" @submit="handleAnswerSubmitted"
+            @next="handlePrimaryAction"></quiz-type-form>
 
-            <input type="text" ref="clozeInput" v-model="textInput" @input="handleTextInput"
-              @keyup.enter="handlePrimaryAction" :readonly="isAnswerSubmitted" class="cloze-input text-2xl sm:text-3xl"
-              autocomplete="off" autocorrect="off" spellcheck="false"
-              :style="{ width: ((currentCard.answer?.length || textInput.length) + 3) + 'ch' }">
+          <quiz-choose-form v-else-if="gameMode === 'choose'" :card="currentCard" :is-submitted="isAnswerSubmitted"
+            @submit="handleAnswerSubmitted" @next="handlePrimaryAction"></quiz-choose-form>
 
-            <span>{{ currentCard.suffix }}</span>
-          </div>
-
+          <quiz-find-mistake v-else-if="gameMode === 'mistake'" :card="currentCard" :is-submitted="isAnswerSubmitted"
+            @submit="handleAnswerSubmitted"></quiz-find-mistake>
         </div>
 
         <div class="pt-2 flex-none">
           <button class="btn-primary w-full text-lg" :class="{ 'btn-next-active': isAnswerSubmitted }"
-            @click="handlePrimaryAction" :disabled="!isAnswerSubmitted && !textInput.trim()">
-            {{ isAnswerSubmitted ? 'Next (Enter)' : 'Check Answer (Enter)' }}
+            @click="handlePrimaryAction" :disabled="!isAnswerSubmitted && gameMode !== 'type'">
+            {{ isAnswerSubmitted ? 'Next (Enter)' : (gameMode === 'type' ? 'Check Answer (Enter)' : 'Select an Option')
+            }}
           </button>
         </div>
       </div>
