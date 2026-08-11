@@ -7,6 +7,12 @@ import QuizTypeForm from '../../js/components/QuizTypeForm.js';
 import QuizChooseForm from '../../js/components/QuizChooseForm.js';
 import QuizFindMistake from '../../js/components/QuizFindMistake.js';
 import {
+  getDefaultFilters,
+  validateFilters,
+  parseQueryParams,
+  buildQueryString
+} from '../../js/filterUtils.js';
+import {
   POS, POS_LABELS,
   PERSON_NUM, PERSON_NUM_LABELS,
   QTY, QTY_LABELS,
@@ -42,56 +48,23 @@ createApp({
     const isAnswerSubmitted = ref(false);
     const feedback = ref({ msg: '', type: '', diff: null });
 
-    const filters = ref({
-      topic: POS.VERB, 
-      words: [], tags: [], scr: [], subj: [], case: [], qty: [], pp: []
-    });
+    const filters = ref(getDefaultFilters(POS.VERB));
+
+    const resetPosFilters = (newTopic) => {
+      filters.value = getDefaultFilters(newTopic);
+    };
+
+    const validationErrors = computed(() => validateFilters(filters.value));
 
     const parseAndApplyQueryParams = () => {
-      const params = new URLSearchParams(window.location.search);
-      if (params.toString() === '') {
-        return false; // No query parameters found
+      const parsed = parseQueryParams(window.location.search, dictionary.value);
+      if (parsed) {
+        filters.value = parsed;
+        return true;
       }
-
-      // Set topic first to trigger the watcher and reset POS-specific filters
-      const posParam = params.get('pos');
-      if (posParam && Object.values(POS).includes(posParam)) {
-        filters.value.topic = posParam;
-      }
-
-      // Apply other filters, overriding any defaults set by resetPosFilters
-      const uuidsParam = params.get('uuids');
-      if (uuidsParam) {
-        const uuidList = uuidsParam.split(',');
-        filters.value.words = dictionary.value.filter(word => uuidList.includes(word.uuid));
-      }
-
-      const tagsParam = params.get('tags');
-      if (tagsParam) filters.value.tags = tagsParam.split(',');
-
-      // Apply POS-specific filters
-      if (filters.value.topic === POS.VERB) {
-        const screevesParam = params.get('screeves');
-        if (screevesParam) filters.value.scr = screevesParam.split(',');
-        const subjectsParam = params.get('subjects');
-        if (subjectsParam) filters.value.subj = subjectsParam.split(',');
-      } else if (filters.value.topic === POS.NOUN) {
-        const casesParam = params.get('cases');
-        if (casesParam) filters.value.case = casesParam.split(',');
-        const qtysParam = params.get('qtys');
-        if (qtysParam) filters.value.qty = qtysParam.split(',');
-        const ppsParam = params.get('pps');
-        if (ppsParam) filters.value.pp = ppsParam.split(',');
-      } else if (filters.value.topic === POS.PRON || filters.value.topic === POS.ADJ) {
-        const casesParam = params.get('cases');
-        if (casesParam) filters.value.case = casesParam.split(',');
-        if (filters.value.topic === POS.PRON) {
-          const qtysParam = params.get('qtys');
-          if (qtysParam) filters.value.qty = qtysParam.split(',');
-        }
-      }
-      return true; // Query parameters were found and applied
+      return false;
     };
+
 
     onMounted(() => {
       resetPosFilters(POS.VERB);
@@ -122,30 +95,6 @@ createApp({
       dictionary.value.filter(w => w.pos === filters.value.topic).forEach(w => w.tags.forEach(t => tags.add(t)));
       return Array.from(tags).sort();
     });
- 
-    const resetPosFilters = (newTopic) => {
-      filters.value.words = [];
-      filters.value.tags = [];
-      filters.value.scr = [];
-      filters.value.subj = [];
-      filters.value.case = [];
-      filters.value.qty = [];
-      filters.value.pp = [];
-
-      if (newTopic === POS.VERB) {
-        filters.value.scr = [SCREEVE.PRES, SCREEVE.FUT, SCREEVE.AOR];
-        filters.value.subj = Object.values(PERSON_NUM);
-      } else if (newTopic === POS.NOUN) {
-        filters.value.case = Object.values(CASE);
-        filters.value.qty = Object.values(QTY);
-        filters.value.pp = [POSTPOSITION.NONE];
-      } else if (newTopic === POS.PRON) {
-        filters.value.case = [CASE.NOM, CASE.ERG, CASE.DAT];
-        filters.value.qty = Object.values(QTY);
-      } else if (newTopic === POS.ADJ) {
-        filters.value.case = Object.values(CASE);
-      }
-    };
 
     const addWordToFilters = (w) => {
       filters.value.words.push(w);
@@ -155,27 +104,6 @@ createApp({
       filters.value.words = filters.value.words.filter(x => x.uuid !== w.uuid);
     };
 
-    const validationErrors = computed(() => {
-      const errors = [];
-      const f = filters.value;
-
-      if (!f.topic) {
-        errors.push("Select a Part of Speech");
-        return errors;
-      }
-
-      if (f.topic === POS.VERB) {
-        if (f.scr.length === 0) errors.push("Select at least one Screeve");
-        if (f.subj.length === 0) errors.push("Select at least one Logical Subject");
-      } else if (f.topic === POS.NOUN || f.topic === POS.PRON) {
-        if (f.case.length === 0) errors.push("Select at least one Case");
-        if (f.qty.length === 0) errors.push("Select at least one Quantity");
-      } else if (f.topic === POS.ADJ) {
-        if (f.case.length === 0) errors.push("Select at least one Case");
-      }
-
-      return errors;
-    });
 
     const startDrill = async () => {
       appState.value = 'loading';
@@ -221,7 +149,6 @@ createApp({
           sentence: c.sentence,
           answer: c.answer,
           hint: c.hint,
-          target: c.target,
           distractors: c.distractors || [],
           needsReinsert: false
         })).sort(() => 0.5 - Math.random());
