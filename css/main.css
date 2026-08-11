@@ -1,33 +1,42 @@
 /* ==========================================================================
-   KARTU PRO - Main Stylesheet (Light Theme)
+   1. DESIGN TOKENS
    ========================================================================== */
-
 :root {
   /* Colors */
   --color-bg: #f8f5f0;
-  --color-surface: #FFFFFF;
+  --color-surface: #ffffff;
   --color-surface-hover: #f3f4f6;
   --color-text-primary: #1e293b;
   --color-text-secondary: #64748b;
-  --color-accent: #A70007;
+  
+  --color-accent: #a70007;
+  --color-accent-rgb: 167, 0, 7; /* Added for pulse keyframe support */
+  
   --color-border: #e5e7eb;
   --color-border-dark: #d1d5db;
-  --color-success: #166534;       /* Deep forest green for text/borders */
-  --color-success-bg: #dcfce7;    /* Soft tint for highlights */
+  
+  --color-success: #166534;
+  --color-success-bg: #dcfce7;
   --color-warning: #b45309;
   --color-warning-bg: #fef3c7;
+  --color-error: #a70007;
+  --color-error-bg: #fef2f2; /* Consolidated from hardcoded hexes */
+
   color-scheme: light;
   
   /* Typography */
   --font-heading: 'Helvetica Neue', Arial, sans-serif;
   --font-body: 'Noto Sans Georgian', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   
-  /* Layout & Utility */
+  /* Utilities */
   --radius-sm: 0.5rem;
   --radius-md: 0.75rem;
   --transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out, opacity 0.2s ease-in-out;
 }
 
+/* ==========================================================================
+   2. BASE RESET & TYPOGRAPHY
+   ========================================================================== */
 *,
 *::before,
 *::after {
@@ -36,27 +45,86 @@
   padding: 0;
 }
 
-
 body {
   background-color: var(--color-bg);
   color: var(--color-text-primary);
   font-family: var(--font-body);
   line-height: 1.6;
-  min-height: 100vh; /* fallback */
+  min-height: 100vh;
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
   padding: 2rem 1.5rem;
 }
 
-/* Containers */
+h1 {
+  font-family: var(--font-heading);
+  font-size: clamp(2.2rem, 5vw, 3.2rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  margin-bottom: 1.25rem;
+}
+
+h2 {
+  font-family: var(--font-heading);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: 0.5rem;
+}
+
+p {
+  color: var(--color-text-secondary);
+  font-size: 1rem;
+  line-height: 1.65;
+  margin-bottom: 0.85rem;
+}
+
+p.subtitle {
+  font-size: 1.2rem;
+  max-width: 540px;
+  margin-bottom: 2.5rem;
+}
+
+img, svg {
+  max-width: 100%;
+  display: block;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+/* ==========================================================================
+   3. LAYOUTS
+   ========================================================================== */
+
+/* Container Shells */
 header, main, footer {
   max-width: 720px;
   margin: 0 auto;
   width: 100%;
 }
 
-/* Header Layout Update */
+main {
+  margin-top: auto;
+  margin-bottom: auto;
+  padding-bottom: 1rem;
+}
+
+main section {
+  margin-bottom: 2rem;
+}
+
+footer {
+  padding-top: 2.5rem;
+  color: var(--color-text-secondary);
+  font-size: 0.85rem;
+  border-top: 1px solid var(--color-border);
+}
+
+/* Global Page Header */
 header {
   padding-bottom: 3rem;
   display: flex;
@@ -66,7 +134,6 @@ header {
   flex-wrap: wrap;
 }
 
-/* Navigation Links */
 .nav-links {
   display: flex;
   align-items: center;
@@ -85,25 +152,78 @@ header {
   color: var(--color-accent);
 }
 
-main {
-  margin-top: auto;
-  margin-bottom: auto;
+/* Sub-App Header Layout */
+.app-header {
   padding-bottom: 1rem;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid var(--color-border);
 }
 
-footer {
-  padding-top: 2.5rem;
-  color: var(--color-text-secondary);
+.app-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
   font-size: 0.85rem;
-  border-top: 1px solid var(--color-border);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-decoration: none;
 }
 
-img, svg {
-  max-width: 100%;
-  display: block;
+.app-back-link:hover {
+  color: var(--color-accent);
 }
 
-/* Brand & Typography */
+/* Card Row List (Used on Apps, Resources, etc.) */
+.card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.card-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.card-info {
+  flex: 1;
+}
+
+.card-info h2 {
+  margin-bottom: 0.25rem;
+}
+
+.card-info p {
+  margin-bottom: 0;
+  font-size: 0.95rem;
+}
+
+@media (max-width: 580px) {
+  .card-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .card-row .btn-accent {
+    width: 100%;
+  }
+}
+
+.grid-2x2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+/* ==========================================================================
+    COMPONENTS
+   ========================================================================== */
+
+/* ==========================================================================
+   1. GENERAL UI ELEMENTS
+   ========================================================================== */
+
+/* Brand & Badges */
 .brand-link {
   display: inline-flex;
   align-items: center;
@@ -119,23 +239,27 @@ img, svg {
   color: var(--color-text-primary);
 }
 
-.logo-circle {
-  width: 52px;
-  height: 52px;
+.logo-circle, .logo-circle-sm {
   border-radius: 50%;
-  border: 2px solid var(--color-border);
+  border: 1px solid var(--color-border);
   background: var(--color-bg);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 6px;
   overflow: hidden;
 }
 
-.logo-circle img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
+.logo-circle {
+  width: 52px;
+  height: 52px;
+  border-width: 2px;
+  padding: 6px;
+}
+
+.logo-circle-sm {
+  width: 28px;
+  height: 28px;
+  padding: 3px;
 }
 
 .badge {
@@ -152,23 +276,20 @@ img, svg {
   border: 1px solid var(--color-border);
 }
 
-h1 {
-  font-family: var(--font-heading);
-  font-size: clamp(2.2rem, 5vw, 3.2rem);
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  line-height: 1.15;
-  margin-bottom: 1.25rem;
-}
-
-p.subtitle {
-  font-size: 1.2rem;
+.badge-coming-soon {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.85rem;
+  font-weight: 700;
   color: var(--color-text-secondary);
-  max-width: 540px;
-  margin-bottom: 2.5rem;
+  background-color: var(--color-surface-hover);
+  border: 1px solid var(--color-border-dark);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 0.85rem;
+  white-space: nowrap;
+  user-select: none;
 }
 
-/* Cards & Containers */
 .card-box {
   background-color: var(--color-surface);
   border: 2px solid var(--color-border);
@@ -184,7 +305,6 @@ p.subtitle {
   flex-wrap: wrap;
 }
 
-/* Base Button */
 .btn, .btn-primary, .btn-secondary, .btn-accent {
   display: inline-flex;
   align-items: center;
@@ -198,10 +318,9 @@ p.subtitle {
   border: none;
 }
 
-/* Modifiers */
 .btn-primary {
   background-color: var(--color-text-primary);
-  color: #FFFFFF;
+  color: #ffffff;
 }
 
 .btn-primary:hover:not(:disabled) {
@@ -228,98 +347,290 @@ p.subtitle {
 
 .btn-accent {
   background-color: var(--color-accent);
-  color: #FFFFFF;
+  color: #ffffff;
 }
 
 .btn-accent:hover {
   opacity: 0.9;
 }
 
-
-:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
+.btn-pulse {
+  background-color: var(--color-accent) !important;
+  color: var(--color-surface) !important;
+  animation: pulse-accent 2s infinite;
 }
 
-
-/* ==========================================================================
-   GENERIC CONTENT & SECTION STYLES
-   ========================================================================== */
-
-/* Section Spacing */
-main section,
- {
-  margin-bottom: 2rem;
-}
-
-/* Headings */
-main h2 {
-  font-family: var(--font-heading);
-  font-size: 1.35rem;
-  font-weight: 700;
+/* Inputs & Filters */
+.input-text {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border-dark);
+  background-color: var(--color-surface);
   color: var(--color-text-primary);
-  margin-bottom: 0.5rem;
-}
-
-/* Body Text */
-main p {
-  color: var(--color-text-secondary);
-  font-size: 1rem;
-  line-height: 1.65;
-  margin-bottom: 0.85rem;
-}
-
-main p:last-child {
-  margin-bottom: 0;
-}
-
-
-/* App List Layout */
-.app-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-}
-
-.app-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1.5rem;
-}
-
-.app-content h2 {
-  margin-bottom: 0.25rem;
-}
-
-.app-content p {
-  margin-bottom: 0;
+  font-family: inherit;
   font-size: 0.95rem;
+  outline: none;
 }
 
-/* Responsive adjustment for small screens */
-@media (max-width: 580px) {
-  .app-card {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  
-  .app-card .btn-accent {
-    width: 100%;
-  }
+.input-text:focus {
+  border-color: var(--color-text-primary);
 }
 
-.badge-coming-soon {
-  display: inline-flex;
-  align-items: center;
-  font-size: 0.85rem;
-  font-weight: 700;
+.filter-chip {
+  padding: 0.3rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--color-border-dark);
+  background-color: var(--color-bg);
   color: var(--color-text-secondary);
-  background-color: var(--color-surface-hover);
+  user-select: none;
+  transition: var(--transition);
+}
+
+.filter-chip:hover {
+  border-color: var(--color-text-primary);
+  color: var(--color-text-primary);
+}
+
+.filter-chip.active {
+  background-color: var(--color-text-primary);
+  color: #ffffff;
+  border-color: var(--color-text-primary);
+}
+
+/* Search Dropdown */
+.search-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  background-color: var(--color-surface);
   border: 1px solid var(--color-border-dark);
   border-radius: var(--radius-sm);
-  padding: 0.5rem 0.85rem;
-  white-space: nowrap;
-  user-select: none;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  max-height: 12rem;
+  overflow-y: auto;
+  margin-top: 0.25rem;
 }
 
+.search-dropdown-item {
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.search-dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.search-dropdown-item:hover {
+  background-color: var(--color-surface-hover);
+}
+
+/* Modals */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modal-box {
+  background-color: var(--color-surface);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  width: 100%;
+  max-width: 28rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+/* ==========================================================================
+   2. APP & INTERACTIVE DRILL COMPONENTS
+   ========================================================================== */
+
+/* Cloze Input */
+.cloze-input {
+  border: none;
+  border-bottom: 3px solid var(--color-text-primary);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  outline: none;
+  text-align: center;
+  font-weight: bold;
+  padding: 0 0.5rem;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  min-width: 120px;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.cloze-input:focus {
+  border-color: var(--color-accent);
+}
+
+.cloze-input:read-only {
+  background: transparent;
+  border-color: transparent;
+}
+
+/* Consolidated Choice Card (Merged .choice-card and .choice-btn) */
+.choice-card {
+  position: relative;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  cursor: pointer;
+  background-color: var(--color-surface);
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  user-select: none;
+  transition: transform 0.1s ease, border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.choice-card:hover:not(.is-correct):not(.is-wrong) {
+  border-color: var(--color-text-primary);
+}
+
+.choice-card:active:not(.is-correct):not(.is-wrong) {
+  transform: scale(0.98);
+}
+
+.choice-card.is-correct {
+  border-color: var(--color-success);
+  background-color: var(--color-success-bg);
+  color: var(--color-success);
+}
+
+.choice-card.is-wrong {
+  border-color: var(--color-accent);
+  background-color: var(--color-error-bg);
+  color: var(--color-accent);
+}
+
+.hotkey-badge {
+  position: absolute;
+  top: -0.65rem;
+  left: -0.65rem;
+  background: var(--color-text-primary);
+  color: var(--color-surface);
+  font-size: 0.75rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Text Diff Display */
+.diff-char {
+  font-size: 1.4rem;
+  letter-spacing: 1px;
+}
+
+.diff-match {
+  color: var(--color-success);
+  font-weight: 700;
+}
+
+.diff-deletion {
+  color: var(--color-accent);
+  text-decoration: line-through;
+  opacity: 0.8;
+}
+
+.diff-insertion {
+  color: var(--color-warning);
+  background-color: var(--color-warning-bg);
+  border-bottom: 2px dashed var(--color-warning);
+  padding: 0 2px;
+  border-radius: 2px;
+}
+
+/* Consolidated Interactive Words (Merged .proof-word and .mistake-word) */
+.interactive-word {
+  display: inline-block;
+  padding: 0.2rem 0.4rem;
+  margin: 0.1rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.interactive-word:hover:not(.is-wrong):not(.is-correct) {
+  background-color: var(--color-surface-hover);
+}
+
+.interactive-word.is-wrong {
+  background-color: var(--color-error-bg);
+  border: 1px solid var(--color-accent);
+  color: var(--color-accent);
+  text-decoration: line-through;
+}
+
+.interactive-word.is-correct {
+  background-color: var(--color-success-bg);
+  border: 1px solid var(--color-success);
+  color: var(--color-success);
+  font-weight: 700;
+}
+
+/* ==========================================================================
+   3. HELPERS & ANIMATIONS
+   ========================================================================== */
+[v-cloak] { display: none !important; }
+.text-secondary { color: var(--color-text-secondary); }
+.text-success { color: var(--color-success); }
+
+@keyframes pulse-accent {
+  0% { box-shadow: 0 0 0 0 rgba(var(--color-accent-rgb), 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(var(--color-accent-rgb), 0); }
+  100% { box-shadow: 0 0 0 0 rgba(var(--color-accent-rgb), 0); }
+}
+
+
+/* Feature Cards & Auto-Grid */
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-top: 1.25rem;
+}
+
+.feature-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 1.15rem;
+}
+
+.feature-card h3 {
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: 0.35rem;
+}
+
+.feature-card p {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 0;
+  line-height: 1.5;
+}
