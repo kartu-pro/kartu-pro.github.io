@@ -6,12 +6,16 @@ import SettingsModal from '../../js/components/SettingsModal.js';
 import QuizTypeForm from '../../js/components/QuizTypeForm.js';
 import QuizChooseForm from '../../js/components/QuizChooseForm.js';
 import QuizFindMistake from '../../js/components/QuizFindMistake.js';
+
 import {
   getDefaultFilters,
   validateFilters,
   parseQueryParams,
   buildQueryString
 } from '../../js/filterUtils.js';
+
+import { shuffleArray, advanceQueue } from '../../js/queueUtils.js';
+
 import {
   POS, POS_LABELS,
   PERSON_NUM, PERSON_NUM_LABELS,
@@ -22,6 +26,12 @@ import {
 } from '../../js/constants.js';
 
 const { createApp, ref, computed, onMounted, watch } = Vue;
+
+const CONTEXT_GAME_MODES = [
+  { value: 'type', label: 'Type the Form' },
+  { value: 'choose', label: 'Choose the Form' },
+  { value: 'mistake', label: 'Find the Mistake' }
+];
 
 createApp({
   components: {
@@ -56,107 +66,73 @@ createApp({
 
     const validationErrors = computed(() => validateFilters(filters.value));
 
-    const parseAndApplyQueryParams = () => {
-      const parsed = parseQueryParams(window.location.search, dictionary.value);
-      if (parsed) {
-        filters.value = parsed;
-        return true;
-      }
-      return false;
-    };
+    const availableTags = computed(() => {
+      const tags = new Set();
+      dictionary.value
+        .filter(w => w.pos === filters.value.topic)
+        .forEach(w => w.tags?.forEach(t => tags.add(t)));
+      return Array.from(tags).sort();
+    });
 
+    const currentSentenceParts = computed(() => {
+      if (!currentCard.value) return { prefix: '', suffix: '' };
+      const targetWord = currentCard.value.target || currentCard.value.answer;
+      const targetPos = currentCard.value.sentence.indexOf(targetWord);
+      
+      if (targetPos === -1) return { prefix: currentCard.value.sentence, suffix: '' };
+      
+      return {
+        prefix: currentCard.value.sentence.slice(0, targetPos),
+        suffix: currentCard.value.sentence.slice(targetPos + targetWord.length)
+      };
+    });
 
     onMounted(() => {
       resetPosFilters(POS.VERB);
-      parseAndApplyQueryParams();
-      // Load dictionary in the background, non-blocking
+      const parsed = parseQueryParams(window.location.search, dictionary.value);
+      if (parsed) filters.value = parsed;
+
       apiGet('/words')
-        .then(words => {
-          dictionary.value = words;
-        })
-        .catch(err => {
-          console.error("Failed to load words", err);
-          // Optionally show an error message to the user
-        })
-        .finally(() => {
-          isLoadingDictionary.value = false;
-        });
+        .then(words => { dictionary.value = words; })
+        .catch(err => console.error("Failed to load words", err))
+        .finally(() => { isLoadingDictionary.value = false; });
     });
 
     watch(() => filters.value.topic, (newTopic, oldTopic) => {
-      // Only reset filters if the topic actually changed by user interaction, not initial setup
-      if (newTopic !== oldTopic) {
-        resetPosFilters(newTopic);
-      }
-    }, { immediate: false }); // Do not run immediately on component mount, handled by onMounted
-
-    const availableTags = computed(() => {
-      const tags = new Set();
-      dictionary.value.filter(w => w.pos === filters.value.topic).forEach(w => w.tags.forEach(t => tags.add(t)));
-      return Array.from(tags).sort();
+      if (newTopic !== oldTopic) resetPosFilters(newTopic);
     });
 
     const addWordToFilters = (w) => {
       filters.value.words.push(w);
-      wordSearch.value = ''; // Clear search input in app.js
+      wordSearch.value = '';
     };
+
     const removeWordFromFilters = (w) => {
       filters.value.words = filters.value.words.filter(x => x.uuid !== w.uuid);
     };
 
-
     const startDrill = async () => {
       appState.value = 'loading';
-      const requestPayload = { pos: filters.value.topic };
-
-      if (filters.value.words.length) {
-        requestPayload.uuids = filters.value.words.map(w => w.uuid);
-      }
-      if (filters.value.tags.length) {
-        requestPayload.tags = filters.value.tags;
-      }
-
-      // Add POS-specific filters
-      if (filters.value.topic === POS.VERB) {
-        if (filters.value.scr.length) requestPayload.screeves = filters.value.scr;
-        if (filters.value.subj.length) requestPayload.subjects = filters.value.subj;
-      } else if (filters.value.topic === POS.NOUN) {
-        if (filters.value.case.length) requestPayload.cases = filters.value.case;
-        if (filters.value.qty.length) requestPayload.qtys = filters.value.qty;
-        if (filters.value.pp.length) requestPayload.pps = filters.value.pp;
-      } else if (filters.value.topic === POS.PRON || filters.value.topic === POS.ADJ) {
-        if (filters.value.case.length) requestPayload.cases = filters.value.case;
-      }
-
-      // Convert arrays in the payload to comma-separated strings for URLSearchParams
-      const params = new URLSearchParams();
-      for (const key in requestPayload) {
-        if (Array.isArray(requestPayload[key])) {
-          params.append(key, requestPayload[key].join(','));
-        } else {
-          params.append(key, requestPayload[key]);
-        }
-      }
-
-      const queryString = params.toString();
-
-      // Update URL without reloading the page
+      const queryString = buildQueryString(filters.value);
       history.pushState({}, '', `?${queryString}`);
 
       try {
         const rawCards = await apiGet(`/context?${queryString}`);
-        activeQueue.value = rawCards.map(c => ({
+
+        const preparedCards = rawCards.map(c => ({
           sentence: c.sentence,
           answer: c.answer,
           hint: c.hint,
+          target: c.target,
           distractors: c.distractors || [],
           needsReinsert: false
-        })).sort(() => 0.5 - Math.random());
+        }));
 
+        activeQueue.value = shuffleArray(preparedCards);
         appState.value = 'quiz';
         loadNextCard();
       } catch (e) {
-        console.log(e.message || "Failed to load cards.");
+        console.error(e.message || "Failed to load cards.");
         appState.value = 'setup';
       }
     };
@@ -177,14 +153,10 @@ createApp({
 
     const handlePrimaryAction = () => {
       if (isAnswerSubmitted.value) {
-        const card = activeQueue.value.shift();
-        if (card && card.needsReinsert) {
-          card.needsReinsert = false;
-          const insertIdx = Math.min(activeQueue.value.length, Math.floor(Math.random() * 5) + 4);
-          activeQueue.value.splice(insertIdx, 0, card);
-        }
+        const { nextQueue, isFinished } = advanceQueue(activeQueue.value);
+        activeQueue.value = nextQueue;
 
-        if (activeQueue.value.length === 0) {
+        if (isFinished) {
           appState.value = 'finished';
         } else {
           loadNextCard();
@@ -198,12 +170,11 @@ createApp({
       appState, dictionary, isLoadingDictionary, filters, 
       wordSearch, availableTags, validationErrors, startDrill,
       activeQueue, currentCard, isAnswerSubmitted, feedback,
-      gameMode, showSettingsModal, typeFormRef,
-      handleAnswerSubmitted, handlePrimaryAction,
+      gameMode, showSettingsModal, typeFormRef, CONTEXT_GAME_MODES,
+      currentSentenceParts, handleAnswerSubmitted, handlePrimaryAction,
       addWordToFilters, removeWordFromFilters,
       POS, POS_LABELS, PERSON_NUM, PERSON_NUM_LABELS, QTY, QTY_LABELS,
       CASE, CASE_LABELS, SCREEVE, SCREEVE_LABELS, POSTPOSITION, POSTPOSITION_LABELS,
     };
-
   }
 }).mount('#app');

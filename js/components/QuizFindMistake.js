@@ -1,24 +1,34 @@
-const { ref, watch } = Vue;
+const { ref, watch, onMounted, onUnmounted } = Vue;
+import { computeDiff } from '../utils.js';
 
 export default {
-  props: ['card', 'isSubmitted'],
-  emits: ['submit'],
+  props: {
+    card: Object,
+    isSubmitted: Boolean
+  },
+  emits: ['submit', 'next'],
   setup(props, { emit }) {
     const words = ref([]);
     const mistakeIndex = ref(-1);
     const selectedIndex = ref(-1);
     const actualMistakeWord = ref('');
 
+    const getLetter = (i) => String.fromCharCode(65 + i);
+
     watch(() => props.card, () => {
-      const distractor = (props.card.distractors && props.card.distractors.length > 0) 
-        ? props.card.distractors[Math.floor(Math.random() * props.card.distractors.length)] 
+      if (!props.card) return;
+
+      const distractor = (props.card.distractors && props.card.distractors.length > 0)
+        ? props.card.distractors[Math.floor(Math.random() * props.card.distractors.length)]
         : '___';
-      
-      const targetPos = props.card.sentence.indexOf(props.card.answer);
-      const modifiedSentence = targetPos !== -1 
-        ? props.card.sentence.slice(0, targetPos) + distractor + props.card.sentence.slice(targetPos + props.card.answer.length)
+
+      const targetWord = props.card.target || props.card.answer;
+      const targetPos = props.card.sentence.indexOf(targetWord);
+
+      const modifiedSentence = targetPos !== -1
+        ? props.card.sentence.slice(0, targetPos) + distractor + props.card.sentence.slice(targetPos + targetWord.length)
         : props.card.sentence.replace(props.card.answer, distractor);
-        
+
       const splitWords = modifiedSentence.split(' ');
       words.value = splitWords;
       mistakeIndex.value = splitWords.findIndex(w => w.includes(distractor));
@@ -26,37 +36,71 @@ export default {
       selectedIndex.value = -1;
     }, { immediate: true });
 
-    const selectWord = (idx) => {
+    const selectWord = (idx, event) => {
       if (props.isSubmitted) return;
+
+      if (event?.target && typeof event.target.blur === 'function') {
+        event.target.blur();
+      } else if (document.activeElement) {
+        document.activeElement.blur();
+      }
+
       selectedIndex.value = idx;
       const isCorrect = idx === mistakeIndex.value;
-      
-      let msg = isCorrect ? '✅ Correct!' : "❌ Not quite."
-      msg += ` "${actualMistakeWord.value}" should be "${props.card.answer}".`;
-      
+      const targetWord = props.card.target || props.card.answer;
+
       emit('submit', {
         isCorrect,
-        feedbackMsg: msg,
-        diff: null
+        feedbackMsg: isCorrect ? '✅ Correct' : '❌ Not quite.',
+        diff: isCorrect ? null : computeDiff(actualMistakeWord.value, targetWord)
       });
     };
 
-    return { words, mistakeIndex, selectedIndex, selectWord };
+    const handleKeydown = (e) => {
+      if (e.key === 'Enter') {
+        if (props.isSubmitted) {
+          e.preventDefault();
+          if (document.activeElement) document.activeElement.blur();
+          emit('next');
+        }
+        return;
+      }
+
+      if (props.isSubmitted) return;
+
+      const key = e.key.toUpperCase();
+      if (key >= 'A' && key <= 'Z') {
+        const idx = key.charCodeAt(0) - 65;
+        if (idx >= 0 && idx < words.value.length) {
+          e.preventDefault();
+          selectWord(idx);
+        }
+      }
+    };
+
+    onMounted(() => window.addEventListener('keydown', handleKeydown));
+    onUnmounted(() => window.removeEventListener('keydown', handleKeydown));
+
+    return { words, selectedIndex, mistakeIndex, selectWord, getLetter };
   },
   template: `
-    <div class="text-2xl sm:text-3xl font-bold flex flex-wrap items-center justify-center gap-x-2 gap-y-3 leading-loose">
-      <span 
-        v-for="(word, i) in words" :key="i"
-        @click="selectWord(i)"
-        class="mistake-word"
-        :class="{
-          'submitted': isSubmitted,
-          'incorrect': isSubmitted && selectedIndex === i && i !== mistakeIndex,
-          'correct': isSubmitted && i === mistakeIndex
-        }"
-      >
-        {{ word }}
-      </span>
+    <div class="w-full flex flex-col items-center gap-6">
+      <div class="flex flex-wrap items-center justify-center gap-3 max-w-2xl">
+        <button 
+          v-for="(word, i) in words" :key="i"
+          @click="selectWord(i, $event)"
+          class="relative inline-flex items-center gap-2 px-3.5 py-2 text-lg sm:text-xl font-bold rounded-xl border-2 transition-all cursor-pointer"
+          :class="{
+            'bg-[var(--color-surface)] border-[var(--color-border)] hover:border-[var(--color-accent)]': !isSubmitted,
+            'bg-emerald-500/10 border-emerald-500 text-emerald-400': isSubmitted && i === mistakeIndex,
+            'bg-rose-500/10 border-rose-500 text-rose-400': isSubmitted && selectedIndex === i && i !== mistakeIndex,
+            'opacity-40 pointer-events-none': isSubmitted && i !== mistakeIndex && selectedIndex !== i
+          }"
+        >
+          <span class="hotkey-badge leading-none">{{ getLetter(i) }}</span>
+          <span>{{ word }}</span>
+        </button>
+      </div>
     </div>
   `
 };

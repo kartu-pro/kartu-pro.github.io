@@ -1,34 +1,35 @@
-const { ref, watch, computed, onMounted, onUnmounted } = Vue;
+const { ref, watch, onMounted, onUnmounted } = Vue;
 
 export default {
-  props: ['card', 'isSubmitted'],
+  props: {
+    answer: String,
+    distractors: { type: Array, default: () => [] },
+    isSubmitted: Boolean
+  },
   emits: ['submit', 'next'],
   setup(props, { emit }) {
     const options = ref([]);
     const selectedIndex = ref(-1);
 
-    watch(() => props.card, () => {
-      const pool = [props.card.answer];
-      if (props.card.distractors) {
-        pool.push(...props.card.distractors.slice(0, 3)); 
-      }
+    // Watch both answer and distractors cleanly using array getters
+    watch([() => props.answer, () => props.distractors], () => {
+      const pool = [props.answer, ...(props.distractors || []).slice(0, 3)];
       options.value = pool.sort(() => 0.5 - Math.random());
       selectedIndex.value = -1;
     }, { immediate: true });
 
-    const parts = computed(() => {
-      const targetPos = props.card.sentence.indexOf(props.card.answer);
-      if (targetPos === -1) return { prefix: props.card.sentence, suffix: '' };
-      return {
-         prefix: props.card.sentence.slice(0, targetPos),
-         suffix: props.card.sentence.slice(targetPos + props.card.answer.length)
-      };
-    });
-
-    const selectOption = (idx) => {
+    const selectOption = (idx, event) => {
       if (props.isSubmitted) return;
+
+      // Blur the clicked button so Enter key won't trigger a native click on it later
+      if (event?.target && typeof event.target.blur === 'function') {
+        event.target.blur();
+      } else if (document.activeElement) {
+        document.activeElement.blur();
+      }
+
       selectedIndex.value = idx;
-      const isCorrect = options.value[idx] === props.card.answer;
+      const isCorrect = options.value[idx] === props.answer;
       
       emit('submit', {
         isCorrect,
@@ -38,12 +39,20 @@ export default {
     };
 
     const handleKeydown = (e) => {
-      if (props.isSubmitted) {
-        if (e.key === 'Enter') emit('next');
+      if (e.key === 'Enter') {
+        if (props.isSubmitted) {
+          e.preventDefault();
+          if (document.activeElement) document.activeElement.blur();
+          emit('next');
+        }
         return;
       }
+
+      if (props.isSubmitted) return;
+
       const num = parseInt(e.key);
       if (num >= 1 && num <= options.value.length) {
+        e.preventDefault();
         selectOption(num - 1);
       }
     };
@@ -51,24 +60,20 @@ export default {
     onMounted(() => window.addEventListener('keydown', handleKeydown));
     onUnmounted(() => window.removeEventListener('keydown', handleKeydown));
 
-    return { options, selectedIndex, parts, selectOption };
+    return { options, selectedIndex, selectOption };
   },
   template: `
     <div class="w-full flex flex-col items-center gap-6">
-      <div class="text-2xl sm:text-3xl font-bold flex flex-wrap items-center justify-center gap-1 leading-loose">
-        <span>{{ parts.prefix }}</span>
-        <span class="text-[var(--color-text-secondary)] border-b-[3px] border-[var(--color-text-primary)] px-4">___</span>
-        <span>{{ parts.suffix }}</span>
-      </div>
+      <slot></slot>
 
       <div class="grid-2x2 w-full max-w-md mt-4">
         <button 
           v-for="(opt, i) in options" :key="i"
-          @click="selectOption(i)"
+          @click="selectOption(i, $event)"
           class="choice-btn"
           :class="{
-            'correct': isSubmitted && opt === card.answer,
-            'incorrect': isSubmitted && selectedIndex === i && opt !== card.answer
+            'correct': isSubmitted && opt === answer,
+            'incorrect': isSubmitted && selectedIndex === i && opt !== answer
           }"
         >
           <span class="hotkey-badge">{{ i + 1 }}</span>

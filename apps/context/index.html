@@ -36,7 +36,8 @@
       </button>
     </header>
 
-    <settings-modal v-model="gameMode" :show="showSettingsModal" @close="showSettingsModal = false"></settings-modal>
+    <settings-modal v-model="gameMode" :options="CONTEXT_GAME_MODES" :show="showSettingsModal"
+      @close="showSettingsModal = false"></settings-modal>
 
     <main class="w-full max-w-3xl mx-auto flex-1 flex flex-col min-h-0 my-0">
 
@@ -155,11 +156,20 @@
             :is-submitted="isAnswerSubmitted" @submit="handleAnswerSubmitted"
             @next="handlePrimaryAction"></quiz-type-form>
 
-          <quiz-choose-form v-else-if="gameMode === 'choose'" :card="currentCard" :is-submitted="isAnswerSubmitted"
-            @submit="handleAnswerSubmitted" @next="handlePrimaryAction"></quiz-choose-form>
+          <!-- Choose Mode (Uses slot for cloze string) -->
+          <quiz-choose-form v-else-if="gameMode === 'choose'" :answer="currentCard.answer"
+            :distractors="currentCard.distractors" :is-submitted="isAnswerSubmitted" @submit="handleAnswerSubmitted"
+            @next="handlePrimaryAction">
+            <div class="text-2xl sm:text-3xl font-bold flex flex-wrap items-center justify-center gap-1 leading-loose">
+              <span>{{ currentSentenceParts.prefix }}</span>
+              <span
+                class="text-[var(--color-text-secondary)] border-b-[3px] border-[var(--color-text-primary)] px-4">___</span>
+              <span>{{ currentSentenceParts.suffix }}</span>
+            </div>
+          </quiz-choose-form>
 
           <quiz-find-mistake v-else-if="gameMode === 'mistake'" :card="currentCard" :is-submitted="isAnswerSubmitted"
-            @submit="handleAnswerSubmitted"></quiz-find-mistake>
+            @submit="handleAnswerSubmitted" @next="handlePrimaryAction"></quiz-find-mistake>
         </div>
 
         <div class="pt-2 flex-none">
