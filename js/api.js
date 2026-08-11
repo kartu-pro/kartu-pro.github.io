@@ -6,14 +6,14 @@ const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby1V2y3Kr5ZrF_V
  * @returns {Promise<any>}
  */
 export async function apiGet(pathAndQuery) {
-  const sessionToken = localStorage.getItem('sessionToken');
+  const sessionToken = localStorage.getItem('token');
   
   // Separate endpoint path from any query params passed in (e.g., '/context?pos=verb')
   const [path, queryString] = pathAndQuery.split('?');
   const params = new URLSearchParams(queryString || '');
   
   params.set('path', path);
-  if (sessionToken) params.set('sessionToken', sessionToken);
+  if (sessionToken) params.set('token', sessionToken);
 
   const response = await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`, {
     method: "GET",
@@ -23,7 +23,7 @@ export async function apiGet(pathAndQuery) {
   const result = await response.json();
 
   if (result.status === 401) {
-    localStorage.removeItem('sessionToken');
+    localStorage.removeItem('token');
     const currentPath = encodeURIComponent(window.location.pathname + window.location.search);
     window.location.href = `/login?redirectTo=${currentPath}`;
     throw new Error('Session expired. Redirecting to login...');
@@ -43,7 +43,7 @@ export async function apiGet(pathAndQuery) {
  * @returns {Promise<any>}
  */
 export async function apiPost(path, data = {}) {
-  const sessionToken = localStorage.getItem('sessionToken');
+  const sessionToken = localStorage.getItem('token');
   const payload = { ...data, ...(sessionToken && { sessionToken }) };
 
   // Append ?path= to POST URL so e.parameter.path receives it in Apps Script
@@ -59,7 +59,7 @@ export async function apiPost(path, data = {}) {
   const result = await response.json();
 
   if (result.status === 401) {
-    localStorage.removeItem('sessionToken');
+    localStorage.removeItem('token');
     const currentPath = encodeURIComponent(window.location.pathname + window.location.search);
     window.location.href = `/login?redirectTo=${currentPath}`;
     throw new Error('Session expired. Redirecting to login...');
