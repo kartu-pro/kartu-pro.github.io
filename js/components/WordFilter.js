@@ -56,29 +56,26 @@ const WordFilter = {
     };
   },
   template: `
-      <div class="mb-4 relative" ref="wordSearchInputRef">
-        <label class="block text-xs font-bold text-secondary mb-1">Words</label>
-        <div class="flex flex-wrap gap-1.5 mb-2" v-if="selectedWords.length">
-          <span v-for="word in selectedWords" :key="word.uuid"
-            class="inline-flex items-center px-2 py-1 bg-[var(--color-surface)] text-xs font-bold rounded border border-[var(--color-border)]">
-            {{ word.lemma }}
-            <button @click="$emit('removeWord', word)"
-              class="ml-1.5 text-secondary hover:text-[var(--color-accent)]">✕</button>
-          </span>
-        </div>
-        <input type="text" :value="modelValue" @input="handleInput" placeholder="Type to search..."
-          class="input-text text-sm">
+    <div class="word-filter relative mb-4" ref="wordSearchInputRef">
+      <label class="filter-label text-secondary font-bold text-xs mb-1 block">Words</label>
 
-        <div v-if="showWordDropdown && filteredDictionary.length"
-          class="absolute z-10 w-full bg-[var(--color-bg)] border border-[var(--color-border)] rounded shadow-lg max-h-40 overflow-y-auto mt-1">
-          <div v-for="item in filteredDictionary" :key="item.uuid" @click="handleAddWord(item)"
-            class="p-2 hover:bg-[var(--color-surface)] cursor-pointer text-sm flex justify-between border-b border-[var(--color-border)]">
-            <span class="font-bold">{{ item.lemma }}</span>
-            <span class="text-secondary">{{ item.en }}</span>
-          </div>
+      <div class="flex flex-wrap gap-1-5 mb-2" v-if="selectedWords.length">
+        <span v-for="word in selectedWords" :key="word.uuid" class="selected-chip">
+          {{ word.lemma }}
+          <button type="button" @click="$emit('removeWord', word)" class="btn-chip-remove">✕</button>
+        </span>
+      </div>
+
+      <input type="text" :value="modelValue" @input="handleInput" placeholder="Type to search..." class="input-text">
+
+      <div v-if="showWordDropdown && filteredDictionary.length" class="search-dropdown">
+        <div v-for="item in filteredDictionary" :key="item.uuid" @click="handleAddWord(item)" class="search-dropdown-item">
+          <span class="font-bold">{{ item.lemma }}</span>
+          <span class="text-secondary">{{ item.en }}</span>
         </div>
       </div>
+    </div>
   `
-};
+  };
 
 export default WordFilter;

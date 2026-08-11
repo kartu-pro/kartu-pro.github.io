@@ -32,21 +32,23 @@ const ChipMultiSelectFilter = {
     }
   },
   template: `
-    <div class="mb-3">
-      <div class="flex justify-between text-xs font-bold text-secondary mb-1">
-        <span>{{ label }}</span>
+    <div class="filter-group mb-3">
+      <div class="filter-header flex justify-between items-center mb-1">
+        <span class="filter-label text-secondary font-bold text-xs">{{ label }}</span>
         <div class="flex gap-2">
-          <button class="text-secondary hover:underline" @click="selectNone" :disabled="disabled">None</button>
-          <button class="text-[var(--color-accent)] hover:underline" @click="selectAll" :disabled="disabled">All</button>
+          <button type="button" class="btn-link text-secondary" @click="selectNone" :disabled="disabled">None</button>
+          <button type="button" class="btn-link text-accent" @click="selectAll" :disabled="disabled">All</button>
         </div>
       </div>
-      <div class="flex flex-wrap gap-1.5">
-        <div v-for="item in items" :key="item"
-             class="filter-chip"
-             :class="{ 'active': modelValue.includes(item), 'disabled': disabled }"
-             @click="toggleItem(item)">
+      <div class="flex flex-wrap gap-1-5">
+        <button v-for="item in items" :key="item"
+          type="button"
+          class="filter-chip"
+          :class="{ 'active': modelValue.includes(item) }"
+          :disabled="disabled"
+          @click="toggleItem(item)">
           {{ itemMap ? itemMap[item] : item }}
-        </div>
+        </button>
       </div>
     </div>
   `

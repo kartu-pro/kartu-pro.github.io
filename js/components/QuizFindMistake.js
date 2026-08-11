@@ -84,20 +84,19 @@ export default {
     return { words, selectedIndex, mistakeIndex, selectWord, getLetter };
   },
   template: `
-    <div class="w-full flex flex-col items-center gap-6">
+    <div class="flex flex-col items-center gap-4 w-full">
       <div class="flex flex-wrap items-center justify-center gap-3 max-w-2xl">
         <button 
           v-for="(word, i) in words" :key="i"
           @click="selectWord(i, $event)"
-          class="relative inline-flex items-center gap-2 px-3.5 py-2 text-lg sm:text-xl font-bold rounded-xl border-2 transition-all cursor-pointer"
+          class="interactive-word"
           :class="{
-            'bg-[var(--color-surface)] border-[var(--color-border)] hover:border-[var(--color-accent)]': !isSubmitted,
-            'bg-emerald-500/10 border-emerald-500 text-emerald-400': isSubmitted && i === mistakeIndex,
-            'bg-rose-500/10 border-rose-500 text-rose-400': isSubmitted && selectedIndex === i && i !== mistakeIndex,
-            'opacity-40 pointer-events-none': isSubmitted && i !== mistakeIndex && selectedIndex !== i
+            'is-correct': isSubmitted && i === mistakeIndex,
+            'is-wrong': isSubmitted && selectedIndex === i && i !== mistakeIndex,
+            'is-disabled': isSubmitted && i !== mistakeIndex && selectedIndex !== i
           }"
         >
-          <span class="hotkey-badge leading-none">{{ getLetter(i) }}</span>
+          <span class="hotkey-badge">{{ getLetter(i) }}</span>
           <span>{{ word }}</span>
         </button>
       </div>

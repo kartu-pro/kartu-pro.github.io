@@ -8,18 +8,15 @@
 
   <!-- Global & App Styles -->
   <link rel="stylesheet" href="/css/main.css">
-  <link rel="stylesheet" href="/css/components.css">
-  <link rel="stylesheet" href="context.css">
 
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;700&display=swap" rel="stylesheet">
 
   <!-- External Scripts -->
   <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body class="h-dvh overflow-hidden">
+<body class="app-body">
   <div id="app" v-cloak class="app-container flex flex-col flex-1 min-h-0">
 
     <!-- Compact Sub-App Header -->
@@ -30,8 +27,7 @@
         </div>
         <span>← Apps</span>
       </a>
-      <button @click="showSettingsModal = true"
-        class="text-sm font-bold bg-[var(--color-surface)] border border-[var(--color-border)] px-3 py-1.5 rounded transition-colors hover:bg-[var(--color-surface-hover)]">
+      <button @click="showSettingsModal = true" class="btn-secondary">
         ⚙️ Settings
       </button>
     </header>
@@ -39,32 +35,30 @@
     <settings-modal v-model="gameMode" :options="CONTEXT_GAME_MODES" :show="showSettingsModal"
       @close="showSettingsModal = false"></settings-modal>
 
-    <main class="w-full max-w-3xl mx-auto flex-1 flex flex-col min-h-0 my-0">
+    <main class="w-full flex-1 flex flex-col min-h-0">
 
       <!-- LOADING -->
-      <div v-if="appState === 'loading'" class="text-center py-12 flex-1 flex items-center justify-center">
-        <h2 class="text-2xl font-bold">Loading...</h2>
+      <div v-if="appState === 'loading'" class="text-center flex-1 flex items-center justify-center">
+        <h2>Loading...</h2>
       </div>
 
       <!-- SETUP UI -->
       <div v-else-if="appState === 'setup'" class="flex-1 flex flex-col min-h-0">
 
         <!-- Fixed Header -->
-        <div class="flex-none mb-4">
+        <div class="flex-none">
           <span class="badge">Grammar in Context</span>
-          <h1 class="text-2xl sm:text-3xl font-extrabold mt-1">What do you want to study?</h1>
+          <h1>What do you want to study?</h1>
         </div>
 
         <!-- Scrollable Filters Container -->
-        <div class="flex-1 overflow-y-auto pr-1 flex flex-col gap-4 min-h-0">
+        <div class="flex-1 overflow-y-auto flex flex-col gap-4 min-h-0">
 
           <pos-select v-model="filters.topic"></pos-select>
 
-
-
           <!-- Grammar Filters -->
           <div v-if="filters.topic" class="card-box">
-            <h3 class="font-bold text-sm border-b border-[var(--color-border)] pb-2 mb-3">Grammar Filters</h3>
+            <h3 class="card-title">Grammar Filters</h3>
 
             <!-- VERBS -->
             <template v-if="filters.topic === 'verb'">
@@ -97,7 +91,7 @@
 
           <!-- Vocab Filters -->
           <div v-if="filters.topic" class="card-box">
-            <h3 class="font-bold text-sm border-b border-[var(--color-border)] pb-2 mb-3">
+            <h3 class="card-title">
               {{ isLoadingDictionary ? 'Loading Vocab Filters...' : 'Word Filters' }}
             </h3>
             <word-filter v-model="wordSearch" :dictionary="dictionary" :topic="filters.topic"
@@ -110,42 +104,36 @@
           </div>
         </div>
 
-
-        <!-- Fixed Bottom Bar -->
-        <!-- Validation Errors -->
-        <div class="flex-none pt-3 border-t border-[var(--color-border)] mt-2">
-          <div v-if="validationErrors.length > 0"
-            class="mb-3 p-3 bg-[var(--color-surface)] border-l-4 border-[var(--color-accent)] text-[var(--color-accent)] rounded text-sm font-semibold">
-            <ul class="list-disc ml-4">
+        <!-- Fixed Bottom Bar / Validation Errors -->
+        <div class="flex-none pt-3">
+          <div v-if="validationErrors.length > 0" class="validation-box">
+            <ul>
               <li v-for="err in validationErrors" :key="err">{{ err }}</li>
             </ul>
           </div>
 
-          <button class="btn-primary w-full text-lg" @click="startDrill" :disabled="validationErrors.length > 0">
+          <button class="btn-primary w-full" @click="startDrill" :disabled="validationErrors.length > 0">
             Start
           </button>
-
         </div>
 
       </div>
 
       <!-- QUIZ UI -->
       <div v-else-if="appState === 'quiz'" class="flex-1 flex flex-col min-h-0 justify-between">
-        <div class="flex justify-between items-center mb-2 flex-none">
-          <span class="text-secondary text-sm font-bold">Remaining: {{ activeQueue.length }}</span>
-          <button
-            class="text-sm font-bold bg-[var(--color-surface)] border border-[var(--color-border)] px-3 py-1 rounded transition-colors hover:bg-[var(--color-surface-hover)]"
-            @click="appState = 'setup'">Quit</button>
+        <div class="flex justify-between items-center flex-none">
+          <span class="text-secondary">Remaining: {{ activeQueue.length }}</span>
+          <button class="btn-secondary" @click="appState = 'setup'">Quit</button>
         </div>
 
-        <div class="card-box flex-1 flex flex-col items-center justify-center text-center my-2" v-if="currentCard">
+        <div class="card-box flex-1 flex flex-col items-center justify-center text-center" v-if="currentCard">
           <!-- Shared Feedback Header -->
-          <div class="min-h-[40px] text-center mb-4 font-bold flex flex-col items-center justify-center">
+          <div class="feedback-container">
             <div v-if="feedback.msg"
-              :class="{'text-success': feedback.type === 'success', 'text-[var(--color-accent)]': feedback.type === 'error'}">
+              :class="{'text-success': feedback.type === 'success', 'text-accent': feedback.type === 'error'}">
               {{ feedback.msg }}
             </div>
-            <div v-if="feedback.type === 'error' && feedback.diff" class="mt-1">
+            <div v-if="feedback.type === 'error' && feedback.diff">
               <span v-for="(part, i) in feedback.diff" :key="i" :class="'diff-' + part.type" class="diff-char">{{
                 part.char }}</span>
             </div>
@@ -156,14 +144,13 @@
             :is-submitted="isAnswerSubmitted" @submit="handleAnswerSubmitted"
             @next="handlePrimaryAction"></quiz-type-form>
 
-          <!-- Choose Mode (Uses slot for cloze string) -->
+          <!-- Choose Mode -->
           <quiz-choose-form v-else-if="gameMode === 'choose'" :answer="currentCard.answer"
             :distractors="currentCard.distractors" :is-submitted="isAnswerSubmitted" @submit="handleAnswerSubmitted"
             @next="handlePrimaryAction">
-            <div class="text-2xl sm:text-3xl font-bold flex flex-wrap items-center justify-center gap-1 leading-loose">
+            <div class="flex flex-wrap items-center justify-center gap-1">
               <span>{{ currentSentenceParts.prefix }}</span>
-              <span
-                class="text-[var(--color-text-secondary)] border-b-[3px] border-[var(--color-text-primary)] px-4">___</span>
+              <span class="cloze-placeholder">___</span>
               <span>{{ currentSentenceParts.suffix }}</span>
             </div>
           </quiz-choose-form>
@@ -172,9 +159,9 @@
             @submit="handleAnswerSubmitted" @next="handlePrimaryAction"></quiz-find-mistake>
         </div>
 
-        <div class="pt-2 flex-none">
-          <button class="btn-primary w-full text-lg" :class="{ 'btn-next-active': isAnswerSubmitted }"
-            @click="handlePrimaryAction" :disabled="!isAnswerSubmitted && gameMode !== 'type'">
+        <div class="flex-none">
+          <button class="btn-primary w-full" :class="{ 'btn-pulse': isAnswerSubmitted }" @click="handlePrimaryAction"
+            :disabled="!isAnswerSubmitted && gameMode !== 'type'">
             {{ isAnswerSubmitted ? 'Next (Enter)' : (gameMode === 'type' ? 'Check Answer (Enter)' : 'Select an Option')
             }}
           </button>
@@ -183,16 +170,14 @@
 
       <!-- FINISHED UI -->
       <div v-else-if="appState === 'finished'" class="text-center flex-1 flex flex-col items-center justify-center">
-        <h2 class="text-3xl font-bold mb-2">Review Complete! 🎉</h2>
-        <p class="text-secondary mb-6 font-semibold">Great practice session.</p>
+        <h2>Review Complete! 🎉</h2>
+        <p class="subtitle">Great practice session.</p>
 
-        <div class="flex flex-col sm:flex-row gap-3 w-full max-w-xs">
-          <button class="btn-primary flex-1 py-3" @click="startDrill">
+        <div class="finished-actions">
+          <button class="btn-primary flex-1" @click="startDrill">
             🔄 Load More
           </button>
-          <button
-            class="bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-primary)] font-bold flex-1 py-3 rounded-lg hover:opacity-80 transition"
-            @click="appState = 'setup'">
+          <button class="btn-secondary flex-1" @click="appState = 'setup'">
             ⚙️ Setup
           </button>
         </div>

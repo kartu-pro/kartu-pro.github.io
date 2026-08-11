@@ -58,7 +58,7 @@ export default {
     return { textInput, clozeInput, parts, handleTextInput, handleEnter };
   },
   template: `
-    <div class="text-2xl sm:text-3xl font-bold flex flex-wrap items-center justify-center gap-1 leading-loose">
+    <div class="quiz-sentence flex flex-wrap items-center justify-center gap-1">
       <span>{{ parts.prefix }}</span>
       
       <input type="text" ref="clozeInput" 
@@ -67,7 +67,7 @@ export default {
         @keyup.enter="handleEnter" 
         :readonly="isSubmitted" 
         :placeholder="card.hint"
-        class="cloze-input text-2xl sm:text-3xl"
+        class="cloze-input"
         autocomplete="off" autocorrect="off" spellcheck="false"
         :style="{ width: Math.max((card.hint?.length || 5), (card.answer?.length || textInput.length) + 3) + 'ch' }">
         

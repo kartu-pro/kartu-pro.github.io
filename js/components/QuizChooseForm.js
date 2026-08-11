@@ -63,17 +63,17 @@ export default {
     return { options, selectedIndex, selectOption };
   },
   template: `
-    <div class="w-full flex flex-col items-center gap-6">
+    <div class="flex flex-col items-center gap-4 w-full">
       <slot></slot>
 
       <div class="grid-2x2 w-full max-w-md mt-4">
         <button 
           v-for="(opt, i) in options" :key="i"
           @click="selectOption(i, $event)"
-          class="choice-btn"
+          class="choice-card"
           :class="{
-            'correct': isSubmitted && opt === answer,
-            'incorrect': isSubmitted && selectedIndex === i && opt !== answer
+            'is-correct': isSubmitted && opt === answer,
+            'is-wrong': isSubmitted && selectedIndex === i && opt !== answer
           }"
         >
           <span class="hotkey-badge">{{ i + 1 }}</span>
@@ -82,4 +82,4 @@ export default {
       </div>
     </div>
   `
-};
+  };
