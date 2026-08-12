@@ -83,7 +83,7 @@ export default {
             :readonly="isSubmitted" 
             :placeholder="card.hint"
             class="cloze-input"
-            autocomplete="off" autocorrect="off" spellcheck="false"
+            autocomplete="off" autocorrect="off" spellcheck="false" autocapitalize="none"
             :style="{ width: inputWidth }">
           <span>{{ parts.suffix }}</span>
         </span>
@@ -105,7 +105,7 @@ export default {
         :readonly="isSubmitted" 
         :placeholder="card.hint"
         class="cloze-input"
-        autocomplete="off" autocorrect="off" spellcheck="false"
+        autocomplete="off" autocorrect="off" spellcheck="false" autocapitalize="none"
         :style="{ width: inputWidth }">
     </div>
   </div>

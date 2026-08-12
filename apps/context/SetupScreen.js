@@ -65,8 +65,7 @@ export default {
     <div class="flex-1 flex flex-col min-h-0">
       <!-- Fixed Header -->
       <div class="flex-none">
-        <span class="badge">Grammar in Context</span>
-        <h1>What do you want to study?</h1>
+        <h2>What do you want to study?</h2>
       </div>
 
       <!-- Scrollable Filters Container -->

@@ -98,7 +98,7 @@ createApp({
     return {
       appState, dictionary, isLoadingDictionary, filters, handleStart,
       activeQueue, currentCard, isAnswerSubmitted, feedback, advanceCard,
-      gameMode, showSettingsModal, showFlagModal, CONTEXT_GAME_MODES: GAME_MODES,
+      gameMode, showSettingsModal, showFlagModal, GAME_MODES,
       handleAnswerSubmitted
     };
   }

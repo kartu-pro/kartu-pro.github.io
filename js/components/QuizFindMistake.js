@@ -1,6 +1,10 @@
+import CopyButton from '/js/components/CopyButton.js';
 const { ref, watch, onMounted, onUnmounted } = Vue;
 
 export default {
+  components: {
+    'copy-button': CopyButton
+  },
   props: {
     card: Object,
     isSubmitted: Boolean
@@ -83,7 +87,7 @@ export default {
     return { words, selectedIndex, mistakeIndex, selectWord, getLetter };
   },
   template: /* html */ `
-<div class="flex flex-col items-center gap-4 w-full">
+  <div class="flex flex-col items-center gap-4 w-full">
     <div class="flex flex-wrap items-center justify-center gap-1-5 max-w-2xl quiz-sentence">
       <button 
         v-for="(word, i) in words" 
@@ -114,6 +118,7 @@ export default {
         <span v-if="!isSubmitted" class="hotkey-badge-subtle">{{ getLetter(i) }}</span>
         <span>{{ word }}</span>
       </button>
+      <copy-button :text="card.sentence"></copy-button>
     </div>
   </div>
   `
