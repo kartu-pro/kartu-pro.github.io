@@ -33,7 +33,7 @@ export default {
       
       emit('submit', {
         isCorrect,
-        feedbackMsg: isCorrect ? '✅ Correct!' : '❌ Not quite.',
+        feedbackMsg: isCorrect ? 'Correct!' : 'Not quite.',
         diff: null
       });
     };
@@ -68,7 +68,7 @@ export default {
 
       <div class="grid-2x2 w-full max-w-md mt-4">
         <button 
-          v-for="(opt, i) in options" :key="i"
+          v-for="(opt, i) in options" :key="opt"
           @click="selectOption(i, $event)"
           class="choice-card"
           :class="{

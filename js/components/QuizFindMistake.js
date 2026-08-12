@@ -22,7 +22,7 @@ export default {
         ? props.card.distractors[Math.floor(Math.random() * props.card.distractors.length)]
         : '___';
 
-      const targetWord = props.card.target || props.card.answer;
+      const targetWord = props.card.answer;
       const targetPos = props.card.sentence.indexOf(targetWord);
 
       const modifiedSentence = targetPos !== -1
@@ -51,8 +51,8 @@ export default {
 
       emit('submit', {
         isCorrect,
-        feedbackMsg: isCorrect ? '✅ Correct' : '❌ Not quite.',
-        diff: isCorrect ? null : computeDiff(actualMistakeWord.value, targetWord)
+        feedbackMsg: isCorrect ? 'Correct!' : 'Not quite.',
+        diff: null
       });
     };
 
@@ -84,22 +84,38 @@ export default {
     return { words, selectedIndex, mistakeIndex, selectWord, getLetter };
   },
   template: `
-    <div class="flex flex-col items-center gap-4 w-full">
-      <div class="flex flex-wrap items-center justify-center gap-3 max-w-2xl">
-        <button 
-          v-for="(word, i) in words" :key="i"
-          @click="selectWord(i, $event)"
-          class="interactive-word"
-          :class="{
-            'is-correct': isSubmitted && i === mistakeIndex,
-            'is-wrong': isSubmitted && selectedIndex === i && i !== mistakeIndex,
-            'is-disabled': isSubmitted && i !== mistakeIndex && selectedIndex !== i
-          }"
+<div class="flex flex-col items-center gap-4 w-full">
+    <div class="flex flex-wrap items-center justify-center gap-1-5 max-w-2xl quiz-sentence-flow">
+      <button 
+        v-for="(word, i) in words" 
+        :key="i"
+        @click="selectWord(i, $event)"
+        :class="{
+          /* Pre-submit state */
+          'is-selected': selectedIndex === i && !isSubmitted,
+
+          /* Always mark mistake word in yellow highlight with strikethrough */
+          'diff-insertion line-through': isSubmitted && i === mistakeIndex,
+
+          /* Dim clean unselected words */
+          'is-disabled': isSubmitted && i !== mistakeIndex && selectedIndex !== i
+        }"
+        class="interactive-word-text relative"
+
+        :style="(isSubmitted && selectedIndex === i && i !== mistakeIndex) ? { color: 'var(--color-accent)' }: {}"
+      >
+        <!-- Correct word floating above the mistake using diff-match -->
+        <span 
+          v-if="isSubmitted && i === mistakeIndex" 
+          class="floating-correction-badge diff-match"
         >
-          <span class="hotkey-badge">{{ getLetter(i) }}</span>
-          <span>{{ word }}</span>
-        </button>
-      </div>
+          {{ card.answer }}
+        </span>
+
+        <span v-if="!isSubmitted" class="hotkey-badge-subtle">{{ getLetter(i) }}</span>
+        <span>{{ word }}</span>
+      </button>
     </div>
+  </div>
   `
 };

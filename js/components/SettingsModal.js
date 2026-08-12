@@ -33,7 +33,7 @@ export default {
         <div class="flex flex-col gap-2 mb-4">
           <label v-for="opt in options" :key="opt.value" class="modal-option">
             <input type="radio" :value="opt.value" v-model="localMode" class="radio-input" />
-            <span class="m-2">{{ opt.label }}</span>
+            <span>{{ opt.label }}</span>
           </label>
         </div>
         

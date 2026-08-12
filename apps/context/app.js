@@ -1,11 +1,15 @@
 import { apiGet } from '../../js/api.js';
+import AppHeader from '../../js/components/AppHeader.js';
+import FlagContent from '../../js/components/FlagContent.js';
+import SettingsModal from '../../js/components/SettingsModal.js';
 import PosSelect from '../../js/components/PosSelect.js';
 import WordFilter from '../../js/components/WordFilter.js';
 import ChipMultiSelectFilter from '../../js/components/ChipMultiSelectFilter.js';
-import SettingsModal from '../../js/components/SettingsModal.js';
+import QuizFeedback from '../../js/components/QuizFeedback.js';
 import QuizTypeForm from '../../js/components/QuizTypeForm.js';
 import QuizChooseForm from '../../js/components/QuizChooseForm.js';
 import QuizFindMistake from '../../js/components/QuizFindMistake.js';
+import FinishedScreen from '../../js/components/FinishedScreen.js';
 
 import {
   getDefaultFilters,
@@ -35,13 +39,17 @@ const CONTEXT_GAME_MODES = [
 
 createApp({
   components: {
+    'app-header': AppHeader,
+    'flag-content': FlagContent,
+    'settings-modal': SettingsModal,
     'pos-select': PosSelect,
     'word-filter': WordFilter,
     'chip-multi-select-filter': ChipMultiSelectFilter,
-    'settings-modal': SettingsModal,
+    'quiz-feedback': QuizFeedback,
     'quiz-type-form': QuizTypeForm,
     'quiz-choose-form': QuizChooseForm,
     'quiz-find-mistake': QuizFindMistake,
+    'finished-screen': FinishedScreen,
   },
   setup() {
     const appState = ref('setup');
@@ -52,6 +60,7 @@ createApp({
 
     const gameMode = ref('type');
     const showSettingsModal = ref(false);
+    const showFlagModal = ref(false);
     const typeFormRef = ref(null);
 
     const wordSearch = ref('');
@@ -90,10 +99,14 @@ createApp({
     onMounted(() => {
       resetPosFilters(POS.VERB);
       const parsed = parseQueryParams(window.location.search, dictionary.value);
-      if (parsed) filters.value = parsed;
+      if (parsed) filters.value = parsed; // immediately try to set inputs from url
 
       apiGet('/words')
-        .then(words => { dictionary.value = words; })
+        .then(words => { 
+          dictionary.value = words;
+          const parsed = parseQueryParams(window.location.search, dictionary.value);
+          if (parsed) filters.value = parsed; // try to set inputs again now that dictionary is loaded
+         })
         .catch(err => console.error("Failed to load words", err))
         .finally(() => { isLoadingDictionary.value = false; });
     });
@@ -170,9 +183,9 @@ createApp({
       appState, dictionary, isLoadingDictionary, filters, 
       wordSearch, availableTags, validationErrors, startDrill,
       activeQueue, currentCard, isAnswerSubmitted, feedback,
-      gameMode, showSettingsModal, typeFormRef, CONTEXT_GAME_MODES,
+      gameMode, showSettingsModal, showFlagModal, typeFormRef, CONTEXT_GAME_MODES,
       currentSentenceParts, handleAnswerSubmitted, handlePrimaryAction,
-      addWordToFilters, removeWordFromFilters,
+      addWordToFilters, removeWordFromFilters, FinishedScreen,
       POS, POS_LABELS, PERSON_NUM, PERSON_NUM_LABELS, QTY, QTY_LABELS,
       CASE, CASE_LABELS, SCREEVE, SCREEVE_LABELS, POSTPOSITION, POSTPOSITION_LABELS,
     };

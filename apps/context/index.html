@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content">
-  <title>KartuContext</title>
+  <title>KartuContext | KartuPro</title>
 
   <!-- Global & App Styles -->
   <link rel="stylesheet" href="/css/main.css">
@@ -19,18 +19,12 @@
 <body class="app-body">
   <div id="app" v-cloak class="app-container flex flex-col flex-1 min-h-0">
 
-    <!-- Compact Sub-App Header -->
-    <header class="app-header flex-none">
-      <a href="/apps" class="app-back-link">
-        <div class="logo-circle-sm">
-          <img src="/assets/logo.svg" alt="KartuPro - Georgian Language Learning Logo">
-        </div>
-        <span>← Apps</span>
-      </a>
-      <button @click="showSettingsModal = true" class="btn-secondary">
-        ⚙️ Settings
-      </button>
-    </header>
+    <app-header :app-state="appState" @open-flag="showFlagModal = true" @open-settings="showSettingsModal = true"
+      @exit-quiz="appState = 'setup'"></app-header>
+
+    <flag-content :show="showFlagModal" :app-state="{ appState, gameMode, filters, currentCard }"
+      @close="showFlagModal = false">
+    </flag-content>
 
     <settings-modal v-model="gameMode" :options="CONTEXT_GAME_MODES" :show="showSettingsModal"
       @close="showSettingsModal = false"></settings-modal>
@@ -92,7 +86,7 @@
           <!-- Vocab Filters -->
           <div v-if="filters.topic" class="card-box">
             <h3 class="card-title">
-              {{ isLoadingDictionary ? 'Loading Vocab Filters...' : 'Word Filters' }}
+              {{ isLoadingDictionary ? 'Loading Word Filters...' : 'Word Filters' }}
             </h3>
             <word-filter v-model="wordSearch" :dictionary="dictionary" :topic="filters.topic"
               :selected-words="filters.words" @add-word="addWordToFilters" @remove-word="removeWordFromFilters"
@@ -121,23 +115,13 @@
 
       <!-- QUIZ UI -->
       <div v-else-if="appState === 'quiz'" class="flex-1 flex flex-col min-h-0 justify-between">
-        <div class="flex justify-between items-center flex-none">
-          <span class="text-secondary">Remaining: {{ activeQueue.length }}</span>
-          <button class="btn-secondary" @click="appState = 'setup'">Quit</button>
-        </div>
 
-        <div class="card-box flex-1 flex flex-col items-center justify-center text-center" v-if="currentCard">
+        <div class="card-box flex-1 flex flex-col items-center justify-center text-center relative" v-if="currentCard">
+          <span class="text-secondary text-xs" style="position: absolute; top: 0.75rem; right: 1rem;">
+            Remaining: {{ activeQueue.length }}
+          </span>
           <!-- Shared Feedback Header -->
-          <div class="feedback-container">
-            <div v-if="feedback.msg"
-              :class="{'text-success': feedback.type === 'success', 'text-accent': feedback.type === 'error'}">
-              {{ feedback.msg }}
-            </div>
-            <div v-if="feedback.type === 'error' && feedback.diff">
-              <span v-for="(part, i) in feedback.diff" :key="i" :class="'diff-' + part.type" class="diff-char">{{
-                part.char }}</span>
-            </div>
-          </div>
+          <quiz-feedback :feedback="feedback"></quiz-feedback>
 
           <!-- Dynamic Game Modes -->
           <quiz-type-form v-if="gameMode === 'type'" ref="typeFormRef" :card="currentCard"
@@ -148,10 +132,14 @@
           <quiz-choose-form v-else-if="gameMode === 'choose'" :answer="currentCard.answer"
             :distractors="currentCard.distractors" :is-submitted="isAnswerSubmitted" @submit="handleAnswerSubmitted"
             @next="handlePrimaryAction">
-            <div class="flex flex-wrap items-center justify-center gap-1">
-              <span>{{ currentSentenceParts.prefix }}</span>
-              <span class="cloze-placeholder">___</span>
-              <span>{{ currentSentenceParts.suffix }}</span>
+            <div class="quiz-sentence">
+              <span class="inline-flex items-center justify-center flex-wrap gap-1">
+                <span class="whitespace-nowrap">
+                  <span>{{ currentSentenceParts.prefix }}</span>
+                  <span class="cloze-placeholder">___</span>
+                  <span>{{ currentSentenceParts.suffix }}</span>
+                </span>
+              </span>
             </div>
           </quiz-choose-form>
 
@@ -169,19 +157,8 @@
       </div>
 
       <!-- FINISHED UI -->
-      <div v-else-if="appState === 'finished'" class="text-center flex-1 flex flex-col items-center justify-center">
-        <h2>Review Complete! 🎉</h2>
-        <p class="subtitle">Great practice session.</p>
-
-        <div class="finished-actions">
-          <button class="btn-primary flex-1" @click="startDrill">
-            🔄 Load More
-          </button>
-          <button class="btn-secondary flex-1" @click="appState = 'setup'">
-            ⚙️ Setup
-          </button>
-        </div>
-      </div>
+      <finished-screen v-else-if="appState === 'finished'" @restart="startDrill" @setup="appState = 'setup'">
+      </finished-screen>
 
     </main>
 

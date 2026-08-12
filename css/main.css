@@ -15,12 +15,12 @@
   --color-border: #e5e7eb;
   --color-border-dark: #d1d5db;
   
-  --color-success: #166534;
-  --color-success-bg: #dcfce7;
+  --color-error: var(--color-accent);
+  --color-error-bg: #fef2f2;
   --color-warning: #b45309;
   --color-warning-bg: #fef3c7;
-  --color-error: #a70007;
-  --color-error-bg: #fef2f2; /* Consolidated from hardcoded hexes */
+  --color-success: #166534;
+  --color-success-bg: #dcfce7;
 
   color-scheme: light;
   
@@ -91,6 +91,18 @@ p.subtitle {
   margin-bottom: 2.5rem;
 }
 
+.card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+}
+.card-feature {
+  border-width: 1px;
+  border-radius: var(--radius-sm);
+  padding: 1.15rem;
+}
+
 img, svg {
   max-width: 100%;
   display: block;
@@ -101,12 +113,11 @@ img, svg {
   outline-offset: 2px;
 }
 
-button {
-  font-size:inherit;
+button, input, select, textarea {
+  font-size: inherit;
+  font-family: inherit;
 }
-input {
-  font-size:inherit;
-}
+
 /* ==========================================================================
    3. LAYOUTS
    ========================================================================== */
@@ -317,6 +328,7 @@ header {
 }
 
 .btn, .btn-primary, .btn-secondary, .btn-accent {
+  margin: 0.5rem 0;
   min-height: 2.25rem;
   display: inline-flex;
   align-items: center;
@@ -493,7 +505,6 @@ header {
 
 .cloze-input:read-only {
   background: transparent;
-  border-color: transparent;
 }
 
 /* Consolidated Choice Card (Merged .choice-card and .choice-btn) */
@@ -519,6 +530,7 @@ header {
 .choice-card:active:not(.is-correct):not(.is-wrong) {
   transform: scale(0.98);
 }
+
 
 .choice-card.is-correct {
   border-color: var(--color-success);
@@ -554,52 +566,82 @@ header {
   letter-spacing: 1px;
 }
 
+/* 1. MATCH: Correctly typed / matched character */
 .diff-match {
   color: var(--color-success);
   font-weight: 700;
 }
 
+/* 2. DELETION: Extra / wrong character typed by user */
 .diff-deletion {
-  color: var(--color-accent);
+  color: var(--color-error) !important;
+  background-color: var(--color-error-bg) !important;
   text-decoration: line-through;
-  opacity: 0.8;
+  text-decoration-thickness: 2px;
+  padding: 0.05em 0.25em;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
 }
 
+/* 3. INSERTION: Missing character / hint to insert */
 .diff-insertion {
-  color: var(--color-warning);
-  background-color: var(--color-warning-bg);
+  color: var(--color-text-primary) !important;
+  background-color: var(--color-warning-bg) !important;
   border-bottom: 2px dashed var(--color-warning);
-  padding: 0 2px;
-  border-radius: 2px;
+  padding: 0.05em 0.25em;
+  border-radius: var(--radius-sm);
+  font-weight: 700;
 }
 
 /* Consolidated Interactive Words (Merged .proof-word and .mistake-word) */
-.interactive-word {
-  display: inline-block;
-  padding: 0.2rem 0.4rem;
-  margin: 0.1rem;
+/* Container line height for wrapping sentences */
+.quiz-sentence-flow {
+  line-height: 2.4;
+}
+
+/* Sentence-style interactive text */
+.interactive-word-text {
+  background: transparent;
+  border: 1px solid transparent;
+  /* Dashed bottom border acts as a subtle affordance */
+  border-bottom: 2px dashed var(--color-border-dark);
   border-radius: var(--radius-sm);
+  padding: 0.1rem 0.3rem;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
   cursor: pointer;
   user-select: none;
-  transition: background-color 0.15s ease, color 0.15s ease;
+  transition: var(--transition);
 }
 
-.interactive-word:hover:not(.is-wrong):not(.is-correct) {
+/* Subtle Hover Effect */
+.interactive-word-text:hover:not(.is-wrong):not(.is-correct):not(.is-disabled) {
   background-color: var(--color-surface-hover);
-}
-
-.interactive-word.is-wrong {
-  background-color: var(--color-error-bg);
-  border: 1px solid var(--color-accent);
+  border-bottom-color: var(--color-accent);
   color: var(--color-accent);
-  text-decoration: line-through;
 }
 
-.interactive-word.is-correct {
-  background-color: var(--color-success-bg);
-  border: 1px solid var(--color-success);
-  color: var(--color-success);
+/* Active Selection State (before submit) */
+.interactive-word-text.is-selected {
+  background-color: var(--color-surface-hover);
+  border-color: var(--color-text-primary);
+}
+
+/* Subtler Hotkey Badge so it doesn't break sentence reading */
+.hotkey-badge-subtle {
+  position: absolute;
+  top: -0.5rem;
+  left: -0.25rem;
+  font-size: 0.65rem;
   font-weight: 700;
+  color: var(--color-text-secondary);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  padding: 0 0.25rem;
+  line-height: 1;
+  pointer-events: none;
 }
 
 /* ==========================================================================
@@ -682,7 +724,9 @@ header {
 .mb-2 { margin-bottom: 0.5rem; }
 .mb-6 { margin-bottom: 1.5rem; }
 
+.ml-2 { margin-left: 0.5rem; }
 .mr-2 { margin-right: 0.5rem; }
+
 
 /* Component & Layout Specifics */
 body.app-body {
@@ -751,7 +795,7 @@ body.app-body {
 }
 
 .quiz-sentence {
-  font-size: clamp(2.5rem, 3vw, 3rem);
+  font-size: clamp(2rem, 3vw, 3rem);
   font-weight: 700;
   line-height: 1.8;
 }
@@ -817,4 +861,165 @@ body.app-body {
 .btn-link:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.text-2xl {
+  font-size: 1.5rem;   /* 24px */
+  line-height: 2rem;   /* 32px */
+}
+
+.max-w-md {
+  max-width: 28rem;    /* 448px */
+}
+
+.selected-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border-dark);
+  color: var(--color-text-primary);
+  user-select: none;
+}
+
+.btn-chip-remove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  line-height: 1;
+  color: var(--color-text-secondary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: var(--transition);
+}
+
+.btn-chip-remove:hover {
+  color: var(--color-accent);
+}
+
+
+/* Missing Utilities & Components */
+.max-w-2xl {
+  max-width: 42rem;
+}
+
+.interactive-word-text.is-correct {
+  border-color: var(--color-success);
+  background-color: var(--color-success-bg);
+  color: var(--color-success);
+}
+
+.interactive-word-text.is-wrong {
+  border-color: var(--color-accent);
+  background-color: var(--color-error-bg);
+  color: var(--color-accent);
+}
+
+.interactive-word-text.is-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.modal-sm {
+  max-width: 22rem;
+}
+
+.modal-title {
+  font-family: var(--font-heading);
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.modal-option {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: var(--color-text-primary);
+  user-select: none;
+}
+
+.radio-input {
+  margin-right: 0.5rem;
+  accent-color: var(--color-accent);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+}
+
+.floating-correction-badge {
+  position: absolute;
+  top: -1.6rem;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 10;
+
+  /* Border */
+  border: 1px solid var(--color-success);
+  border-radius: var(--radius-sm);
+  padding: 0.1rem 0.4rem;
+  line-height: 1.2;
+
+  /* Semi-transparent surface background (matches .card-box color) */
+  background-color: color-mix(in srgb, var(--color-surface) 90%, transparent);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.line-through {
+  text-decoration: line-through;
+}
+
+/* Compact 1:1 Square Header Icon Buttons */
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;  /* 36px square */
+  height: 2.25rem; /* 36px square */
+  padding: 0;      /* Removes beefy button padding */
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.btn-icon:hover {
+  background-color: var(--color-surface-hover);
+  border-color: var(--color-border-dark);
+}
+
+/* Styled Back Link */
+.app-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.65rem 0.35rem 0.35rem;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none;
+  transition: var(--transition);
+  border: 1px solid transparent;
+}
+
+.app-back-link:hover {
+  background-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
+  border-color: var(--color-border);
 }

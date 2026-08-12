@@ -13,6 +13,11 @@ export default {
       nextTick(() => clozeInput.value?.focus());
     }, { immediate: true });
 
+    const isAnswerInSentence = computed(() => {
+      if (!props.card?.sentence || !props.card?.answer) return false;
+      return props.card.sentence.indexOf(props.card.answer) !== -1;
+    });
+
     const parts = computed(() => {
       const targetPos = props.card.sentence.indexOf(props.card.answer);
       if (targetPos === -1) return { prefix: props.card.sentence, suffix: '' };
@@ -43,7 +48,7 @@ export default {
       const isCorrect = textInput.value.trim() === props.card.answer;
       emit('submit', {
         isCorrect,
-        feedbackMsg: isCorrect ? '✅ Correct!' : '❌ Not quite.',
+        feedbackMsg: isCorrect ? 'Correct!' : 'Not quite.',
         diff: isCorrect ? null : computeDiff(textInput.value.trim(), props.card.answer)
       });
     };
@@ -55,11 +60,33 @@ export default {
 
     expose({ submitAnswer });
 
-    return { textInput, clozeInput, parts, handleTextInput, handleEnter };
+    return { textInput, clozeInput, isAnswerInSentence, parts, handleTextInput, handleEnter };
   },
   template: `
-    <div class="quiz-sentence flex flex-wrap items-center justify-center gap-1">
-      <span>{{ parts.prefix }}</span>
+  <div class="w-full flex flex-col items-center">
+
+    <!-- Inline mode when answer exists in sentence -->
+    <div v-if="isAnswerInSentence" class="quiz-sentence text-center">
+      <span class="inline-flex items-center justify-center flex-wrap gap-1">
+        <span class="whitespace-nowrap">
+          <span>{{ parts.prefix }}</span>
+          <input type="text" ref="clozeInput" 
+            v-model="textInput" 
+            @input="handleTextInput"
+            @keyup.enter="handleEnter" 
+            :readonly="isSubmitted" 
+            :placeholder="card.hint"
+            class="cloze-input"
+            autocomplete="off" autocorrect="off" spellcheck="false"
+            :style="{ width: Math.max((card.hint?.length || 5), (card.answer?.length || textInput.length)) + 3 + 'ch' }">
+          <span>{{ parts.suffix }}</span>
+        </span>
+      </span>
+    </div>
+
+    <!-- Standalone mode when answer is not in sentence -->
+    <div v-else class="flex flex-col items-center gap-6">
+      <div class="quiz-sentence text-center">{{ card.sentence }}</div>
       
       <input type="text" ref="clozeInput" 
         v-model="textInput" 
@@ -69,9 +96,8 @@ export default {
         :placeholder="card.hint"
         class="cloze-input"
         autocomplete="off" autocorrect="off" spellcheck="false"
-        :style="{ width: Math.max((card.hint?.length || 5), (card.answer?.length || textInput.length) + 3) + 'ch' }">
-        
-      <span>{{ parts.suffix }}</span>
+        :style="{ width: Math.max((card.hint?.length || 5), (card.answer?.length || textInput.length)) + 3 + 'ch' }">
     </div>
+  </div>
   `
 };
