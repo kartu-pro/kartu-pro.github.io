@@ -1,0 +1,106 @@
+import WordFilter from '/js/components/WordFilter.js';
+import ChipMultiSelectFilter from '/js/components/ChipMultiSelectFilter.js';
+
+import { validateFilters } from './filters.js';
+
+import {
+  POS,
+  SCREEVE, SCREEVE_LABELS,
+  PERSON_NUM, PERSON_NUM_LABELS
+} from '/js/constants.js';
+
+const { ref, computed } = Vue;
+
+export default {
+  components: {
+    'word-filter': WordFilter,
+    'chip-multi-select-filter': ChipMultiSelectFilter,
+  },
+  props: {
+    filters: { type: Object, required: true },
+    dictionary: { type: Array, default: () => [] },
+    isLoadingDictionary: { type: Boolean, default: false }
+  },
+  emits: ['start'],
+  setup(props, { emit }) {
+    const wordSearch = ref('');
+    const validationErrors = computed(() => validateFilters(props.filters));
+
+    // 1. Filter dictionary for verbs only
+    const verbDictionary = computed(() =>
+      props.dictionary.filter(w => w.pos === POS.VERB)
+    );
+
+    // 2. Extract tags only from verb words
+    const availableTags = computed(() => {
+      const tags = new Set();
+      verbDictionary.value.forEach(w => w.tags?.forEach(t => tags.add(t)));
+      return Array.from(tags).sort();
+    });
+
+    const addWordToFilters = (w) => {
+      props.filters.words.push(w);
+      wordSearch.value = '';
+    };
+
+    const removeWordFromFilters = (w) => {
+      props.filters.words = props.filters.words.filter(x => x.uuid !== w.uuid);
+    };
+
+    return {
+      wordSearch,
+      validationErrors,
+      verbDictionary,
+      availableTags,
+      addWordToFilters,
+      removeWordFromFilters,
+      POS,
+      SCREEVE, SCREEVE_LABELS,
+      PERSON_NUM, PERSON_NUM_LABELS
+    };
+  },
+  template: `
+    <div class="flex-1 flex flex-col min-h-0">
+      <div class="flex-none">
+        <h2>What do you want to study?</h2>
+      </div>
+
+      <div class="flex-1 overflow-y-auto flex flex-col gap-4 min-h-0">
+        <!-- Grammar Filters -->
+        <div class="card-box">
+          <h3 class="card-title">Grammar Filters</h3>
+          <chip-multi-select-filter label="Screeve" :items="Object.values(SCREEVE)" v-model="filters.scr"
+            :item-map="SCREEVE_LABELS"></chip-multi-select-filter>
+          <chip-multi-select-filter label="Subject" :items="Object.values(PERSON_NUM)" v-model="filters.subj"
+            :item-map="PERSON_NUM_LABELS"></chip-multi-select-filter>
+        </div>
+
+        <!-- Vocab Filters -->
+        <div class="card-box">
+          <h3 class="card-title">
+            {{ isLoadingDictionary ? 'Loading Word Filters...' : 'Word Filters' }}
+          </h3>
+          <word-filter v-model="wordSearch" :dictionary="verbDictionary" :topic="POS.VERB"
+            :selected-words="filters.words" @add-word="addWordToFilters" @remove-word="removeWordFromFilters"
+            :disabled="isLoadingDictionary">
+          </word-filter>
+
+          <chip-multi-select-filter label="Tags" :items="availableTags" v-model="filters.tags"
+            :disabled="isLoadingDictionary"></chip-multi-select-filter>
+        </div>
+      </div>
+
+      <div class="flex-none pt-3">
+        <div v-if="validationErrors.length > 0" class="validation-box">
+          <ul>
+            <li v-for="err in validationErrors" :key="err">{{ err }}</li>
+          </ul>
+        </div>
+
+        <button class="btn-primary w-full" @click="$emit('start')" :disabled="validationErrors.length > 0">
+          Start
+        </button>
+      </div>
+    </div>
+  `
+};

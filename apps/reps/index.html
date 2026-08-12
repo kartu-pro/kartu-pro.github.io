@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content">
+  <title>KartuReps | KartuPro</title>
+
+  <!-- Global & App Styles -->
+  <link rel="stylesheet" href="/css/main.css">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;700&display=swap" rel="stylesheet">
+
+  <!-- External Scripts -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+
+<body class="app-body">
+  <div id="app" v-cloak class="app-container flex flex-col flex-1 min-h-0">
+
+    <app-header :app-state="appState" @open-flag="showFlagModal = true" @open-settings="showSettingsModal = true"
+      @exit-quiz="appState = 'setup'"></app-header>
+
+    <flag-content :show="showFlagModal" :app-state="{ appState, gameMode, filters, currentCard }"
+      @close="showFlagModal = false">
+    </flag-content>
+
+    <settings-modal v-model="gameMode" :options="GAME_MODES" :show="showSettingsModal"
+      @close="showSettingsModal = false"></settings-modal>
+
+    <main class="w-full flex-1 flex flex-col min-h-0">
+
+      <!-- LOADING -->
+      <div v-if="appState === 'loading'" class="text-center flex-1 flex items-center justify-center">
+        <h2>Loading...</h2>
+      </div>
+
+      <!-- SETUP UI -->
+      <setup-screen v-else-if="appState === 'setup'" v-model:filters="filters" :dictionary="dictionary"
+        :is-loading-dictionary="isLoadingDictionary" @start="handleStart">
+      </setup-screen>
+
+      <!-- QUIZ UI -->
+      <quiz-screen v-else-if="appState === 'quiz'" :current-card="currentCard" :active-queue-length="activeQueue.length"
+        :feedback="feedback" :game-mode="gameMode" :is-answer-submitted="isAnswerSubmitted"
+        @submit="handleAnswerSubmitted" @next="advanceCard">
+      </quiz-screen>
+
+      <!-- FINISHED UI -->
+      <finished-screen v-else-if="appState === 'finished'" @restart="handleStart" @setup="appState = 'setup'">
+      </finished-screen>
+
+    </main>
+
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+
+</html>
