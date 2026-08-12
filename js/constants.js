@@ -24,7 +24,7 @@ export const SCREEVE = {
   AOR: 'aor',
   OPT: 'opt',
   PERF: 'perf',
-  PLUPERF: 'pluperf',
+  PLU: 'plu',
   PERF_SUBJ: 'perf-subj',
 };
 
@@ -38,7 +38,7 @@ export const SCREEVE_LABELS = {
   [SCREEVE.AOR]: 'Aorist',
   [SCREEVE.OPT]: 'Optative',
   [SCREEVE.PERF]: 'Perfect',
-  [SCREEVE.PLUPERF]: 'Pluperfect',
+  [SCREEVE.PLU]: 'Pluperfect',
   [SCREEVE.PERF_SUBJ]: 'Perf. Subj.',
 };
 
