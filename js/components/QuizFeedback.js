@@ -1,4 +1,3 @@
-// ../../js/components/QuizFeedback.js
 export default {
   props: ['feedback'],
   template: `

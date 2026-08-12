@@ -37,127 +37,18 @@
       </div>
 
       <!-- SETUP UI -->
-      <div v-else-if="appState === 'setup'" class="flex-1 flex flex-col min-h-0">
-
-        <!-- Fixed Header -->
-        <div class="flex-none">
-          <span class="badge">Grammar in Context</span>
-          <h1>What do you want to study?</h1>
-        </div>
-
-        <!-- Scrollable Filters Container -->
-        <div class="flex-1 overflow-y-auto flex flex-col gap-4 min-h-0">
-
-          <pos-select v-model="filters.topic"></pos-select>
-
-          <!-- Grammar Filters -->
-          <div v-if="filters.topic" class="card-box">
-            <h3 class="card-title">Grammar Filters</h3>
-
-            <!-- VERBS -->
-            <template v-if="filters.topic === 'verb'">
-              <chip-multi-select-filter label="Screeve" :items="Object.values(SCREEVE)" v-model="filters.scr"
-                :item-map="SCREEVE_LABELS"></chip-multi-select-filter>
-
-              <chip-multi-select-filter label="Subject" :items="Object.values(PERSON_NUM)" v-model="filters.subj"
-                :item-map="PERSON_NUM_LABELS"></chip-multi-select-filter>
-            </template>
-
-            <!-- CASES -->
-            <template v-if="['noun', 'pron', 'adj'].includes(filters.topic)">
-              <chip-multi-select-filter label="Case" :items="Object.values(CASE)" v-model="filters.case"
-                :item-map="CASE_LABELS"></chip-multi-select-filter>
-            </template>
-
-            <!-- QTY -->
-            <template v-if="['noun'].includes(filters.topic)">
-              <chip-multi-select-filter label="Quantity" :items="Object.values(QTY)" v-model="filters.qty"
-                :item-map="QTY_LABELS"></chip-multi-select-filter>
-            </template>
-
-            <!-- POSTPOSITIONS -->
-            <template v-if="['noun'].includes(filters.topic)">
-              <chip-multi-select-filter label="Postpositions" :items="Object.values(POSTPOSITION)" v-model="filters.pp"
-                :item-map="POSTPOSITION_LABELS"></chip-multi-select-filter>
-            </template>
-
-          </div>
-
-          <!-- Vocab Filters -->
-          <div v-if="filters.topic" class="card-box">
-            <h3 class="card-title">
-              {{ isLoadingDictionary ? 'Loading Word Filters...' : 'Word Filters' }}
-            </h3>
-            <word-filter v-model="wordSearch" :dictionary="dictionary" :topic="filters.topic"
-              :selected-words="filters.words" @add-word="addWordToFilters" @remove-word="removeWordFromFilters"
-              :disabled="isLoadingDictionary || !filters.topic">
-            </word-filter>
-
-            <chip-multi-select-filter label="Tags" :items="availableTags" v-model="filters.tags"
-              :disabled="isLoadingDictionary || !filters.topic"></chip-multi-select-filter>
-          </div>
-        </div>
-
-        <!-- Fixed Bottom Bar / Validation Errors -->
-        <div class="flex-none pt-3">
-          <div v-if="validationErrors.length > 0" class="validation-box">
-            <ul>
-              <li v-for="err in validationErrors" :key="err">{{ err }}</li>
-            </ul>
-          </div>
-
-          <button class="btn-primary w-full" @click="startDrill" :disabled="validationErrors.length > 0">
-            Start
-          </button>
-        </div>
-
-      </div>
+      <setup-screen v-else-if="appState === 'setup'" v-model:filters="filters" :dictionary="dictionary"
+        :is-loading-dictionary="isLoadingDictionary" @start="handleStart">
+      </setup-screen>
 
       <!-- QUIZ UI -->
-      <div v-else-if="appState === 'quiz'" class="flex-1 flex flex-col min-h-0 justify-between">
-
-        <div class="card-box flex-1 flex flex-col items-center justify-center text-center relative" v-if="currentCard">
-          <span class="text-secondary text-xs" style="position: absolute; top: 0.75rem; right: 1rem;">
-            Remaining: {{ activeQueue.length }}
-          </span>
-          <!-- Shared Feedback Header -->
-          <quiz-feedback :feedback="feedback"></quiz-feedback>
-
-          <!-- Dynamic Game Modes -->
-          <quiz-type-form v-if="gameMode === 'type'" ref="typeFormRef" :card="currentCard"
-            :is-submitted="isAnswerSubmitted" @submit="handleAnswerSubmitted"
-            @next="handlePrimaryAction"></quiz-type-form>
-
-          <!-- Choose Mode -->
-          <quiz-choose-form v-else-if="gameMode === 'choose'" :answer="currentCard.answer"
-            :distractors="currentCard.distractors" :is-submitted="isAnswerSubmitted" @submit="handleAnswerSubmitted"
-            @next="handlePrimaryAction">
-            <div class="quiz-sentence">
-              <span class="inline-flex items-center justify-center flex-wrap gap-1">
-                <span class="whitespace-nowrap">
-                  <span>{{ currentSentenceParts.prefix }}</span>
-                  <span class="cloze-placeholder">___</span>
-                  <span>{{ currentSentenceParts.suffix }}</span>
-                </span>
-              </span>
-            </div>
-          </quiz-choose-form>
-
-          <quiz-find-mistake v-else-if="gameMode === 'mistake'" :card="currentCard" :is-submitted="isAnswerSubmitted"
-            @submit="handleAnswerSubmitted" @next="handlePrimaryAction"></quiz-find-mistake>
-        </div>
-
-        <div class="flex-none">
-          <button class="btn-primary w-full" :class="{ 'btn-pulse': isAnswerSubmitted }" @click="handlePrimaryAction"
-            :disabled="!isAnswerSubmitted && gameMode !== 'type'">
-            {{ isAnswerSubmitted ? 'Next (Enter)' : (gameMode === 'type' ? 'Check Answer (Enter)' : 'Select an Option')
-            }}
-          </button>
-        </div>
-      </div>
+      <quiz-screen v-else-if="appState === 'quiz'" :current-card="currentCard" :active-queue-length="activeQueue.length"
+        :feedback="feedback" :game-mode="gameMode" :is-answer-submitted="isAnswerSubmitted"
+        @submit="handleAnswerSubmitted" @next="advanceCard">
+      </quiz-screen>
 
       <!-- FINISHED UI -->
-      <finished-screen v-else-if="appState === 'finished'" @restart="startDrill" @setup="appState = 'setup'">
+      <finished-screen v-else-if="appState === 'finished'" @restart="handleStart" @setup="appState = 'setup'">
       </finished-screen>
 
     </main>

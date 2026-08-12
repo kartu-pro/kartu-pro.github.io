@@ -1,5 +1,4 @@
 const { ref, watch, onMounted, onUnmounted } = Vue;
-import { computeDiff } from '../utils.js';
 
 export default {
   props: {
@@ -83,9 +82,9 @@ export default {
 
     return { words, selectedIndex, mistakeIndex, selectWord, getLetter };
   },
-  template: `
+  template: /* html */ `
 <div class="flex flex-col items-center gap-4 w-full">
-    <div class="flex flex-wrap items-center justify-center gap-1-5 max-w-2xl quiz-sentence-flow">
+    <div class="flex flex-wrap items-center justify-center gap-1-5 max-w-2xl quiz-sentence">
       <button 
         v-for="(word, i) in words" 
         :key="i"

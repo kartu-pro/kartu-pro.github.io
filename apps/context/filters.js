@@ -1,5 +1,5 @@
-import { POS, SCREEVE, PERSON_NUM, CASE, QTY, POSTPOSITION } from '../constants.js';
-import { createFilterEngine } from '../shared/filterEngine.js';
+import { POS, SCREEVE, PERSON_NUM, CASE, QTY, POSTPOSITION } from '/js/constants.js';
+import { createFilterEngine } from '/js/filterEngine.js';
 
 const SCHEMAS = {
   [POS.VERB]: {

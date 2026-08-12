@@ -49,3 +49,15 @@ export function computeDiff(input, expected) {
   }
   return result;
 }
+
+export function splitSentence(sentence = '', target = '') {
+  if (!sentence || !target) return { prefix: sentence, suffix: '', found: false };
+  const idx = sentence.indexOf(target);
+  if (idx === -1) return { prefix: sentence, suffix: '', found: false };
+
+  return {
+    prefix: sentence.slice(0, idx),
+    suffix: sentence.slice(idx + target.length),
+    found: true
+  };
+}

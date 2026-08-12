@@ -1,7 +1,12 @@
-import { transliterate, computeDiff } from '../utils.js';
+import { transliterate, computeDiff, splitSentence } from '/js/textUtils.js';
+import CopyButton from '/js/components/CopyButton.js';
+
 const { ref, watch, computed, nextTick } = Vue;
 
 export default {
+  components: {
+    'copy-button': CopyButton
+  },
   props: ['card', 'isSubmitted'],
   emits: ['submit', 'next'],
   setup(props, { emit, expose }) {
@@ -19,12 +24,13 @@ export default {
     });
 
     const parts = computed(() => {
-      const targetPos = props.card.sentence.indexOf(props.card.answer);
-      if (targetPos === -1) return { prefix: props.card.sentence, suffix: '' };
-      return {
-         prefix: props.card.sentence.slice(0, targetPos),
-         suffix: props.card.sentence.slice(targetPos + props.card.answer.length)
-      };
+      return splitSentence(props.card?.sentence, props.card?.answer);
+    });
+
+    const inputWidth = computed(() => {
+      const hintLen = props.card?.hint?.length || 0;
+      const answerLen = props.card?.answer?.length || 0;
+      return Math.max(hintLen, answerLen) + 4 + 'ch';
     });
 
     const handleTextInput = (e) => {
@@ -60,7 +66,7 @@ export default {
 
     expose({ submitAnswer });
 
-    return { textInput, clozeInput, isAnswerInSentence, parts, handleTextInput, handleEnter };
+    return { textInput, clozeInput, inputWidth, isAnswerInSentence, parts, handleTextInput, handleEnter };
   },
   template: `
   <div class="w-full flex flex-col items-center">
@@ -78,15 +84,19 @@ export default {
             :placeholder="card.hint"
             class="cloze-input"
             autocomplete="off" autocorrect="off" spellcheck="false"
-            :style="{ width: Math.max((card.hint?.length || 5), (card.answer?.length || textInput.length)) + 3 + 'ch' }">
+            :style="{ width: inputWidth }">
           <span>{{ parts.suffix }}</span>
         </span>
+        <copy-button :text="card.sentence"></copy-button>
       </span>
     </div>
 
     <!-- Standalone mode when answer is not in sentence -->
     <div v-else class="flex flex-col items-center gap-6">
-      <div class="quiz-sentence text-center">{{ card.sentence }}</div>
+      <div class="quiz-sentence text-center inline-flex items-center gap-1">
+        <span>{{ card.sentence }}</span>
+        <copy-button :text="card.sentence"></copy-button>
+      </div>
       
       <input type="text" ref="clozeInput" 
         v-model="textInput" 
@@ -96,7 +106,7 @@ export default {
         :placeholder="card.hint"
         class="cloze-input"
         autocomplete="off" autocorrect="off" spellcheck="false"
-        :style="{ width: Math.max((card.hint?.length || 5), (card.answer?.length || textInput.length)) + 3 + 'ch' }">
+        :style="{ width: inputWidth }">
     </div>
   </div>
   `
