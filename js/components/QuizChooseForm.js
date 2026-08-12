@@ -21,6 +21,11 @@ export default {
       return splitSentence(props.card?.sentence, targetStr);
     });
 
+    const isAnswerInSentence = computed(() => {
+      if (!props.card?.sentence || !props.card?.answer) return false;
+      return props.card.sentence.indexOf(props.card.answer) !== -1;
+    });
+
     watch(() => props.card, (newCard) => {
       if (!newCard) return;
       const pool = [newCard.answer, ...(newCard.distractors || []).slice(0, 3)];
@@ -69,18 +74,24 @@ export default {
     onMounted(() => window.addEventListener('keydown', handleKeydown));
     onUnmounted(() => window.removeEventListener('keydown', handleKeydown));
 
-    return { options, selectedIndex, selectOption, parts };
+    return { options, selectedIndex, selectOption, parts, isAnswerInSentence };
   },
   template: `
     <div class="flex flex-col flex-1 justify-center items-center gap-4 w-full">
       <div class="quiz-sentence text-center">
-        <span class="inline-flex items-center justify-center flex-wrap gap-1">
+
+        <!-- Inline mode for sentence context -->
+        <span v-if="isAnswerInSentence" class="inline-flex items-center justify-center flex-wrap gap-1">
           <span class="whitespace-nowrap">
             <span>{{ parts.prefix }}</span>
             <span class="cloze-placeholder">___</span>
             <span>{{ parts.suffix }}</span>
           </span>
-          <copy-button :text="card.sentence"></copy-button>
+          <copy-button :text="card.sentence" class="ml-2"></copy-button>
+        </span>
+        <span v-else class="inline-flex items-center justify-center flex-wrap gap-1">
+          <span>{{ card.sentence }}</span>
+          <copy-button :text="card.sentence" class="ml-2"></copy-button>
         </span>
       </div>
 

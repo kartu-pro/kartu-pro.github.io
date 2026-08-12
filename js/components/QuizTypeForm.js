@@ -87,15 +87,15 @@ export default {
             :style="{ width: inputWidth }">
           <span>{{ parts.suffix }}</span>
         </span>
-        <copy-button :text="card.sentence"></copy-button>
+        <copy-button :text="card.sentence" class="ml-2"></copy-button>
       </span>
     </div>
 
     <!-- Standalone mode when answer is not in sentence -->
-    <div v-else class="flex flex-col items-center gap-6">
-      <div class="quiz-sentence text-center inline-flex items-center gap-1">
+    <div v-else class="quiz-sentence text-center">
+      <div class="quiz-sentence text-center inline-flex items-center gap-4">
         <span>{{ card.sentence }}</span>
-        <copy-button :text="card.sentence"></copy-button>
+        <copy-button :text="card.sentence" class="ml-2"></copy-button>
       </div>
       
       <input type="text" ref="clozeInput" 

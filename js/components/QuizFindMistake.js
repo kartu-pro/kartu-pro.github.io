@@ -118,7 +118,7 @@ export default {
         <span v-if="!isSubmitted" class="hotkey-badge-subtle">{{ getLetter(i) }}</span>
         <span>{{ word }}</span>
       </button>
-      <copy-button :text="card.sentence"></copy-button>
+      <copy-button :text="card.sentence" class="ml-2"></copy-button>
     </div>
   </div>
   `
