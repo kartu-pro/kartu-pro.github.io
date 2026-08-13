@@ -67,33 +67,27 @@
       align-self: flex-start;
       margin-top: 0.5rem;
     }
+
+    .status-msg {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-top: 0.5rem;
+    }
   </style>
+  <script type="module" src="/js/components/SiteHeader.js"></script>
+  <script type="module" src="/js/components/SiteFooter.js"></script>
 </head>
 
 <body>
 
-  <header>
-    <a href="/" class="brand-link">
-      <div class="logo-circle">
-        <img src="/assets/logo.svg" alt="KartuPro - Georgian Language Learning Logo">
-      </div>
-      <span class="brand-title">KartuPro</span>
-    </a>
-
-    <nav class="nav-links">
-      <a href="/apps/">Apps</a>
-      <a href="/resources/">Resources</a>
-      <a href="/about/">About</a>
-      <a href="/contact/">Contact</a>
-    </nav>
-  </header>
+  <site-header></site-header>
 
   <main>
     <section class="card-box contact-section">
       <h2>Contact Us</h2>
       <p>Have questions or feedback? Send us a message.</p>
 
-      <form action="https://formspree.io/f/mdaqqdjr" method="POST" class="contact-form">
+      <form id="contactForm" class="contact-form">
         <div class="form-group">
           <label for="name">Name</label>
           <input type="text" id="name" name="name" required placeholder="Your name">
@@ -110,13 +104,46 @@
         </div>
 
         <button type="submit" class="btn-accent">Send Message</button>
+        <p id="status" class="status-msg"></p>
       </form>
     </section>
   </main>
 
-  <footer>
-    &copy; KartuPro.
-  </footer>
+  <site-footer></site-footer>
+
+  <script type="module">
+    import {apiPost} from '/js/api.js';
+
+    const form = document.getElementById('contactForm');
+    const status = document.getElementById('status');
+    const submitBtn = form.querySelector('button[type="submit"]');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const payload = {
+        name: document.getElementById('name').value,
+        email: document.getElementById('email').value,
+        message: document.getElementById('message').value
+      };
+
+      submitBtn.disabled = true;
+      status.style.color = 'var(--color-text-secondary)';
+      status.innerText = 'Sending message...';
+
+      try {
+        await apiPost('/contact', payload);
+        status.style.color = 'var(--color-success)';
+        status.innerText = 'Thank you! Your message has been sent.';
+        form.reset();
+      } catch (err) {
+        status.style.color = 'var(--color-accent)';
+        status.innerText = err.message || 'Failed to send message. Please try again.';
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+  </script>
 
 </body>
 

@@ -154,7 +154,8 @@
         <!-- NAVIGATION -->
         <header class="bg-slate-800 text-white flex-none border-b-4 border-[#A70007]">
             <div class="max-w-3xl mx-auto flex justify-between items-center px-4 py-3">
-                <a href="/drills" class="font-bold text-lg text-white no-underline flex items-center gap-2">🇬🇪 Kartu Pro / Drills</a>
+                <a href="/drills" class="font-bold text-lg text-white no-underline flex items-center gap-2">🇬🇪 Kartu
+                    Pro / Drills</a>
                 <button class="btn-secondary" @click="showSettings = true">
                     ⚙️ Settings
                 </button>
@@ -715,16 +716,16 @@
                         if (queueIdx !== -1) {
                             activeQueue.value.splice(queueIdx, 1);
                         }
-                
+
                         // Only re-insert if the card hasn't reached 2 correct hits
                         if (card.hits < 2) {
                             let insertIdx;
-                
+
                             if (card.wasLastCorrect) {
                                 // Random position starting at least 6 cards away (or end of queue if < 6)
                                 const minDistance = 6;
                                 const maxDistance = activeQueue.value.length;
-                            
+
                                 if (maxDistance <= minDistance) {
                                     insertIdx = maxDistance; // Queue is short, put at the end
                                 } else {
@@ -736,16 +737,16 @@
                                 const delay = Math.floor(Math.random() * 4) + 3; // 3, 4, 5, or 6
                                 insertIdx = Math.min(activeQueue.value.length, delay);
                             }
-                
+
                             activeQueue.value.splice(insertIdx, 0, card);
                         }
                     }
-                
+
                     if (activeQueue.value.length === 0) {
                         appState.value = 'finished';
                         return;
                     }
-                
+
                     currentCardObj.value = activeQueue.value[0];
                     isAnswerSubmitted.value = false;
                     loadCardIntoView();
@@ -841,16 +842,16 @@
 
                 const handleAnswerSubmission = (isCorrect, diff = null) => {
                     isAnswerSubmitted.value = true;
-                
+
                     const sc = currentCardObj.value.screeve || 'Unknown';
                     if (!screeveStats.value[sc]) {
                         screeveStats.value[sc] = {attempts: 0, correct: 0};
                     }
                     screeveStats.value[sc].attempts++;
-                
+
                     // Track state for queue positioning
                     currentCardObj.value.wasLastCorrect = isCorrect;
-                
+
                     if (isCorrect) {
                         screeveStats.value[sc].correct++;
                         currentCardObj.value.hits = (currentCardObj.value.hits || 0) + 1;
