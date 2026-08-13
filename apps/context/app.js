@@ -78,6 +78,11 @@ createApp({
     };
 
     onMounted(() => {
+      if (!localStorage.getItem('token')) {
+        const currentPath = encodeURIComponent(window.location.pathname + window.location.search);
+        window.location.href = `/login?redirectTo=${currentPath}`;
+        return;
+      }
       resetPosFilters(POS.VERB);
 
       // Parse URL params immediately using whatever dictionary is currently cached

@@ -65,9 +65,10 @@
     &copy; KartuPro.
   </footer>
 
-  <script src="/api.js"></script>
-  <script>
-    const sessionToken = localStorage.getItem('sessionToken');
+  <script type="module">
+    import {apiPost} from '/js/api.js';
+
+    const sessionToken = localStorage.getItem('token');
     const appElement = document.getElementById('app');
     const urlParams = new URLSearchParams(window.location.search);
     const targetRedirect = urlParams.get('redirectTo') || '/';
@@ -120,10 +121,12 @@
       } catch (err) {
         console.warn('Backend logout warning:', err.message);
       } finally {
-        localStorage.removeItem('sessionToken');
+        localStorage.removeItem('token');
         window.location.reload();
       }
     }
+    window.sendLink = sendLink;
+    window.logout = logout;
   </script>
 
 </body>

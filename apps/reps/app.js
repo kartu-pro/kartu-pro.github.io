@@ -83,6 +83,11 @@ createApp({
     const handleStart = () => startDrill(filters.value);
 
     onMounted(() => {
+      if (!localStorage.getItem('token')) {
+        const currentPath = encodeURIComponent(window.location.pathname + window.location.search);
+        window.location.href = `/login?redirectTo=${currentPath}`;
+        return;
+      }
       const parsed = parseQueryParams(window.location.search, dictionary.value);
       if (parsed) filters.value = parsed;
 
