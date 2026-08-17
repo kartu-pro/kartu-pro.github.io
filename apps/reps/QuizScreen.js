@@ -79,7 +79,15 @@ export default {
       <div class="flex-none">
         <button class="btn-primary w-full" :class="{ 'btn-pulse': isAnswerSubmitted }" @click="handlePrimaryAction"
           :disabled="!isAnswerSubmitted && gameMode !== 'type'">
-          {{ isAnswerSubmitted ? 'Next ↵' : (gameMode === 'type' ? 'Check ↵': 'Select an Option') }}
+          <template v-if="isAnswerSubmitted">
+            Next <span class="font-bold ml-1" style="font-size: 1.25em;">↵</span>
+          </template>
+          <template v-else-if="gameMode === 'type'">
+            Check <span class="font-bold ml-1" style="font-size: 1.25em;">↵</span>
+          </template>
+          <template v-else>
+            Select an Option
+          </template>
         </button>
       </div>
     </div>

@@ -83,15 +83,18 @@ export default {
       <span v-else class="whitespace-nowrap">{{ parts.prefix }}</span>
 
       <!-- Single Shared Input -->
-      <input type="text" ref="clozeInput" 
-        v-model="textInput" 
-        @input="handleTextInput"
-        @keydown.enter.prevent="handleEnter" 
-        :placeholder="card.hint"
-        class="cloze-input"
-        autocomplete="off" autocorrect="off" spellcheck="false" autocapitalize="none"
-        :enterkeyhint="isSubmitted ? 'next' : 'go'"
-        :style="{ width: inputWidth }">
+      <div class="relative flex items-center">
+        <input type="text" ref="clozeInput" 
+          v-model="textInput" 
+          @input="handleTextInput"
+          @keydown.enter.prevent="handleEnter" 
+          :placeholder="card.hint"
+          class="cloze-input"
+          autocomplete="off" autocorrect="off" spellcheck="false" autocapitalize="none"
+          :enterkeyhint="isSubmitted ? 'next' : 'go'"
+          :style="{ width: inputWidth }">
+        <span class="font-bold" style="font-size: 1.25em;">↵</span>
+      </div>
 
       <!-- Inline Suffix & Copy -->
       <template v-if="isAnswerInSentence">
