@@ -70,43 +70,34 @@ export default {
   },
   template: `
   <div class="w-full flex flex-col items-center">
-
-    <!-- Inline mode when answer exists in sentence -->
-    <div v-if="isAnswerInSentence" class="quiz-sentence text-center">
-      <span class="inline-flex items-center justify-center flex-wrap gap-1">
-        <span class="whitespace-nowrap">
-          <span>{{ parts.prefix }}</span>
-          <input type="text" ref="clozeInput" 
-            v-model="textInput" 
-            @input="handleTextInput"
-            @keyup.enter="handleEnter" 
-            :readonly="isSubmitted" 
-            :placeholder="card.hint"
-            class="cloze-input"
-            autocomplete="off" autocorrect="off" spellcheck="false" autocapitalize="none"
-            :style="{ width: inputWidth }">
-          <span>{{ parts.suffix }}</span>
-        </span>
-        <copy-button :text="card.sentence" class="ml-2"></copy-button>
-      </span>
-    </div>
-
-    <!-- Standalone mode when answer is not in sentence -->
-    <div v-else class="quiz-sentence text-center">
-      <div class="quiz-sentence text-center inline-flex items-center gap-4">
-        <span>{{ card.sentence }}</span>
-        <copy-button :text="card.sentence" class="ml-2"></copy-button>
-      </div>
+    <div class="quiz-sentence text-center flex items-center justify-center flex-wrap gap-2"
+         :class="{ 'flex-col': !isAnswerInSentence }">
       
+      <!-- Standalone Header (Sentence + Copy) -->
+      <div v-if="!isAnswerInSentence" class="inline-flex items-center gap-2">
+        <span>{{ card.sentence }}</span>
+        <copy-button :text="card.sentence"></copy-button>
+      </div>
+
+      <!-- Inline Prefix -->
+      <span v-else class="whitespace-nowrap">{{ parts.prefix }}</span>
+
+      <!-- Single Shared Input -->
       <input type="text" ref="clozeInput" 
         v-model="textInput" 
         @input="handleTextInput"
-        @keyup.enter="handleEnter" 
-        :readonly="isSubmitted" 
+        @keydown.enter.prevent="handleEnter" 
         :placeholder="card.hint"
         class="cloze-input"
         autocomplete="off" autocorrect="off" spellcheck="false" autocapitalize="none"
+        :enterkeyhint="isSubmitted ? 'next' : 'go'"
         :style="{ width: inputWidth }">
+
+      <!-- Inline Suffix & Copy -->
+      <template v-if="isAnswerInSentence">
+        <span class="whitespace-nowrap">{{ parts.suffix }}</span>
+        <copy-button :text="card.sentence" class="ml-1"></copy-button>
+      </template>
     </div>
   </div>
   `
