@@ -79,7 +79,7 @@ export default {
       <div class="flex-none">
         <button class="btn-primary w-full" :class="{ 'btn-pulse': isAnswerSubmitted }" @click="handlePrimaryAction"
           :disabled="!isAnswerSubmitted && gameMode !== 'type'">
-          {{ isAnswerSubmitted ? 'Next (Enter)' : (gameMode === 'type' ? 'Check Answer (Enter)' : 'Select an Option') }}
+          {{ isAnswerSubmitted ? 'Next ↵' : (gameMode === 'type' ? 'Check ↵': 'Select an Option') }}
         </button>
       </div>
     </div>
