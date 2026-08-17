@@ -15,6 +15,10 @@ async function request(url, options = {}) {
     throw new Error(result.error || "Something went wrong.");
   }
 
+  if (result.refreshedToken) {
+    localStorage.setItem('token', result.refreshedToken);
+  }
+
   return result.data;
 }
 
@@ -31,7 +35,7 @@ export async function apiGet(pathAndQuery) {
 
 export async function apiPost(path, data = {}) {
   const sessionToken = localStorage.getItem('token');
-  const payload = { ...data, ...(sessionToken && { sessionToken }) };
+  const payload = { ...data, ...(sessionToken && { token: sessionToken }) };
   const url = `${APPS_SCRIPT_URL}?path=${encodeURIComponent(path)}`;
 
   return request(url, {
