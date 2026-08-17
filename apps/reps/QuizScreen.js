@@ -83,7 +83,7 @@ export default {
             Next <span class="font-bold ml-1" style="font-size: 1.25em;">↵</span>
           </template>
           <template v-else-if="gameMode === 'type'">
-            Check <span class="font-bold ml-1" style="font-size: 1.25em;">↵</span>
+            Check <span class="font-bold ml-2" style="font-size: 1.25em;">↵</span>
           </template>
           <template v-else>
             Select an Option

@@ -93,7 +93,7 @@ export default {
           autocomplete="off" autocorrect="off" spellcheck="false" autocapitalize="none"
           :enterkeyhint="isSubmitted ? 'next' : 'go'"
           :style="{ width: inputWidth }">
-        <span class="font-bold" style="font-size: 1.25em;">↵</span>
+        <span class="font-bold text-accent" style="font-size: 1.25em;">↵</span>
       </div>
 
       <!-- Inline Suffix & Copy -->
