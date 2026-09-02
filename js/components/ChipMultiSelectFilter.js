@@ -1,9 +1,15 @@
 const ChipMultiSelectFilter = {
   props: {
     label: String,
-    items: Array, // e.g., ['pres', 'fut', 'aor'] or ['1s', '2s']
-    modelValue: Array, // currently selected items, e.g., filters.value.scr
-    itemMap: Object, // optional map for display names, e.g., CONFIG.scr
+    items: {
+      type: Array,
+      default: () => []
+    },
+    modelValue: {
+      type: Array,
+      default: () => [] // <--- Prevents undefined crashes
+    },
+    itemMap: Object,
     disabled: {
       type: Boolean,
       default: false
@@ -13,7 +19,7 @@ const ChipMultiSelectFilter = {
   methods: {
     toggleItem(item) {
       if (this.disabled) return;
-      const currentSelection = [...this.modelValue];
+      const currentSelection = [...(this.modelValue || [])];
       const idx = currentSelection.indexOf(item);
       if (idx > -1) {
         currentSelection.splice(idx, 1);
@@ -24,7 +30,7 @@ const ChipMultiSelectFilter = {
     },
     selectAll() {
       if (this.disabled) return;
-      this.$emit('update:modelValue', [...this.items]);
+      this.$emit('update:modelValue', [...(this.items || [])]);
     },
     selectNone() {
       if (this.disabled) return;

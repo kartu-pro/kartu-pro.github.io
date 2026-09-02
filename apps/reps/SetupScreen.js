@@ -39,6 +39,9 @@ export default {
     });
 
     const addWordToFilters = (w) => {
+      if (!props.filters.words) {
+        props.filters.words = [];
+      }
       props.filters.words.push(w);
       wordSearch.value = '';
     };
