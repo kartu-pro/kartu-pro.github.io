@@ -88,12 +88,21 @@ createApp({
         window.location.href = `/login?redirectTo=${currentPath}`;
         return;
       }
-      const parsed = parseQueryParams(window.location.search, dictionary.value);
-      if (parsed) Object.assign(filters.value, parsed);
 
+      // 1. Parse immediately so grammar filters (screeve, subject) render instantly
+      const initialParsed = parseQueryParams(window.location.search, dictionary.value);
+      if (initialParsed) {
+        Object.assign(filters.value, initialParsed);
+      }
+
+      // 2. Hydrate word/tag filters once dictionary resolves
       loadDictionary().then(words => {
         const reParsed = parseQueryParams(window.location.search, words);
-        if (reParsed) Object.assign(filters.value, reParsed);
+        if (!reParsed) return;
+
+        // Only hydrate dictionary-dependent fields so active clicks on 'scr' or 'subj' are preserved
+        if (reParsed.words?.length) filters.value.words = reParsed.words;
+        if (reParsed.tags?.length) filters.value.tags = reParsed.tags;
       });
     });
 

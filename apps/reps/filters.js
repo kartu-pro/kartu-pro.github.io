@@ -3,8 +3,8 @@ import { createFilterEngine } from '/js/filterEngine.js';
 
 const SCHEMA = {
   fields: {
-    words: { param: 'uuids', isWords: true },
-    tags: {},
+    words: { param: 'uuids', isWords: true, default: () => [] },
+    tags: { default: () => [] },
     scr: { param: 'screeves', default: () => [SCREEVE.PRES,SCREEVE.FUT,SCREEVE.AOR], requiredMsg: 'Select at least one Screeve' },
     subj: { param: 'subjects', default: () => Object.values(PERSON_NUM), requiredMsg: 'Select at least one Subject' },
   }
