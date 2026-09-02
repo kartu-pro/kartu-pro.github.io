@@ -45,7 +45,10 @@ export default {
     };
 
     const removeWordFromFilters = (w) => {
-      props.filters.words = props.filters.words.filter(x => x.uuid !== w.uuid);
+      const index = props.filters.words.findIndex(x => x.uuid === w.uuid);
+      if (index !== -1) {
+        props.filters.words.splice(index, 1);
+      }
     };
 
     return {

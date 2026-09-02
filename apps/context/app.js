@@ -74,7 +74,7 @@ createApp({
     const handleStart = () => startDrill(filters.value);
 
     const resetPosFilters = (newTopic) => {
-      filters.value = getDefaultFilters(newTopic);
+      Object.assign(filters.value, getDefaultFilters(newTopic));
     };
 
     onMounted(() => {
@@ -87,12 +87,12 @@ createApp({
 
       // Parse URL params immediately using whatever dictionary is currently cached
       const parsed = parseQueryParams(window.location.search, dictionary.value);
-      if (parsed) filters.value = parsed;
+      if (parsed) Object.assign(filters.value, parsed);
 
       // 2. Load dictionary asynchronously and re-parse URL params once dictionary resolves
       loadDictionary().then(words => {
         const reParsed = parseQueryParams(window.location.search, words);
-        if (reParsed) filters.value = reParsed;
+        if (reParsed) Object.assign(filters.value, reParsed);
       });
     });
 

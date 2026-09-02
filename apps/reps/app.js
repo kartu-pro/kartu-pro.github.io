@@ -89,11 +89,11 @@ createApp({
         return;
       }
       const parsed = parseQueryParams(window.location.search, dictionary.value);
-      if (parsed) filters.value = parsed;
+      if (parsed) Object.assign(filters.value, parsed);
 
       loadDictionary().then(words => {
         const reParsed = parseQueryParams(window.location.search, words);
-        if (reParsed) filters.value = reParsed;
+        if (reParsed) Object.assign(filters.value, reParsed);
       });
     });
 
