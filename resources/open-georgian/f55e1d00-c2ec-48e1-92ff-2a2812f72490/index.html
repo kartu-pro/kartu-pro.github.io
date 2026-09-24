@@ -1,0 +1,1423 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base href="/resources/open-georgian/">
+    <title>წარდგენა (verb) - Open Georgian</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <style>
+        :root {
+            --sticky-bar-height: 48px;
+        }
+
+        body { 
+            font-family: var(--font-body); 
+            margin: 0; 
+            padding: 2rem 1.5rem; 
+            background: var(--color-bg); 
+            color: var(--color-text-primary); 
+        }
+
+        .container { 
+            max-width: 720px; 
+            margin: 0 auto; 
+            background: var(--color-surface); 
+            padding: 1.5rem; 
+            border-radius: var(--radius-md); 
+            border: 1px solid var(--color-border);
+        }
+
+        .site-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 1.25rem; 
+            border-bottom: 1px solid var(--color-border); 
+            padding-bottom: 0.75rem; 
+        }
+
+        .site-title { 
+            font-family: var(--font-heading);
+            font-size: 1.25rem; 
+            font-weight: 800; 
+            text-decoration: none; 
+            color: var(--color-accent); 
+        }
+
+        .nav-links a { 
+            margin-left: 1rem; 
+            color: var(--color-text-secondary); 
+            text-decoration: none; 
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .nav-links a:hover { 
+            color: var(--color-accent); 
+            text-decoration: underline; 
+        }
+        
+        .search-container { 
+            position: relative; 
+            margin-bottom: 1.5rem; 
+        }
+
+        .search-input { 
+            width: 100%; 
+            padding: 0.6rem 0.8rem; 
+            font-size: 0.95rem; 
+            font-family: var(--font-body);
+            background-color: var(--color-surface);
+            color: var(--color-text-primary);
+            border: 1px solid var(--color-border-dark); 
+            border-radius: var(--radius-sm); 
+            outline: none;
+        }
+
+        .search-input:focus {
+            border-color: var(--color-text-primary);
+        }
+
+        .dropdown { 
+            position: absolute; 
+            top: 100%; 
+            left: 0; 
+            right: 0; 
+            background: var(--color-surface); 
+            border: 1px solid var(--color-border-dark); 
+            border-radius: var(--radius-sm);
+            max-height: 300px; 
+            overflow-y: auto; 
+            z-index: 1000; 
+            display: none; 
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .dropdown-item { 
+            padding: 0.5rem 0.75rem; 
+            cursor: pointer; 
+            border-bottom: 1px solid var(--color-border); 
+            font-size: 0.9rem;
+        }
+
+        .dropdown-item:hover { 
+            background: var(--color-surface-hover); 
+        }
+        
+         
+        .sticky-context-bar {
+            position: sticky;
+            top: 0;
+            height: var(--sticky-bar-height);
+            z-index: 900;
+            background: var(--color-surface);
+            border-bottom: 1px solid var(--color-border);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0 0.75rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+            margin-bottom: 1.25rem;
+        }
+
+        .sticky-context-bar .context-label {
+            font-size: 0.9rem;
+            color: var(--color-text-secondary);
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .sticky-jump-select {
+            padding: 0.35rem 0.65rem;
+            font-family: var(--font-body);
+            font-size: 0.85rem;
+            font-weight: 600;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--color-border-dark);
+            background: var(--color-surface-hover);
+            color: var(--color-text-primary);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .sticky-jump-select:focus {
+            outline: none;
+            border-color: var(--color-accent);
+        }
+
+        .jump-section {
+            scroll-margin-top: calc(var(--sticky-bar-height) + 12px);
+        }
+
+        .screeve-title {
+            position: static;
+            background: transparent;
+            margin-top: 1.75rem;
+            border-bottom: 2px solid var(--color-border);
+            padding: 0.5rem 0 0.25rem 0;
+            color: var(--color-text-primary);
+            font-family: var(--font-heading);
+        }
+        
+         
+        table.paradigm-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0.5rem;
+            table-layout: fixed;
+        }
+
+        table.paradigm-table th, 
+        table.paradigm-table td {
+            border: 1px solid var(--color-border);
+            padding: 0.5rem 0.25rem;
+            text-align: center;
+            vertical-align: middle;
+            word-wrap: break-word;
+        }
+
+        table.paradigm-table th { 
+            background: var(--color-surface-hover); 
+            font-size: 0.9em; 
+        }
+
+        .col-subj   { width: 12%; }
+        .col-prefix { width: 12%; }
+        .col-person { width: 12%; }
+        .col-vers   { width: 12%; }
+        .col-root   { width: 22%; }
+        .col-pfsf   { width: 15%; }
+        .col-suffix { width: 15%; }
+        .col-single { width: 88%; }
+
+        .text-red, .text-blue, .text-purple { 
+            color: var(--color-accent); 
+            font-weight: 600; 
+        }
+
+        .legend-box { 
+            display: flex; 
+            gap: 1rem; 
+            font-size: 0.85rem; 
+            margin: 0.75rem 0; 
+            padding: 0.5rem 0.75rem; 
+            background: var(--color-bg); 
+            border: 1px solid var(--color-border); 
+            border-radius: var(--radius-sm); 
+            flex-wrap: wrap; 
+        }
+
+        .stats-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); 
+            gap: 1rem; 
+            margin: 1.25rem 0; 
+        }
+
+        .stat-card { 
+            background: var(--color-surface-hover); 
+            border: 1px solid var(--color-border);
+            padding: 1rem; 
+            border-radius: var(--radius-sm); 
+            text-align: center; 
+        }
+
+        .stat-number { 
+            font-family: var(--font-heading);
+            font-size: 1.8rem; 
+            font-weight: 800; 
+            color: var(--color-accent); 
+        }
+
+        .stat-label { 
+            font-size: 0.85rem; 
+            color: var(--color-text-secondary); 
+        }
+
+        .edit-item { 
+            border-bottom: 1px solid var(--color-border); 
+            padding: 0.6rem 0; 
+            font-size: 0.9em; 
+        }
+
+        .edit-meta { 
+            font-size: 0.8em; 
+            color: var(--color-text-secondary); 
+        }
+
+        .dupes-section { 
+            margin-top: 2rem; 
+            background: var(--color-warning-bg); 
+            padding: 0.75rem; 
+            border-radius: var(--radius-sm); 
+            border: 1px solid var(--color-border-dark);
+        }
+        
+        footer { 
+            margin-top: 2.5rem; 
+            text-align: center; 
+            font-size: 0.85em; 
+            color: var(--color-text-secondary); 
+            border-top: 1px solid var(--color-border); 
+            padding-top: 1rem; 
+        }
+
+        ul {
+            list-style: none;
+            padding-left: 0;  
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="site-header">
+            <a href="/" class="site-title">Open Georgian</a>
+        </header>
+
+        <div class="search-container">
+            <input type="text" id="search" class="search-input" placeholder="Search... (e.g., კეთება, ვაკეთებ, vak'eteb, do)" autocomplete="off">
+            <div id="dropdown" class="dropdown"></div>
+        </div>
+
+        
+
+
+<div class="sticky-context-bar" id="sticky-context-bar">
+    <label for="sticky-jump-select" class="context-label">Section:</label>
+    <select id="sticky-jump-select" class="sticky-jump-select" aria-label="Jump to section">
+        
+    </select>
+</div>
+
+<h1 id="overview" class="jump-section" data-jump-title="Overview">
+    წარდგენა
+</h1>
+
+
+    <p>
+        <strong>verb</strong>, Class 1
+    </p>
+
+
+
+
+
+
+
+    
+
+<h2 class="jump-section">Forms</h2>
+
+    
+    <h3 id="screeve-pres" class="screeve-title jump-section" data-jump-title="Present">Present</h3>
+    <table class="paradigm-table">
+        <colgroup>
+            <col class="col-subj">
+            
+                <col class="col-single">
+            
+        </colgroup>
+        <thead>
+            <tr>
+                <th class="col-subj">Sub</th>
+                
+                    <th class="col-single">Form</th>
+                
+            </tr>
+        </thead>
+        <tbody>
+            
+            <tr>
+                <td class="col-subj"><strong>1s</strong></td>
+                
+                    <td class="col-single">წარმოვადგენ</td>
+                
+            </tr>
+            
+            <tr>
+                <td class="col-subj"><strong>2s</strong></td>
+                
+                    <td class="col-single">წარმოადგენ</td>
+                
+            </tr>
+            
+            <tr>
+                <td class="col-subj"><strong>3s</strong></td>
+                
+                    <td class="col-single">წარმოადგენს</td>
+                
+            </tr>
+            
+            <tr>
+                <td class="col-subj"><strong>1p</strong></td>
+                
+                    <td class="col-single">წარმოვადგენთ</td>
+                
+            </tr>
+            
+            <tr>
+                <td class="col-subj"><strong>2p</strong></td>
+                
+                    <td class="col-single">წარმოადგენთ</td>
+                
+            </tr>
+            
+            <tr>
+                <td class="col-subj"><strong>3p</strong></td>
+                
+                    <td class="col-single">წარმოადგენენ</td>
+                
+            </tr>
+            
+        </tbody>
+    </table>
+
+    
+    <h3 id="screeve-imp" class="screeve-title jump-section" data-jump-title="Imperfect">Imperfect</h3>
+    <table class="paradigm-table">
+        <colgroup>
+            <col class="col-subj">
+            
+                <col class="col-single">
+            
+        </colgroup>
+        <thead>
+            <tr>
+                <th class="col-subj">Sub</th>
+                
+                    <th class="col-single">Form</th>
+                
+            </tr>
+        </thead>
+        <tbody>
+            
+            <tr>
+                <td class="col-subj"><strong>1s</strong></td>
+                
+                    <td class="col-single">წარმოვადგენდი</td>
+                
+            </tr>
+            
+            <tr>
+                <td class="col-subj"><strong>2s</strong></td>
+                
+                    <td class="col-single">წარმოადგენდი</td>
+                
+            </tr>
+            
+            <tr>
+                <td class="col-subj"><strong>3s</strong></td>
+                
+                    <td class="col-single">წარმოადგენდა</td>
+                
+            </tr>
+            
+            <tr>
+                <td class="col-subj"><strong>1p</strong></td>
+                
+                    <td class="col-single">წარმოვადგენდით</td>
+                
+            </tr>
+            
+            <tr>
+                <td class="col-subj"><strong>2p</strong></td>
+                
+                    <td class="col-single">წარმოადგენდით</td>
+                
+            </tr>
+            
+            <tr>
+                <td class="col-subj"><strong>3p</strong></td>
+                
+                    <td class="col-single">წარმოადგენდნენ</td>
+                
+            </tr>
+            
+        </tbody>
+    </table>
+
+    
+    <h3 id="screeve-pres-subj" class="screeve-title jump-section" data-jump-title="Present Subjunctive">Present Subjunctive</h3>
+    <table class="paradigm-table">
+        <colgroup>
+            <col class="col-subj">
+            
+                <col class="col-single">
+            
+        </colgroup>
+        <thead>
+            <tr>
+                <th class="col-subj">Sub</th>
+                
+                    <th class="col-single">Form</th>
+                
+            </tr>
+        </thead>
+        <tbody>
+            
+            <tr>
+                <td class="col-subj"><strong>1s</strong></td>
+                
+                    <td class="col-single">წარმოვადგენდე</td>
+                
+            </tr>
+            
+            <tr>
+                <td class="col-subj"><strong>2s</strong></td>
+                
+                    <td class="col-single">წარმოადგენდე</td>
+                
+            </tr>
+            
+            <tr>
+                <td class="col-subj"><strong>3s</strong></td>
+                
+                    <td class="col-single">წარმოადგენდეს</td>
+                
+            </tr>
+            
+            <tr>
+                <td class="col-subj"><strong>1p</strong></td>
+                
+                    <td class="col-single">წარმოვადგენდეთ</td>
+                
+            </tr>
+            
+            <tr>
+                <td class="col-subj"><strong>2p</strong></td>
+                
+                    <td class="col-single">წარმოადგენდეთ</td>
+                
+            </tr>
+            
+            <tr>
+                <td class="col-subj"><strong>3p</strong></td>
+                
+                    <td class="col-single">წარმოადგენდნენ</td>
+                
+            </tr>
+            
+        </tbody>
+    </table>
+
+    
+    <h3 id="screeve-fut" class="screeve-title jump-section" data-jump-title="Future">Future</h3>
+    <table class="paradigm-table">
+        <colgroup>
+            <col class="col-subj">
+            
+                <col class="col-single">
+            
+        </colgroup>
+        <thead>
+            <tr>
+                <th class="col-subj">Sub</th>
+                
+                    <th class="col-single">Form</th>
+                
+            </tr>
+        </thead>
+        <tbody>
+            
+            <tr>
+                <td class="col-subj"><strong>1s</strong></td>
+                
+                    <td class="col-single">წარმოვადგენ</td>
+                
+            </tr>
+            
+            <tr>
+                <td class="col-subj"><strong>2s</strong></td>
+                
+                    <td class="col-single">წარმოადგენ</td>
+                
+            </tr>
+            
+            <tr>
+                <td class="col-subj"><strong>3s</strong></td>
+                
+                    <td class="col-single">წარმოადგენს</td>
+                
+            </tr>
+            
+            <tr>
+                <td class="col-subj"><strong>1p</strong></td>
+                
+                    <td class="col-single">წარმოვადგენთ</td>
+                
+            </tr>
+            
+            <tr>
+                <td class="col-subj"><strong>2p</strong></td>
+                
+                    <td class="col-single">წარმოადგენთ</td>
+                
+            </tr>
+            
+            <tr>
+                <td class="col-subj"><strong>3p</strong></td>
+                
+                    <td class="col-single">წარმოადგენენ</td>
+                
+            </tr>
+            
+        </tbody>
+    </table>
+
+    
+    <h3 id="screeve-cond" class="screeve-title jump-section" data-jump-title="Conditional">Conditional</h3>
+    <table class="paradigm-table">
+        <colgroup>
+            <col class="col-subj">
+            
+                <col class="col-single">
+            
+        </colgroup>
+        <thead>
+            <tr>
+                <th class="col-subj">Sub</th>
+                
+                    <th class="col-single">Form</th>
+                
+            </tr>
+        </thead>
+        <tbody>
+            
+            <tr>
+                <td class="col-subj"><strong>1s</strong></td>
+                
+                    <td class="col-single">წარმოვადგენდი</td>
+                
+            </tr>
+            
+            <tr>
+                <td class="col-subj"><strong>2s</strong></td>
+                
+                    <td class="col-single">წარმოადგენდი</td>
+                
+            </tr>
+            
+            <tr>
+                <td class="col-subj"><strong>3s</strong></td>
+                
+                    <td class="col-single">წარმოადგენდა</td>
+                
+            </tr>
+            
+            <tr>
+                <td class="col-subj"><strong>1p</strong></td>
+                
+                    <td class="col-single">წარმოვადგენდით</td>
+                
+            </tr>
+            
+            <tr>
+                <td class="col-subj"><strong>2p</strong></td>
+                
+                    <td class="col-single">წარმოადგენდით</td>
+                
+            </tr>
+            
+            <tr>
+                <td class="col-subj"><strong>3p</strong></td>
+                
+                    <td class="col-single">წარმოადგენდნენ</td>
+                
+            </tr>
+            
+        </tbody>
+    </table>
+
+    
+    <h3 id="screeve-aor" class="screeve-title jump-section" data-jump-title="Aorist">Aorist</h3>
+    <table class="paradigm-table">
+        <colgroup>
+            <col class="col-subj">
+            
+                <col class="col-single">
+            
+        </colgroup>
+        <thead>
+            <tr>
+                <th class="col-subj">Sub</th>
+                
+                    <th class="col-single">Form</th>
+                
+            </tr>
+        </thead>
+        <tbody>
+            
+            <tr>
+                <td class="col-subj"><strong>1s</strong></td>
+                
+                    <td class="col-single">წარმოვადგინე</td>
+                
+            </tr>
+            
+            <tr>
+                <td class="col-subj"><strong>2s</strong></td>
+                
+                    <td class="col-single">წარმოადგინე</td>
+                
+            </tr>
+            
+            <tr>
+                <td class="col-subj"><strong>3s</strong></td>
+                
+                    <td class="col-single">წარმოადგინა</td>
+                
+            </tr>
+            
+            <tr>
+                <td class="col-subj"><strong>1p</strong></td>
+                
+                    <td class="col-single">წარმოვაგდინეთ</td>
+                
+            </tr>
+            
+            <tr>
+                <td class="col-subj"><strong>2p</strong></td>
+                
+                    <td class="col-single">წარმოადგინეთ</td>
+                
+            </tr>
+            
+            <tr>
+                <td class="col-subj"><strong>3p</strong></td>
+                
+                    <td class="col-single">წარმოადგინეს</td>
+                
+            </tr>
+            
+        </tbody>
+    </table>
+
+    
+    <h3 id="screeve-opt" class="screeve-title jump-section" data-jump-title="Optative">Optative</h3>
+    <table class="paradigm-table">
+        <colgroup>
+            <col class="col-subj">
+            
+                <col class="col-single">
+            
+        </colgroup>
+        <thead>
+            <tr>
+                <th class="col-subj">Sub</th>
+                
+                    <th class="col-single">Form</th>
+                
+            </tr>
+        </thead>
+        <tbody>
+            
+            <tr>
+                <td class="col-subj"><strong>1s</strong></td>
+                
+                    <td class="col-single">წარმოვადგინო</td>
+                
+            </tr>
+            
+            <tr>
+                <td class="col-subj"><strong>2s</strong></td>
+                
+                    <td class="col-single">წარმოადგინო</td>
+                
+            </tr>
+            
+            <tr>
+                <td class="col-subj"><strong>3s</strong></td>
+                
+                    <td class="col-single">წარმოადგინოს</td>
+                
+            </tr>
+            
+            <tr>
+                <td class="col-subj"><strong>1p</strong></td>
+                
+                    <td class="col-single">წარმოვადგინოთ</td>
+                
+            </tr>
+            
+            <tr>
+                <td class="col-subj"><strong>2p</strong></td>
+                
+                    <td class="col-single">წარმოადგინოთ</td>
+                
+            </tr>
+            
+            <tr>
+                <td class="col-subj"><strong>3p</strong></td>
+                
+                    <td class="col-single">წარმოადგინონ</td>
+                
+            </tr>
+            
+        </tbody>
+    </table>
+
+    
+    <h3 id="screeve-perf" class="screeve-title jump-section" data-jump-title="Perfect">Perfect</h3>
+    <table class="paradigm-table">
+        <colgroup>
+            <col class="col-subj">
+            
+                <col class="col-single">
+            
+        </colgroup>
+        <thead>
+            <tr>
+                <th class="col-subj">Sub</th>
+                
+                    <th class="col-single">Form</th>
+                
+            </tr>
+        </thead>
+        <tbody>
+            
+            <tr>
+                <td class="col-subj"><strong>1s</strong></td>
+                
+                    <td class="col-single">წარმომიდგენია</td>
+                
+            </tr>
+            
+            <tr>
+                <td class="col-subj"><strong>2s</strong></td>
+                
+                    <td class="col-single">წარმოგიდგენია</td>
+                
+            </tr>
+            
+            <tr>
+                <td class="col-subj"><strong>3s</strong></td>
+                
+                    <td class="col-single">წარმოუდგენია</td>
+                
+            </tr>
+            
+            <tr>
+                <td class="col-subj"><strong>1p</strong></td>
+                
+                    <td class="col-single">წარმოგვიდგენია</td>
+                
+            </tr>
+            
+            <tr>
+                <td class="col-subj"><strong>2p</strong></td>
+                
+                    <td class="col-single">წარმოგიდგენიათ</td>
+                
+            </tr>
+            
+            <tr>
+                <td class="col-subj"><strong>3p</strong></td>
+                
+                    <td class="col-single">წარმოუდგენიათ</td>
+                
+            </tr>
+            
+        </tbody>
+    </table>
+
+    
+    <h3 id="screeve-plu" class="screeve-title jump-section" data-jump-title="Pluperfect">Pluperfect</h3>
+    <table class="paradigm-table">
+        <colgroup>
+            <col class="col-subj">
+            
+                <col class="col-single">
+            
+        </colgroup>
+        <thead>
+            <tr>
+                <th class="col-subj">Sub</th>
+                
+                    <th class="col-single">Form</th>
+                
+            </tr>
+        </thead>
+        <tbody>
+            
+            <tr>
+                <td class="col-subj"><strong>1s</strong></td>
+                
+                    <td class="col-single">წარმომედგინა</td>
+                
+            </tr>
+            
+            <tr>
+                <td class="col-subj"><strong>2s</strong></td>
+                
+                    <td class="col-single">წარმოგედგინა</td>
+                
+            </tr>
+            
+            <tr>
+                <td class="col-subj"><strong>3s</strong></td>
+                
+                    <td class="col-single">წარმოედგინა</td>
+                
+            </tr>
+            
+            <tr>
+                <td class="col-subj"><strong>1p</strong></td>
+                
+                    <td class="col-single">წარმოგვედგინა</td>
+                
+            </tr>
+            
+            <tr>
+                <td class="col-subj"><strong>2p</strong></td>
+                
+                    <td class="col-single">წარმოგედგინათ</td>
+                
+            </tr>
+            
+            <tr>
+                <td class="col-subj"><strong>3p</strong></td>
+                
+                    <td class="col-single">წარმოედგინათ</td>
+                
+            </tr>
+            
+        </tbody>
+    </table>
+
+    
+    <h3 id="screeve-perf-subj" class="screeve-title jump-section" data-jump-title="Perfect Subjunctive">Perfect Subjunctive</h3>
+    <table class="paradigm-table">
+        <colgroup>
+            <col class="col-subj">
+            
+                <col class="col-single">
+            
+        </colgroup>
+        <thead>
+            <tr>
+                <th class="col-subj">Sub</th>
+                
+                    <th class="col-single">Form</th>
+                
+            </tr>
+        </thead>
+        <tbody>
+            
+            <tr>
+                <td class="col-subj"><strong>1s</strong></td>
+                
+                    <td class="col-single">წარმომედგინოს</td>
+                
+            </tr>
+            
+            <tr>
+                <td class="col-subj"><strong>2s</strong></td>
+                
+                    <td class="col-single">წარმოგედგინოს</td>
+                
+            </tr>
+            
+            <tr>
+                <td class="col-subj"><strong>3s</strong></td>
+                
+                    <td class="col-single">წარმოედგინოს</td>
+                
+            </tr>
+            
+            <tr>
+                <td class="col-subj"><strong>1p</strong></td>
+                
+                    <td class="col-single">წარმოგვედგინოს</td>
+                
+            </tr>
+            
+            <tr>
+                <td class="col-subj"><strong>2p</strong></td>
+                
+                    <td class="col-single">წარმოგედგინოთ</td>
+                
+            </tr>
+            
+            <tr>
+                <td class="col-subj"><strong>3p</strong></td>
+                
+                    <td class="col-single">წარმოედგინოთ</td>
+                
+            </tr>
+            
+        </tbody>
+    </table>
+
+
+
+
+
+
+<section style="margin-top: 32px;">
+    <h2 id="related-words" class="jump-section" data-jump-title="Related Words">
+        Related Words
+    </h2>
+    
+        <p><em>No related words linked yet.</em></p>
+    
+</section>
+
+
+
+<div class="dupes-section">
+    <h3>Possible Duplicates</h3>
+    <ul>
+        
+        <li><a href="../9a3255cf-65f2-4402-be5a-4f52b2928320/">წარდგენა (ID: 9a3255cf-65f2-4402-be5a-4f52b2928320)</a> - Same Lemma</li>
+        
+        <li><a href="../030409fc-79d6-4214-8709-f9f583b6f834/">წარდგენა (ID: 030409fc-79d6-4214-8709-f9f583b6f834)</a> - Same Lemma</li>
+        
+        <li><a href="../ce7ad5de-edb4-453a-8641-cb3bfa1b18f3/">წარმოდგენა (ID: ce7ad5de-edb4-453a-8641-cb3bfa1b18f3)</a> - Shares form &#39;წარმოვადგენ&#39;</li>
+        
+        <li><a href="../61095581-6f56-4bfa-a521-a81509639529/">წარმოდგენა (ID: 61095581-6f56-4bfa-a521-a81509639529)</a> - Shares form &#39;წარმომიდგენია&#39;</li>
+        
+    </ul>
+</div>
+
+
+<section style="margin-top: 32px;">
+    <h2 id="edit-history" class="jump-section" data-jump-title="Edit History">
+        Edit History (70)
+    </h2>
+    
+        <div class="edits-list">
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:31</strong> by kartupro.ge@gmail.com [form[457114c2-6eeb-49fd-bd36-2b7bc2b96174].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოვადგინე</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:31</strong> by kartupro.ge@gmail.com [form[c81803f3-b1da-4cc5-af7b-f8b399508743].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოედგინოთ</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:31</strong> by kartupro.ge@gmail.com [form[028d931c-0921-4d84-8b3a-83c61e6f657b].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოგედგინოთ</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:31</strong> by kartupro.ge@gmail.com [form[3590537d-707b-4271-b916-d7ad4722b60c].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოგვედგინოს</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:31</strong> by kartupro.ge@gmail.com [form[5ddeb435-8db5-440d-b935-868ae65cfb1e].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოედგინოს</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:31</strong> by kartupro.ge@gmail.com [form[17955e8e-37fe-438b-b32b-82a0b451d194].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოგედგინოს</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:31</strong> by kartupro.ge@gmail.com [form[964e7d81-11bb-40c4-b99c-3a8f6a54813b].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმომედგინოს</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:31</strong> by kartupro.ge@gmail.com [form[2943998b-f98f-4710-999d-58bf9f982091].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოედგინათ</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:31</strong> by kartupro.ge@gmail.com [form[d709b42d-a9d2-4457-abdb-3e3b0aaf3705].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოგედგინათ</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:31</strong> by kartupro.ge@gmail.com [form[86aa559a-4a8b-49f0-bd74-cbf215d71d62].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოგვედგინა</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:31</strong> by kartupro.ge@gmail.com [form[0cbf0152-446b-4959-9874-79c0860c1e9a].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოედგინა</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:31</strong> by kartupro.ge@gmail.com [form[27cc349c-c473-4550-92f1-204756e18933].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოგედგინა</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:31</strong> by kartupro.ge@gmail.com [form[c221ba6c-17f5-46f4-85b8-9709042fd260].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმომედგინა</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:31</strong> by kartupro.ge@gmail.com [form[1d1db0fc-0e58-474c-be26-7f2ec902ce4a].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოუდგენიათ</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:31</strong> by kartupro.ge@gmail.com [form[6cd8b1fd-7f18-4657-a0e1-7d7ea344e7fe].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოგიდგენიათ</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:31</strong> by kartupro.ge@gmail.com [form[f68fed23-b83d-482c-88cd-a20b1a3c12dd].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოგვიდგენია</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:31</strong> by kartupro.ge@gmail.com [form[1d97b251-5725-4073-8916-d462b9221e96].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოუდგენია</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:31</strong> by kartupro.ge@gmail.com [form[00188c8b-7b0c-42b4-860a-ffe9a7648742].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოგიდგენია</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:31</strong> by kartupro.ge@gmail.com [form[9470d2e7-2477-4f30-8f0a-97db6e8b0044].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმომიდგენია</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:31</strong> by kartupro.ge@gmail.com [form[9c598f43-bbcb-4b23-8190-4b625eae7b00].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოადგინონ</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:31</strong> by kartupro.ge@gmail.com [form[dc2aa954-465a-4fd2-a3b4-7635d7d27e1d].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოადგინოთ</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:31</strong> by kartupro.ge@gmail.com [form[531193b9-49a7-4fd7-8131-4a97af151705].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოვადგინოთ</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:31</strong> by kartupro.ge@gmail.com [form[b8b6148a-5c6b-491f-837d-5316516574d6].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოადგინოს</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:31</strong> by kartupro.ge@gmail.com [form[2995f4ce-a955-43b9-af28-20023b5798c7].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოადგინო</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:31</strong> by kartupro.ge@gmail.com [form[d4b29619-8f6d-46ca-bc57-b2ba03fc62ee].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოვადგინო</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:31</strong> by kartupro.ge@gmail.com [form[e51de137-ea3d-4ed5-829d-aae051fe5c18].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოადგინეს</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:31</strong> by kartupro.ge@gmail.com [form[9ae38412-14bd-4e41-a76a-43ec3c8424e0].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოადგინეთ</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:31</strong> by kartupro.ge@gmail.com [form[25f2cd54-2295-4d0c-ad7f-6a0e156c08ab].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოვაგდინეთ</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:31</strong> by kartupro.ge@gmail.com [form[0e5d2ecb-2668-431a-9ada-6275b94e6dc4].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოადგინა</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:31</strong> by kartupro.ge@gmail.com [form[de336295-95f3-40ac-930e-24756d055996].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოადგინე</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:19</strong> by kartupro.ge@gmail.com [form[e58a4332-247e-4327-8f20-b2ddcd6ba7a5].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოადგენდე</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:19</strong> by kartupro.ge@gmail.com [form[46bb465e-2672-41a1-a3e8-81404a6cd8f3].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოადგენდნენ</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:19</strong> by kartupro.ge@gmail.com [form[50ca751b-5a48-428e-a907-b108ae618855].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოადგენდით</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:19</strong> by kartupro.ge@gmail.com [form[36b2d909-a2f9-481e-b676-18a87b6b717f].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოადგენდნენ</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:19</strong> by kartupro.ge@gmail.com [form[07d9714a-9c1e-48d9-a726-548b74d528ee].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოვადგენდე</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:19</strong> by kartupro.ge@gmail.com [form[5afde347-3045-4dc3-8db5-4a2d7a960f33].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოადგენდე</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:19</strong> by kartupro.ge@gmail.com [form[6e5cadd8-5782-4669-a0fe-0b2d169a5931].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოადგენდეს</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:19</strong> by kartupro.ge@gmail.com [form[971eb520-333a-4d59-9b02-44f7a6da0453].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოვადგენდეთ</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:19</strong> by kartupro.ge@gmail.com [form[1b446c3d-1f95-4f9f-a176-8d5fe910ca41].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოადგენდეთ</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:19</strong> by kartupro.ge@gmail.com [form[be4d6aeb-04ad-44ab-a4c2-b6d693b37236].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოადგენდნენ</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:19</strong> by kartupro.ge@gmail.com [form[0cfbf310-cf9b-4d7a-8a9e-aed99f4e9362].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოადგენდა</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:19</strong> by kartupro.ge@gmail.com [form[b6d7f30c-792b-483b-b7cc-de91a28a83c3].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოადგენდი</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:19</strong> by kartupro.ge@gmail.com [form[c56b3282-2640-4dad-8eec-c3d29ec62806].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოვადგენდი</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:19</strong> by kartupro.ge@gmail.com [form[bdf7947a-b8d4-4def-8bd9-2c90c23fc5b8].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოადგენენ</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:19</strong> by kartupro.ge@gmail.com [form[4497cf92-54a0-45fb-969a-9d656891dbc1].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოადგენთ</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:19</strong> by kartupro.ge@gmail.com [form[bf0ad462-28fb-4b0a-a358-e778af58f73d].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოვადგენთ</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:19</strong> by kartupro.ge@gmail.com [form[3518bde4-174f-4158-80a8-48da3dd34ee9].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოადგენს</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:19</strong> by kartupro.ge@gmail.com [form[b9604e5c-c76e-442d-ac60-d33b76205dce].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოადგენ</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:19</strong> by kartupro.ge@gmail.com [form[eddbb9c8-0f12-4093-b988-7b6d7c56cf2b].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოვადგენ</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:19</strong> by kartupro.ge@gmail.com [form[22ffe58b-6ad7-4c04-a55d-f3e86e913027].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოვადგენდით</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:19</strong> by kartupro.ge@gmail.com [form[6572df14-621d-48bd-9956-6e199e0164cd].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოადგენდეთ</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:19</strong> by kartupro.ge@gmail.com [form[bdd9d35f-724b-4f32-86df-99870e818886].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოვადგენდეთ</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:19</strong> by kartupro.ge@gmail.com [form[89542857-cac2-4fd4-b2d3-d9088f061f50].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოადგენდეს</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:19</strong> by kartupro.ge@gmail.com [form[dae7f4be-9ef3-4cbf-8630-d71c4afb3960].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოვადგენ</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:19</strong> by kartupro.ge@gmail.com [form[218b9098-f585-497d-bd53-3f8b2cd1a5a6].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოვადგენდე</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:19</strong> by kartupro.ge@gmail.com [form[b5dc7d0e-4191-4f9f-8bcc-f6cc0f5df276].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოადგენდნენ</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:19</strong> by kartupro.ge@gmail.com [form[19460eee-0a91-4be5-b559-b62831005e3b].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოადგენდით</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:19</strong> by kartupro.ge@gmail.com [form[ad90f0f7-9df7-4458-ba04-8f49c2a34df2].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოვადგენდით</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:19</strong> by kartupro.ge@gmail.com [form[7b91d5b2-0d8f-40ba-8455-c544226ddc8d].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოადგენდა</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:19</strong> by kartupro.ge@gmail.com [form[beaae73a-cba9-4d15-80e7-f30442c6f3d0].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოადგენდი</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:19</strong> by kartupro.ge@gmail.com [form[a65fa05f-bd25-470d-b6fa-e5d647aeda11].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოვადგენდი</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:19</strong> by kartupro.ge@gmail.com [form[38e9425e-42a7-4c05-b599-39543b021b62].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოადგენენ</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:19</strong> by kartupro.ge@gmail.com [form[1945057b-0ede-473a-b8f2-9c4b1fad4664].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოადგენთ</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:19</strong> by kartupro.ge@gmail.com [form[94a35fbe-088a-4f9d-b95a-9c56d332984a].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოვადგენთ</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:19</strong> by kartupro.ge@gmail.com [form[c8cab1ae-900b-407a-a891-1363c1f837f7].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოადგენს</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:24:19</strong> by kartupro.ge@gmail.com [form[3f5b253f-62fc-48fb-b3e1-5f810cd34d04].form]</div>
+                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>წარმოადგენ</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:23:37</strong> by kartupro.ge@gmail.com [form[c8cab1ae-900b-407a-a891-1363c1f837f7].form]</div>
+                <div>Changed: <code></code> &rarr; <code>წარმოადგენს</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:23:36</strong> by kartupro.ge@gmail.com [form[3f5b253f-62fc-48fb-b3e1-5f810cd34d04].form]</div>
+                <div>Changed: <code></code> &rarr; <code>წარმოადგენ</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/19/2026 22:22:50</strong> by kartupro.ge@gmail.com [lemma]</div>
+                <div>Changed: <code>[UNKNOWN]</code> &rarr; <code>წარდგენა</code></div>
+                
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>8/21/2026 7:41:32</strong> by ingest_script [masdar]</div>
+                <div>Changed: <code></code> &rarr; <code>[UNKNOWN]</code></div>
+                <div><em>Comment: Corrected interactively during import</em></div>
+            </div>
+            
+        </div>
+    
+</section>
+
+
+        <footer>
+            <p>Page last generated at Thu, 24 Sep 2026 15:00:15 &#43;04.</p>
+        </footer>
+    </div>
+
+    <script src="search.js" defer></script>
+</body>
+</html>

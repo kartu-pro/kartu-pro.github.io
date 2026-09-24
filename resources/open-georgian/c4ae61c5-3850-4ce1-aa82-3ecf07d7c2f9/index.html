@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base href="/resources/open-georgian/">
+    <title>პორტუგალიელი (noun) - Open Georgian</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <style>
+        :root {
+            --sticky-bar-height: 48px;
+        }
+
+        body { 
+            font-family: var(--font-body); 
+            margin: 0; 
+            padding: 2rem 1.5rem; 
+            background: var(--color-bg); 
+            color: var(--color-text-primary); 
+        }
+
+        .container { 
+            max-width: 720px; 
+            margin: 0 auto; 
+            background: var(--color-surface); 
+            padding: 1.5rem; 
+            border-radius: var(--radius-md); 
+            border: 1px solid var(--color-border);
+        }
+
+        .site-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 1.25rem; 
+            border-bottom: 1px solid var(--color-border); 
+            padding-bottom: 0.75rem; 
+        }
+
+        .site-title { 
+            font-family: var(--font-heading);
+            font-size: 1.25rem; 
+            font-weight: 800; 
+            text-decoration: none; 
+            color: var(--color-accent); 
+        }
+
+        .nav-links a { 
+            margin-left: 1rem; 
+            color: var(--color-text-secondary); 
+            text-decoration: none; 
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .nav-links a:hover { 
+            color: var(--color-accent); 
+            text-decoration: underline; 
+        }
+        
+        .search-container { 
+            position: relative; 
+            margin-bottom: 1.5rem; 
+        }
+
+        .search-input { 
+            width: 100%; 
+            padding: 0.6rem 0.8rem; 
+            font-size: 0.95rem; 
+            font-family: var(--font-body);
+            background-color: var(--color-surface);
+            color: var(--color-text-primary);
+            border: 1px solid var(--color-border-dark); 
+            border-radius: var(--radius-sm); 
+            outline: none;
+        }
+
+        .search-input:focus {
+            border-color: var(--color-text-primary);
+        }
+
+        .dropdown { 
+            position: absolute; 
+            top: 100%; 
+            left: 0; 
+            right: 0; 
+            background: var(--color-surface); 
+            border: 1px solid var(--color-border-dark); 
+            border-radius: var(--radius-sm);
+            max-height: 300px; 
+            overflow-y: auto; 
+            z-index: 1000; 
+            display: none; 
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .dropdown-item { 
+            padding: 0.5rem 0.75rem; 
+            cursor: pointer; 
+            border-bottom: 1px solid var(--color-border); 
+            font-size: 0.9rem;
+        }
+
+        .dropdown-item:hover { 
+            background: var(--color-surface-hover); 
+        }
+        
+         
+        .sticky-context-bar {
+            position: sticky;
+            top: 0;
+            height: var(--sticky-bar-height);
+            z-index: 900;
+            background: var(--color-surface);
+            border-bottom: 1px solid var(--color-border);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0 0.75rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+            margin-bottom: 1.25rem;
+        }
+
+        .sticky-context-bar .context-label {
+            font-size: 0.9rem;
+            color: var(--color-text-secondary);
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .sticky-jump-select {
+            padding: 0.35rem 0.65rem;
+            font-family: var(--font-body);
+            font-size: 0.85rem;
+            font-weight: 600;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--color-border-dark);
+            background: var(--color-surface-hover);
+            color: var(--color-text-primary);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .sticky-jump-select:focus {
+            outline: none;
+            border-color: var(--color-accent);
+        }
+
+        .jump-section {
+            scroll-margin-top: calc(var(--sticky-bar-height) + 12px);
+        }
+
+        .screeve-title {
+            position: static;
+            background: transparent;
+            margin-top: 1.75rem;
+            border-bottom: 2px solid var(--color-border);
+            padding: 0.5rem 0 0.25rem 0;
+            color: var(--color-text-primary);
+            font-family: var(--font-heading);
+        }
+        
+         
+        table.paradigm-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0.5rem;
+            table-layout: fixed;
+        }
+
+        table.paradigm-table th, 
+        table.paradigm-table td {
+            border: 1px solid var(--color-border);
+            padding: 0.5rem 0.25rem;
+            text-align: center;
+            vertical-align: middle;
+            word-wrap: break-word;
+        }
+
+        table.paradigm-table th { 
+            background: var(--color-surface-hover); 
+            font-size: 0.9em; 
+        }
+
+        .col-subj   { width: 12%; }
+        .col-prefix { width: 12%; }
+        .col-person { width: 12%; }
+        .col-vers   { width: 12%; }
+        .col-root   { width: 22%; }
+        .col-pfsf   { width: 15%; }
+        .col-suffix { width: 15%; }
+        .col-single { width: 88%; }
+
+        .text-red, .text-blue, .text-purple { 
+            color: var(--color-accent); 
+            font-weight: 600; 
+        }
+
+        .legend-box { 
+            display: flex; 
+            gap: 1rem; 
+            font-size: 0.85rem; 
+            margin: 0.75rem 0; 
+            padding: 0.5rem 0.75rem; 
+            background: var(--color-bg); 
+            border: 1px solid var(--color-border); 
+            border-radius: var(--radius-sm); 
+            flex-wrap: wrap; 
+        }
+
+        .stats-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); 
+            gap: 1rem; 
+            margin: 1.25rem 0; 
+        }
+
+        .stat-card { 
+            background: var(--color-surface-hover); 
+            border: 1px solid var(--color-border);
+            padding: 1rem; 
+            border-radius: var(--radius-sm); 
+            text-align: center; 
+        }
+
+        .stat-number { 
+            font-family: var(--font-heading);
+            font-size: 1.8rem; 
+            font-weight: 800; 
+            color: var(--color-accent); 
+        }
+
+        .stat-label { 
+            font-size: 0.85rem; 
+            color: var(--color-text-secondary); 
+        }
+
+        .edit-item { 
+            border-bottom: 1px solid var(--color-border); 
+            padding: 0.6rem 0; 
+            font-size: 0.9em; 
+        }
+
+        .edit-meta { 
+            font-size: 0.8em; 
+            color: var(--color-text-secondary); 
+        }
+
+        .dupes-section { 
+            margin-top: 2rem; 
+            background: var(--color-warning-bg); 
+            padding: 0.75rem; 
+            border-radius: var(--radius-sm); 
+            border: 1px solid var(--color-border-dark);
+        }
+        
+        footer { 
+            margin-top: 2.5rem; 
+            text-align: center; 
+            font-size: 0.85em; 
+            color: var(--color-text-secondary); 
+            border-top: 1px solid var(--color-border); 
+            padding-top: 1rem; 
+        }
+
+        ul {
+            list-style: none;
+            padding-left: 0;  
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="site-header">
+            <a href="/" class="site-title">Open Georgian</a>
+        </header>
+
+        <div class="search-container">
+            <input type="text" id="search" class="search-input" placeholder="Search... (e.g., კეთება, ვაკეთებ, vak'eteb, do)" autocomplete="off">
+            <div id="dropdown" class="dropdown"></div>
+        </div>
+
+        
+
+
+<div class="sticky-context-bar" id="sticky-context-bar">
+    <label for="sticky-jump-select" class="context-label">Section:</label>
+    <select id="sticky-jump-select" class="sticky-jump-select" aria-label="Jump to section">
+        
+    </select>
+</div>
+
+<h1 id="overview" class="jump-section" data-jump-title="Overview">
+    პორტუგალიელი
+</h1>
+
+
+    <p>
+        <strong>noun</strong>
+    </p>
+
+
+
+
+
+
+
+    
+
+
+
+
+
+
+<section style="margin-top: 32px;">
+    <h2 id="related-words" class="jump-section" data-jump-title="Related Words">
+        Related Words
+    </h2>
+    
+        <p><em>No related words linked yet.</em></p>
+    
+</section>
+
+
+
+
+<section style="margin-top: 32px;">
+    <h2 id="edit-history" class="jump-section" data-jump-title="Edit History">
+        Edit History (0)
+    </h2>
+    
+        <p><em>No edit history found for this word.</em></p>
+    
+</section>
+
+
+        <footer>
+            <p>Page last generated at Thu, 24 Sep 2026 15:00:15 &#43;04.</p>
+        </footer>
+    </div>
+
+    <script src="search.js" defer></script>
+</body>
+</html>
