@@ -6,340 +6,7 @@
     <base href="/resources/open-georgian/">
     <title>გადაჭრა (verb) - Open Georgian</title>
     <link rel="stylesheet" href="/css/main.css">
-    <style>
-        :root {
-            --sticky-bar-height: 48px;
-        }
-
-        body { 
-            font-family: var(--font-body); 
-            margin: 0; 
-            padding: 2rem 1.5rem; 
-            background: var(--color-bg); 
-            color: var(--color-text-primary); 
-        }
-
-        .container { 
-            max-width: 720px; 
-            margin: 0 auto; 
-            background: var(--color-surface); 
-            padding: 1.5rem; 
-            border-radius: var(--radius-md); 
-            border: 1px solid var(--color-border);
-        }
-
-        .site-header { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            margin-bottom: 1.25rem; 
-            border-bottom: 1px solid var(--color-border); 
-            padding-bottom: 0.75rem; 
-        }
-
-        .site-title { 
-            font-family: var(--font-heading);
-            font-size: 1.25rem; 
-            font-weight: 800; 
-            text-decoration: none; 
-            color: var(--color-accent); 
-        }
-
-        .nav-links a { 
-            margin-left: 1rem; 
-            color: var(--color-text-secondary); 
-            text-decoration: none; 
-            font-weight: 600;
-            transition: var(--transition);
-        }
-
-        .nav-links a:hover { 
-            color: var(--color-accent); 
-            text-decoration: underline; 
-        }
-        
-        .search-container { 
-            position: relative; 
-            margin-bottom: 1.5rem; 
-        }
-
-        .search-input { 
-            width: 100%; 
-            padding: 0.6rem 0.8rem; 
-            font-size: 0.95rem; 
-            font-family: var(--font-body);
-            background-color: var(--color-surface);
-            color: var(--color-text-primary);
-            border: 1px solid var(--color-border-dark); 
-            border-radius: var(--radius-sm); 
-            outline: none;
-        }
-
-        .search-input:focus {
-            border-color: var(--color-text-primary);
-        }
-
-        .dropdown { 
-            position: absolute; 
-            top: 100%; 
-            left: 0; 
-            right: 0; 
-            background: var(--color-surface); 
-            border: 1px solid var(--color-border-dark); 
-            border-radius: var(--radius-sm);
-            max-height: 300px; 
-            overflow-y: auto; 
-            z-index: 1000; 
-            display: none; 
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        }
-
-        .dropdown-item { 
-            padding: 0.5rem 0.75rem; 
-            cursor: pointer; 
-            border-bottom: 1px solid var(--color-border); 
-            font-size: 0.9rem;
-        }
-
-        .dropdown-item:hover { 
-            background: var(--color-surface-hover); 
-        }
-        
-         
-        .sticky-context-bar {
-            position: sticky;
-            top: 0;
-            height: var(--sticky-bar-height);
-            z-index: 900;
-            background: var(--color-surface);
-            border-bottom: 1px solid var(--color-border);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0 0.75rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
-            margin-bottom: 1.25rem;
-        }
-
-        .sticky-context-bar .context-label {
-            font-size: 0.9rem;
-            color: var(--color-text-secondary);
-            font-weight: 500;
-            white-space: nowrap;
-        }
-
-        .sticky-jump-select {
-            padding: 0.35rem 0.65rem;
-            font-family: var(--font-body);
-            font-size: 0.85rem;
-            font-weight: 600;
-            border-radius: var(--radius-sm);
-            border: 1px solid var(--color-border-dark);
-            background: var(--color-surface-hover);
-            color: var(--color-text-primary);
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .sticky-jump-select:focus {
-            outline: none;
-            border-color: var(--color-accent);
-        }
-
-        .jump-section {
-            scroll-margin-top: calc(var(--sticky-bar-height) + 12px);
-        }
-
-        .screeve-title {
-            position: static;
-            background: transparent;
-            margin-top: 1.75rem;
-            border-bottom: 2px solid var(--color-border);
-            padding: 0.5rem 0 0.25rem 0;
-            color: var(--color-text-primary);
-            font-family: var(--font-heading);
-        }
-        
-         
-        table.paradigm-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 0.5rem;
-            table-layout: fixed;
-        }
-
-        table.paradigm-table th, 
-        table.paradigm-table td {
-            border: 1px solid var(--color-border);
-            padding: 0.5rem 0.25rem;
-            text-align: center;
-            vertical-align: middle;
-            word-wrap: break-word;
-        }
-
-        table.paradigm-table th { 
-            background: var(--color-surface-hover); 
-            font-size: 0.9em; 
-        }
-        .table-wrapper {
-            width: 100%;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            margin-top: 0.5rem;
-        }
-         
-        .table-wrapper table.paradigm-table {
-            table-layout: auto;
-            min-width: 550px;  
-        }
-        th[data-tooltip] {
-          position: relative;
-          cursor: help;
-          user-select: none;
-        }
-
-         
-        th[data-tooltip]::after {
-          content: attr(data-tooltip);
-          position: absolute;
-          top: 125%;  
-          left: 50%;
-          transform: translateX(-50%);
-          background-color: var(--color-border-dark, #333);
-          color: #fff;
-          padding: 4px 8px;
-          font-size: 0.75rem;
-          font-weight: normal;
-          border-radius: var(--radius-sm, 4px);
-          white-space: nowrap;
-          opacity: 0;
-          pointer-events: none;
-          transition: opacity 0.15s ease-in-out;
-          z-index: 1000;
-          box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-
-         
-        th[data-tooltip]::before {
-          content: '';
-          position: absolute;
-          top: 105%;
-          left: 50%;
-          transform: translateX(-50%);
-          border-width: 5px;
-          border-style: solid;
-          border-color: transparent transparent var(--color-border-dark, #333) transparent;
-          opacity: 0;
-          pointer-events: none;
-          transition: opacity 0.15s ease-in-out;
-          z-index: 1000;
-        }
-
-         
-        th[data-tooltip]:hover::after,
-        th[data-tooltip]:hover::before,
-        th[data-tooltip]:focus::after,
-        th[data-tooltip]:focus::before,
-        th[data-tooltip]:active::after,
-        th[data-tooltip]:active::before {
-          opacity: 1;
-        }
-
-        .col-subj   { width: 12%; }
-        .col-prefix { width: 12%; }
-        .col-person { width: 12%; }
-        .col-vers   { width: 12%; }
-        .col-root   { width: 22%; }
-        .col-pfsf   { width: 15%; }
-        .col-suffix { width: 15%; }
-        .col-single { width: 88%; }
-
-        .text-red, .text-blue, .text-purple { 
-            color: var(--color-accent); 
-            font-weight: 600; 
-        }
-
-        .legend-box { 
-            display: flex; 
-            gap: 1rem; 
-            font-size: 0.85rem; 
-            margin: 0.75rem 0; 
-            padding: 0.5rem 0.75rem; 
-            background: var(--color-bg); 
-            border: 1px solid var(--color-border); 
-            border-radius: var(--radius-sm); 
-            flex-wrap: wrap; 
-        }
-
-        .stats-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); 
-            gap: 1rem; 
-            margin: 1.25rem 0; 
-        }
-
-        .stat-card { 
-            background: var(--color-surface-hover); 
-            border: 1px solid var(--color-border);
-            padding: 1rem; 
-            border-radius: var(--radius-sm); 
-            text-align: center; 
-        }
-
-        .stat-number { 
-            font-family: var(--font-heading);
-            font-size: 1.8rem; 
-            font-weight: 800; 
-            color: var(--color-accent); 
-        }
-
-        .stat-label { 
-            font-size: 0.85rem; 
-            color: var(--color-text-secondary); 
-        }
-
-        .edit-item { 
-            border-bottom: 1px solid var(--color-border); 
-            padding: 0.6rem 0; 
-            font-size: 0.9em; 
-        }
-
-        .edit-meta { 
-            font-size: 0.8em; 
-            color: var(--color-text-secondary); 
-        }
-
-        .dupes-section { 
-            margin-top: 2rem; 
-            background: var(--color-warning-bg); 
-            padding: 0.75rem; 
-            border-radius: var(--radius-sm); 
-            border: 1px solid var(--color-border-dark);
-        }
-        
-        footer { 
-            margin-top: 2.5rem; 
-            text-align: center; 
-            font-size: 0.85em; 
-            color: var(--color-text-secondary); 
-            border-top: 1px solid var(--color-border); 
-            padding-top: 1rem; 
-        }
-
-        ul {
-            list-style: none;
-            padding-left: 0;  
-        }
-
-        @media (max-width: 600px) {
-            body {
-                padding: 0.5rem;
-            }
-            .container {
-                padding: 0.75rem;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
@@ -372,6 +39,8 @@
     </p>
 
 
+
+    <p>solve, cut across</p>
 
 
 
@@ -1416,19 +1085,19 @@
             <li>
                 <a href="edf8e804-fb81-47df-96b0-f3b6513e77bb/"><strong>გაჭრა</strong></a>
                 <span style="color: #6c757d;">(verb)</span>
-                
+                 - cut, slice, be effective
             </li>
             
             <li>
                 <a href="d49aff6d-8035-4a15-b0ff-46c6d3569465/"><strong>მოჭრა</strong></a>
                 <span style="color: #6c757d;">(verb)</span>
-                
+                 - cut, trim, fell
             </li>
             
             <li>
                 <a href="7c85e655-217b-44e2-ac21-67cfd7b648ad/"><strong>ჭრა</strong></a>
                 <span style="color: #6c757d;">(verb)</span>
-                
+                 - cut, carve, slice
             </li>
             
         </ul>
@@ -1451,14 +1120,422 @@
 
 <section style="margin-top: 32px;">
     <h2 id="edit-history" class="jump-section" data-jump-title="Edit History">
-        Edit History (1)
+        Edit History (69)
     </h2>
     
         <div class="edits-list">
             
             <div class="edit-item">
+                <div class="edit-meta"><strong>9/25/2026 9:52:24</strong> by kartupro.ge@gmail.com [attributes.translation]</div>
+                <div>Changed:  &rarr; solve, cut across</div>
+                <div><em>Comment: added translation</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[4db39e15-d177-4d84-af6e-4fcdf0c98d0b].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[5273a697-c2b6-4ff0-b156-a07ac242c058].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[4ab4deaf-46d0-44fb-99ec-441033ad0c5a].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[e38aa0ff-648c-4a33-a464-f8d698e8528e].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[c7500c2c-c9b6-4a9e-9efa-f6ad5b4ecc4e].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[8510d988-b3bf-41b7-be90-979e140b818d].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[a4b86b29-afee-4048-86e3-cddbbacf03a9].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[2dbd8805-a379-4685-a84d-aecec53fc34d].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[f5d69c7b-7fc1-4853-bcc2-455d3cfcea0a].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[2e4bd12e-1aff-4e7c-9e11-792132dc8269].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[89e9e7fd-4e53-49c9-a818-84740845fa00].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[c4a1c3e9-1cfa-4b50-a655-f7222e665008].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[ed8a40a1-dc51-4d77-94a5-d4f31d42d09e].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[52439c9d-1bca-468c-a037-f04b0991eab7].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[c406bcd7-88c3-4b5c-b6c4-99f0914ca0f5].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[d80f98a5-6038-425c-a726-4d46789722b6].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[366a2477-9bc6-42d7-85ba-18f6007f13f5].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[0c3909c9-8337-49a4-91a8-c2d833e86de9].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[aed32f8a-5755-4d9a-8c06-5a81855ae34f].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[aeea4712-73fd-46f7-a296-6e98d303d5ec].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[fb312947-a7c4-4de7-9900-9cefd2c9e2b5].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[7a0b3e70-7782-4795-bb98-b32aee8dff73].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[1a5d1c83-403d-441c-8d4e-e8568453ef1c].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[5c139a43-e90a-4495-b29c-e65f103fd062].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[3c7b383d-5eef-405c-a025-a8e846a4f1d2].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[9f67d60e-5ed4-4ba4-9989-0c8c17fced88].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[b41db990-b39c-4a8b-b511-de4299be12c8].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[bfba51cc-a5b7-466c-ab94-3ae90b267083].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[b9e1cc19-7e53-4a57-8400-8a6c0459ad03].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[a66802ab-655b-4c08-9bce-0e0d7134302f].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[9cf52ad3-a086-47f8-bee0-2799236665a8].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[848a4dbf-f3ce-426c-b8e2-84863e3f7a4d].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[f4df71a4-9080-488e-9113-09ef9b43e382].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[d63499ae-1057-4927-91cb-1f8d3ec54399].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[d2f6c163-e72e-4451-87a2-75a2d4cd21e4].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[4b18705b-dca6-4e3d-9483-b090dcc09efb].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[377acd7e-709c-4c5e-8349-0702b04b8da5].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[47b5593d-a768-481c-a605-114f575ff798].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[5865d31e-526d-4116-8b7d-40b63c3791d9].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[dc9971bd-a1f3-489e-94a5-8f91c174fa9d].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[eb1ef86b-c4ee-4aa7-a148-8d453b489d3a].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[813cd608-800b-42f8-b563-5913cfa87b5f].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[af6763cf-1166-4abe-a916-f7850b9a5f21].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[9310d1c4-38c4-4750-a7d7-807ce61755ed].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[72be3529-7344-426e-a104-e1a1e44f433c].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[bd3ea90e-b03e-49c1-ac61-8e32d52c300b].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[ab302523-8242-4ec3-813b-d156f9ace3c3].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[8069af06-8ed1-4508-8735-a0bcc5d2fb8e].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[b4d23ca1-3fb9-436e-a3c9-330cdbd65ac3].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[7f305010-ff2d-454b-b044-15bc4d1542f8].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[79fad1b1-76bf-4808-87b9-e68eb89e0bed].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[ef092a86-7a6c-4c80-b50e-cd5ace38401f].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[32cc925a-4a00-4446-bf9c-b5817fc74396].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[3af388e3-fba9-4d20-8098-16afe3c0abab].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[595dc315-e04f-4752-bcd5-0a5f986457ce].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[8902b7b6-fbec-43e9-9bd7-13fde9b5e168].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[7acb617d-6c0d-48fe-a9e3-0ae6ff57227a].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[37aaf30e-f44a-4ed3-b503-1e1719636ef8].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[f9b8ddf8-b2c3-4575-b4d6-87684e4eabbc].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[28e02842-0c67-4328-aa5c-4be5a67bb193].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[c36cdb31-27a2-4747-9a13-3a185cc2b75f].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[5a0d72fc-29c2-4de9-ad93-519a3929ffb5].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[71f4b5eb-ddcd-4ab3-a21c-fcddc27a6168].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[4976ee88-73ee-4d96-b571-b77741177ac0].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[0b124e9e-2a0f-4188-9f97-4df386e7e642].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:14</strong> by kartupro.ge@gmail.com [form[f4710cf0-666e-4b88-ac17-8938f31f202f].word_id]</div>
+                <div>Changed: 0b8e980e-09e7-42d3-b3f1-02d33fe5ab1c &rarr; 8da528af-b3c4-4ab5-b920-b35abf76917b</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/24/2026 22:10:13</strong> by kartupro.ge@gmail.com [attributes]</div>
+                <div>Changed: {} &rarr; {&#34;verb_class&#34;:1}</div>
+                <div><em>Comment: Pipeline word auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
                 <div class="edit-meta"><strong>9/17/2026 7:48:13</strong> by gemini_batch_typo_fix [form[bfba51cc-a5b7-466c-ab94-3ae90b267083].form]</div>
-                <div>Changed: <code>გადავჭრდით</code> &rarr; <code>გადავჭრიდით</code></div>
+                <div>Changed: გადავჭრდით &rarr; გადავჭრიდით</div>
                 <div><em>Comment: Fixed typo via batch LLM processing</em></div>
             </div>
             
@@ -1468,7 +1545,7 @@
 
 
         <footer>
-            <p>Page last generated at Fri, 25 Sep 2026 00:16:24 &#43;04.</p>
+            <p>Page last generated at Fri, 25 Sep 2026 13:24:40 &#43;04.</p>
         </footer>
     </div>
 

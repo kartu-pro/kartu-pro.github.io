@@ -6,340 +6,7 @@
     <base href="/resources/open-georgian/">
     <title>შურისძიება (verb) - Open Georgian</title>
     <link rel="stylesheet" href="/css/main.css">
-    <style>
-        :root {
-            --sticky-bar-height: 48px;
-        }
-
-        body { 
-            font-family: var(--font-body); 
-            margin: 0; 
-            padding: 2rem 1.5rem; 
-            background: var(--color-bg); 
-            color: var(--color-text-primary); 
-        }
-
-        .container { 
-            max-width: 720px; 
-            margin: 0 auto; 
-            background: var(--color-surface); 
-            padding: 1.5rem; 
-            border-radius: var(--radius-md); 
-            border: 1px solid var(--color-border);
-        }
-
-        .site-header { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            margin-bottom: 1.25rem; 
-            border-bottom: 1px solid var(--color-border); 
-            padding-bottom: 0.75rem; 
-        }
-
-        .site-title { 
-            font-family: var(--font-heading);
-            font-size: 1.25rem; 
-            font-weight: 800; 
-            text-decoration: none; 
-            color: var(--color-accent); 
-        }
-
-        .nav-links a { 
-            margin-left: 1rem; 
-            color: var(--color-text-secondary); 
-            text-decoration: none; 
-            font-weight: 600;
-            transition: var(--transition);
-        }
-
-        .nav-links a:hover { 
-            color: var(--color-accent); 
-            text-decoration: underline; 
-        }
-        
-        .search-container { 
-            position: relative; 
-            margin-bottom: 1.5rem; 
-        }
-
-        .search-input { 
-            width: 100%; 
-            padding: 0.6rem 0.8rem; 
-            font-size: 0.95rem; 
-            font-family: var(--font-body);
-            background-color: var(--color-surface);
-            color: var(--color-text-primary);
-            border: 1px solid var(--color-border-dark); 
-            border-radius: var(--radius-sm); 
-            outline: none;
-        }
-
-        .search-input:focus {
-            border-color: var(--color-text-primary);
-        }
-
-        .dropdown { 
-            position: absolute; 
-            top: 100%; 
-            left: 0; 
-            right: 0; 
-            background: var(--color-surface); 
-            border: 1px solid var(--color-border-dark); 
-            border-radius: var(--radius-sm);
-            max-height: 300px; 
-            overflow-y: auto; 
-            z-index: 1000; 
-            display: none; 
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        }
-
-        .dropdown-item { 
-            padding: 0.5rem 0.75rem; 
-            cursor: pointer; 
-            border-bottom: 1px solid var(--color-border); 
-            font-size: 0.9rem;
-        }
-
-        .dropdown-item:hover { 
-            background: var(--color-surface-hover); 
-        }
-        
-         
-        .sticky-context-bar {
-            position: sticky;
-            top: 0;
-            height: var(--sticky-bar-height);
-            z-index: 900;
-            background: var(--color-surface);
-            border-bottom: 1px solid var(--color-border);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0 0.75rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
-            margin-bottom: 1.25rem;
-        }
-
-        .sticky-context-bar .context-label {
-            font-size: 0.9rem;
-            color: var(--color-text-secondary);
-            font-weight: 500;
-            white-space: nowrap;
-        }
-
-        .sticky-jump-select {
-            padding: 0.35rem 0.65rem;
-            font-family: var(--font-body);
-            font-size: 0.85rem;
-            font-weight: 600;
-            border-radius: var(--radius-sm);
-            border: 1px solid var(--color-border-dark);
-            background: var(--color-surface-hover);
-            color: var(--color-text-primary);
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .sticky-jump-select:focus {
-            outline: none;
-            border-color: var(--color-accent);
-        }
-
-        .jump-section {
-            scroll-margin-top: calc(var(--sticky-bar-height) + 12px);
-        }
-
-        .screeve-title {
-            position: static;
-            background: transparent;
-            margin-top: 1.75rem;
-            border-bottom: 2px solid var(--color-border);
-            padding: 0.5rem 0 0.25rem 0;
-            color: var(--color-text-primary);
-            font-family: var(--font-heading);
-        }
-        
-         
-        table.paradigm-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 0.5rem;
-            table-layout: fixed;
-        }
-
-        table.paradigm-table th, 
-        table.paradigm-table td {
-            border: 1px solid var(--color-border);
-            padding: 0.5rem 0.25rem;
-            text-align: center;
-            vertical-align: middle;
-            word-wrap: break-word;
-        }
-
-        table.paradigm-table th { 
-            background: var(--color-surface-hover); 
-            font-size: 0.9em; 
-        }
-        .table-wrapper {
-            width: 100%;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            margin-top: 0.5rem;
-        }
-         
-        .table-wrapper table.paradigm-table {
-            table-layout: auto;
-            min-width: 550px;  
-        }
-        th[data-tooltip] {
-          position: relative;
-          cursor: help;
-          user-select: none;
-        }
-
-         
-        th[data-tooltip]::after {
-          content: attr(data-tooltip);
-          position: absolute;
-          top: 125%;  
-          left: 50%;
-          transform: translateX(-50%);
-          background-color: var(--color-border-dark, #333);
-          color: #fff;
-          padding: 4px 8px;
-          font-size: 0.75rem;
-          font-weight: normal;
-          border-radius: var(--radius-sm, 4px);
-          white-space: nowrap;
-          opacity: 0;
-          pointer-events: none;
-          transition: opacity 0.15s ease-in-out;
-          z-index: 1000;
-          box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-
-         
-        th[data-tooltip]::before {
-          content: '';
-          position: absolute;
-          top: 105%;
-          left: 50%;
-          transform: translateX(-50%);
-          border-width: 5px;
-          border-style: solid;
-          border-color: transparent transparent var(--color-border-dark, #333) transparent;
-          opacity: 0;
-          pointer-events: none;
-          transition: opacity 0.15s ease-in-out;
-          z-index: 1000;
-        }
-
-         
-        th[data-tooltip]:hover::after,
-        th[data-tooltip]:hover::before,
-        th[data-tooltip]:focus::after,
-        th[data-tooltip]:focus::before,
-        th[data-tooltip]:active::after,
-        th[data-tooltip]:active::before {
-          opacity: 1;
-        }
-
-        .col-subj   { width: 12%; }
-        .col-prefix { width: 12%; }
-        .col-person { width: 12%; }
-        .col-vers   { width: 12%; }
-        .col-root   { width: 22%; }
-        .col-pfsf   { width: 15%; }
-        .col-suffix { width: 15%; }
-        .col-single { width: 88%; }
-
-        .text-red, .text-blue, .text-purple { 
-            color: var(--color-accent); 
-            font-weight: 600; 
-        }
-
-        .legend-box { 
-            display: flex; 
-            gap: 1rem; 
-            font-size: 0.85rem; 
-            margin: 0.75rem 0; 
-            padding: 0.5rem 0.75rem; 
-            background: var(--color-bg); 
-            border: 1px solid var(--color-border); 
-            border-radius: var(--radius-sm); 
-            flex-wrap: wrap; 
-        }
-
-        .stats-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); 
-            gap: 1rem; 
-            margin: 1.25rem 0; 
-        }
-
-        .stat-card { 
-            background: var(--color-surface-hover); 
-            border: 1px solid var(--color-border);
-            padding: 1rem; 
-            border-radius: var(--radius-sm); 
-            text-align: center; 
-        }
-
-        .stat-number { 
-            font-family: var(--font-heading);
-            font-size: 1.8rem; 
-            font-weight: 800; 
-            color: var(--color-accent); 
-        }
-
-        .stat-label { 
-            font-size: 0.85rem; 
-            color: var(--color-text-secondary); 
-        }
-
-        .edit-item { 
-            border-bottom: 1px solid var(--color-border); 
-            padding: 0.6rem 0; 
-            font-size: 0.9em; 
-        }
-
-        .edit-meta { 
-            font-size: 0.8em; 
-            color: var(--color-text-secondary); 
-        }
-
-        .dupes-section { 
-            margin-top: 2rem; 
-            background: var(--color-warning-bg); 
-            padding: 0.75rem; 
-            border-radius: var(--radius-sm); 
-            border: 1px solid var(--color-border-dark);
-        }
-        
-        footer { 
-            margin-top: 2.5rem; 
-            text-align: center; 
-            font-size: 0.85em; 
-            color: var(--color-text-secondary); 
-            border-top: 1px solid var(--color-border); 
-            padding-top: 1rem; 
-        }
-
-        ul {
-            list-style: none;
-            padding-left: 0;  
-        }
-
-        @media (max-width: 600px) {
-            body {
-                padding: 0.5rem;
-            }
-            .container {
-                padding: 0.75rem;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
@@ -1078,409 +745,409 @@
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:28</strong> by kartupro.ge@gmail.com [form[30cfe8b6-844c-4ba4-9cca-843b083ac405].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>ვიძიე</code></div>
+                <div>Changed: [unavailable] &rarr; ვიძიე</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:28</strong> by kartupro.ge@gmail.com [form[f041ac14-52e9-402a-a174-ffb030bdeed4].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>ეძიებინოთ</code></div>
+                <div>Changed: [unavailable] &rarr; ეძიებინოთ</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:28</strong> by kartupro.ge@gmail.com [form[00dbf3b4-7a3a-44a4-858e-cd4d4fb88031].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>გეძიებინოთ</code></div>
+                <div>Changed: [unavailable] &rarr; გეძიებინოთ</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:28</strong> by kartupro.ge@gmail.com [form[a7b31c1e-6fdf-4060-957f-ec2b628db7e4].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>გვეძიებინოს</code></div>
+                <div>Changed: [unavailable] &rarr; გვეძიებინოს</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:28</strong> by kartupro.ge@gmail.com [form[81e24418-a1eb-443f-a209-a60cf2c40845].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>ეძიებინოს</code></div>
+                <div>Changed: [unavailable] &rarr; ეძიებინოს</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:28</strong> by kartupro.ge@gmail.com [form[818eeb1b-619c-4066-9dd4-a4ae87012612].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>გეძიებინოს</code></div>
+                <div>Changed: [unavailable] &rarr; გეძიებინოს</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:28</strong> by kartupro.ge@gmail.com [form[c238bb3b-6d5c-410c-b208-ac882a8276c9].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>მეძიებინოს</code></div>
+                <div>Changed: [unavailable] &rarr; მეძიებინოს</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:28</strong> by kartupro.ge@gmail.com [form[438aae16-887d-4aae-8c80-c01f02a42405].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>ეძიებინათ</code></div>
+                <div>Changed: [unavailable] &rarr; ეძიებინათ</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:28</strong> by kartupro.ge@gmail.com [form[7dcedd6b-eedd-4530-9ea1-fc85721a0701].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>გეძიებინათ</code></div>
+                <div>Changed: [unavailable] &rarr; გეძიებინათ</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:28</strong> by kartupro.ge@gmail.com [form[2627761f-4d87-4923-aa08-15f4ad06cf44].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>გვეძიებინა</code></div>
+                <div>Changed: [unavailable] &rarr; გვეძიებინა</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:28</strong> by kartupro.ge@gmail.com [form[3df7cfb8-e62e-4573-9826-5c88781d2861].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>ეძიებინა</code></div>
+                <div>Changed: [unavailable] &rarr; ეძიებინა</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:28</strong> by kartupro.ge@gmail.com [form[b07b7468-a279-4553-8096-bff47e405000].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>გეძიებინა</code></div>
+                <div>Changed: [unavailable] &rarr; გეძიებინა</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:28</strong> by kartupro.ge@gmail.com [form[b49db72d-5717-4c58-9d68-552ed4e5343d].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>მეძიებინა</code></div>
+                <div>Changed: [unavailable] &rarr; მეძიებინა</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:28</strong> by kartupro.ge@gmail.com [form[9b9331ad-51dc-4bb1-8918-5e495b736e41].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>უძიებიათ</code></div>
+                <div>Changed: [unavailable] &rarr; უძიებიათ</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:28</strong> by kartupro.ge@gmail.com [form[53183dbf-2c71-4aa4-a06a-090c80709ec5].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>გიძიებიათ</code></div>
+                <div>Changed: [unavailable] &rarr; გიძიებიათ</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:28</strong> by kartupro.ge@gmail.com [form[6079b820-cc81-4ee0-8331-4143921a467f].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>გვიძიებია</code></div>
+                <div>Changed: [unavailable] &rarr; გვიძიებია</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:28</strong> by kartupro.ge@gmail.com [form[719c8b3b-aa97-4079-a53d-8993988a8cfe].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>უძიებია</code></div>
+                <div>Changed: [unavailable] &rarr; უძიებია</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:28</strong> by kartupro.ge@gmail.com [form[f0788108-365e-4b7f-b2fd-c4b518b3cecc].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>გიძიებია</code></div>
+                <div>Changed: [unavailable] &rarr; გიძიებია</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:28</strong> by kartupro.ge@gmail.com [form[1dc05a8c-8132-4317-8066-30c228fdbf65].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>მიძიებია</code></div>
+                <div>Changed: [unavailable] &rarr; მიძიებია</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:28</strong> by kartupro.ge@gmail.com [form[788995e8-5c15-4c2f-bff9-a3922f3d5dea].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>იძიონ</code></div>
+                <div>Changed: [unavailable] &rarr; იძიონ</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:28</strong> by kartupro.ge@gmail.com [form[8ac4cf99-e387-43b9-aae1-abbb915cfce2].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>იძიოთ</code></div>
+                <div>Changed: [unavailable] &rarr; იძიოთ</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:28</strong> by kartupro.ge@gmail.com [form[0388c222-58d1-4c82-806b-ad5b2b4e391d].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>ვიძიოთ</code></div>
+                <div>Changed: [unavailable] &rarr; ვიძიოთ</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:28</strong> by kartupro.ge@gmail.com [form[86b72361-1e82-40c1-85f6-d0bfd556b39a].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>იძიოს</code></div>
+                <div>Changed: [unavailable] &rarr; იძიოს</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:28</strong> by kartupro.ge@gmail.com [form[9a99e3d4-a31f-45ed-a602-90e28e4fccb7].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>იძიო</code></div>
+                <div>Changed: [unavailable] &rarr; იძიო</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:28</strong> by kartupro.ge@gmail.com [form[79604080-d262-4dd8-a183-6e80ee6cad01].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>ვიძიო</code></div>
+                <div>Changed: [unavailable] &rarr; ვიძიო</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:28</strong> by kartupro.ge@gmail.com [form[8263a529-ebe4-4393-b122-a0ccca560482].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>იძიეს</code></div>
+                <div>Changed: [unavailable] &rarr; იძიეს</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:28</strong> by kartupro.ge@gmail.com [form[d588f3f1-9ef4-4b44-bf49-2ad4e0ba5bb7].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>იძიეთ</code></div>
+                <div>Changed: [unavailable] &rarr; იძიეთ</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:28</strong> by kartupro.ge@gmail.com [form[f6dd8537-6cc7-4563-84b7-ac7c095c5466].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>ვიძიეთ</code></div>
+                <div>Changed: [unavailable] &rarr; ვიძიეთ</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:28</strong> by kartupro.ge@gmail.com [form[cea7b4c6-649a-40a9-86be-5d61d4d456de].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>იძია</code></div>
+                <div>Changed: [unavailable] &rarr; იძია</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:28</strong> by kartupro.ge@gmail.com [form[82f459b3-64ce-41ee-90c6-20f4372d297c].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>იძიე</code></div>
+                <div>Changed: [unavailable] &rarr; იძიე</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:18</strong> by kartupro.ge@gmail.com [form[bced0949-9295-4dff-b51f-231d7071285a].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>ვიძიებდეთ</code></div>
+                <div>Changed: [unavailable] &rarr; ვიძიებდეთ</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:18</strong> by kartupro.ge@gmail.com [form[ea220cbf-cc91-4652-8ab4-f77bcccafa54].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>იძიებდნენ</code></div>
+                <div>Changed: [unavailable] &rarr; იძიებდნენ</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:18</strong> by kartupro.ge@gmail.com [form[56dbc89f-a410-411d-8494-077d52db7325].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>ვიძიებდე</code></div>
+                <div>Changed: [unavailable] &rarr; ვიძიებდე</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:18</strong> by kartupro.ge@gmail.com [form[2b5f7ac1-1b2b-4452-8d3a-47275e64e104].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>იძიებდე</code></div>
+                <div>Changed: [unavailable] &rarr; იძიებდე</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:18</strong> by kartupro.ge@gmail.com [form[82060fa8-fb58-4c61-8cab-6fab8540f7ab].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>იძიებდეს</code></div>
+                <div>Changed: [unavailable] &rarr; იძიებდეს</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:18</strong> by kartupro.ge@gmail.com [form[f008ec84-19b0-41d0-a1c8-a0cfcef56484].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>ვიძიებდეთ</code></div>
+                <div>Changed: [unavailable] &rarr; ვიძიებდეთ</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:18</strong> by kartupro.ge@gmail.com [form[3eef519a-0b2f-4bb8-aef2-d035ce1688d1].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>იძიებდეთ</code></div>
+                <div>Changed: [unavailable] &rarr; იძიებდეთ</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:18</strong> by kartupro.ge@gmail.com [form[d27622d2-9ae7-40f9-9fe1-af3be91cdcb0].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>იძიებდნენ</code></div>
+                <div>Changed: [unavailable] &rarr; იძიებდნენ</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:18</strong> by kartupro.ge@gmail.com [form[c988a5ef-cba1-4352-ad54-0083ae058e20].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>იძიებდით</code></div>
+                <div>Changed: [unavailable] &rarr; იძიებდით</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:18</strong> by kartupro.ge@gmail.com [form[21f12c1d-8c4e-4e19-a2f8-3eed4751e521].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>ვიძიებდით</code></div>
+                <div>Changed: [unavailable] &rarr; ვიძიებდით</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:18</strong> by kartupro.ge@gmail.com [form[ab24286d-178c-4e09-89d9-f6dfa005389e].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>იძიებდა</code></div>
+                <div>Changed: [unavailable] &rarr; იძიებდა</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:18</strong> by kartupro.ge@gmail.com [form[def8d50c-4310-4406-a571-65213be80910].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>იძიებდი</code></div>
+                <div>Changed: [unavailable] &rarr; იძიებდი</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:18</strong> by kartupro.ge@gmail.com [form[c1d7d400-e555-4eac-89b7-2e92f794d1ad].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>ვიძიებდი</code></div>
+                <div>Changed: [unavailable] &rarr; ვიძიებდი</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:18</strong> by kartupro.ge@gmail.com [form[1f270385-b008-4509-bc4c-463d6e45268d].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>იძიებენ</code></div>
+                <div>Changed: [unavailable] &rarr; იძიებენ</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:18</strong> by kartupro.ge@gmail.com [form[53a827b6-2a49-45ec-b2f8-90e327fc222a].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>იძიებთ</code></div>
+                <div>Changed: [unavailable] &rarr; იძიებთ</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:18</strong> by kartupro.ge@gmail.com [form[282961c3-8088-4235-ba8d-30484329baf4].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>ვიძიებთ</code></div>
+                <div>Changed: [unavailable] &rarr; ვიძიებთ</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:18</strong> by kartupro.ge@gmail.com [form[a9ace2ca-9208-4e0d-830c-c384f40d1158].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>იძიებს</code></div>
+                <div>Changed: [unavailable] &rarr; იძიებს</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:18</strong> by kartupro.ge@gmail.com [form[5f75b8c0-61a1-4cdd-a06e-0fa59a3325e7].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>იძიებ</code></div>
+                <div>Changed: [unavailable] &rarr; იძიებ</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:18</strong> by kartupro.ge@gmail.com [form[0bd719ba-f301-4bee-a6d9-3ce03fd03835].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>ვიძიებ</code></div>
+                <div>Changed: [unavailable] &rarr; ვიძიებ</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:18</strong> by kartupro.ge@gmail.com [form[fcae8603-ab6e-4f3c-9146-b57782326940].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>იძიებდნენ</code></div>
+                <div>Changed: [unavailable] &rarr; იძიებდნენ</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:18</strong> by kartupro.ge@gmail.com [form[965e3331-5c53-4a1d-b0ae-bd3d9a4d8aa9].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>იძიებდეთ</code></div>
+                <div>Changed: [unavailable] &rarr; იძიებდეთ</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:18</strong> by kartupro.ge@gmail.com [form[88f2bc58-ac53-4c22-bca5-d4beee273e55].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>ვიძიებ</code></div>
+                <div>Changed: [unavailable] &rarr; ვიძიებ</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:18</strong> by kartupro.ge@gmail.com [form[fb168d4c-6d3d-46f2-9c81-3c95e17ef238].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>იძიებდეს</code></div>
+                <div>Changed: [unavailable] &rarr; იძიებდეს</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:18</strong> by kartupro.ge@gmail.com [form[bd60e523-f722-4cc3-9bd9-1783a1b4993a].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>იძიებდე</code></div>
+                <div>Changed: [unavailable] &rarr; იძიებდე</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:18</strong> by kartupro.ge@gmail.com [form[c6c4007c-a427-40b3-ac62-2c41e96aee32].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>ვიძიებდე</code></div>
+                <div>Changed: [unavailable] &rarr; ვიძიებდე</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:18</strong> by kartupro.ge@gmail.com [form[0bb6bf36-bad5-4c14-b994-c79b4505f160].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>იძიებდნენ</code></div>
+                <div>Changed: [unavailable] &rarr; იძიებდნენ</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:18</strong> by kartupro.ge@gmail.com [form[bede2874-7341-482d-a9b0-e30672cf342a].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>იძიებდით</code></div>
+                <div>Changed: [unavailable] &rarr; იძიებდით</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:18</strong> by kartupro.ge@gmail.com [form[f028be97-cf66-4599-90d9-621e83f704bc].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>ვიძიებდით</code></div>
+                <div>Changed: [unavailable] &rarr; ვიძიებდით</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:18</strong> by kartupro.ge@gmail.com [form[fd05e5d8-447f-41b9-b27f-d245ed58c8ea].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>იძიებდა</code></div>
+                <div>Changed: [unavailable] &rarr; იძიებდა</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:18</strong> by kartupro.ge@gmail.com [form[850a5ff9-9f18-4e47-beec-65f889dc604c].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>იძიებდი</code></div>
+                <div>Changed: [unavailable] &rarr; იძიებდი</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:18</strong> by kartupro.ge@gmail.com [form[bf2cdd8e-5d60-4d5f-939d-8c9837dd0801].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>ვძიებდი</code></div>
+                <div>Changed: [unavailable] &rarr; ვძიებდი</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:18</strong> by kartupro.ge@gmail.com [form[6b3d0d86-abe0-4b5d-bd7c-562ffaf0d847].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>იძიებენ</code></div>
+                <div>Changed: [unavailable] &rarr; იძიებენ</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:18</strong> by kartupro.ge@gmail.com [form[7e76baf5-a270-4582-b9f8-1e6d4e97ad4b].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>იძიებთ</code></div>
+                <div>Changed: [unavailable] &rarr; იძიებთ</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:18</strong> by kartupro.ge@gmail.com [form[a1bc6603-f3fd-46c3-9055-a279d6c503cd].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>ვიძიებთ</code></div>
+                <div>Changed: [unavailable] &rarr; ვიძიებთ</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:18</strong> by kartupro.ge@gmail.com [form[c47c99b1-9026-402b-9e46-8dba510646c4].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>იძიებს</code></div>
+                <div>Changed: [unavailable] &rarr; იძიებს</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:30:18</strong> by kartupro.ge@gmail.com [form[994e4f74-5645-4b81-95b6-8921265ea23d].form]</div>
-                <div>Changed: <code>[unavailable - bulk edit]</code> &rarr; <code>იძიებ</code></div>
+                <div>Changed: [unavailable] &rarr; იძიებ</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>9/19/2026 22:29:03</strong> by kartupro.ge@gmail.com [lemma]</div>
-                <div>Changed: <code>[UNKNOWN]</code> &rarr; <code>შურისძიება</code></div>
+                <div>Changed: [UNKNOWN] &rarr; შურისძიება</div>
                 
             </div>
             
             <div class="edit-item">
                 <div class="edit-meta"><strong>8/21/2026 7:41:32</strong> by ingest_script [masdar]</div>
-                <div>Changed: <code></code> &rarr; <code>[UNKNOWN]</code></div>
+                <div>Changed:  &rarr; [UNKNOWN]</div>
                 <div><em>Comment: Corrected interactively during import</em></div>
             </div>
             
@@ -1490,7 +1157,7 @@
 
 
         <footer>
-            <p>Page last generated at Fri, 25 Sep 2026 00:16:24 &#43;04.</p>
+            <p>Page last generated at Fri, 25 Sep 2026 13:24:40 &#43;04.</p>
         </footer>
     </div>
 

@@ -6,340 +6,7 @@
     <base href="/resources/open-georgian/">
     <title>თესვა (verb) - Open Georgian</title>
     <link rel="stylesheet" href="/css/main.css">
-    <style>
-        :root {
-            --sticky-bar-height: 48px;
-        }
-
-        body { 
-            font-family: var(--font-body); 
-            margin: 0; 
-            padding: 2rem 1.5rem; 
-            background: var(--color-bg); 
-            color: var(--color-text-primary); 
-        }
-
-        .container { 
-            max-width: 720px; 
-            margin: 0 auto; 
-            background: var(--color-surface); 
-            padding: 1.5rem; 
-            border-radius: var(--radius-md); 
-            border: 1px solid var(--color-border);
-        }
-
-        .site-header { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            margin-bottom: 1.25rem; 
-            border-bottom: 1px solid var(--color-border); 
-            padding-bottom: 0.75rem; 
-        }
-
-        .site-title { 
-            font-family: var(--font-heading);
-            font-size: 1.25rem; 
-            font-weight: 800; 
-            text-decoration: none; 
-            color: var(--color-accent); 
-        }
-
-        .nav-links a { 
-            margin-left: 1rem; 
-            color: var(--color-text-secondary); 
-            text-decoration: none; 
-            font-weight: 600;
-            transition: var(--transition);
-        }
-
-        .nav-links a:hover { 
-            color: var(--color-accent); 
-            text-decoration: underline; 
-        }
-        
-        .search-container { 
-            position: relative; 
-            margin-bottom: 1.5rem; 
-        }
-
-        .search-input { 
-            width: 100%; 
-            padding: 0.6rem 0.8rem; 
-            font-size: 0.95rem; 
-            font-family: var(--font-body);
-            background-color: var(--color-surface);
-            color: var(--color-text-primary);
-            border: 1px solid var(--color-border-dark); 
-            border-radius: var(--radius-sm); 
-            outline: none;
-        }
-
-        .search-input:focus {
-            border-color: var(--color-text-primary);
-        }
-
-        .dropdown { 
-            position: absolute; 
-            top: 100%; 
-            left: 0; 
-            right: 0; 
-            background: var(--color-surface); 
-            border: 1px solid var(--color-border-dark); 
-            border-radius: var(--radius-sm);
-            max-height: 300px; 
-            overflow-y: auto; 
-            z-index: 1000; 
-            display: none; 
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        }
-
-        .dropdown-item { 
-            padding: 0.5rem 0.75rem; 
-            cursor: pointer; 
-            border-bottom: 1px solid var(--color-border); 
-            font-size: 0.9rem;
-        }
-
-        .dropdown-item:hover { 
-            background: var(--color-surface-hover); 
-        }
-        
-         
-        .sticky-context-bar {
-            position: sticky;
-            top: 0;
-            height: var(--sticky-bar-height);
-            z-index: 900;
-            background: var(--color-surface);
-            border-bottom: 1px solid var(--color-border);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0 0.75rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
-            margin-bottom: 1.25rem;
-        }
-
-        .sticky-context-bar .context-label {
-            font-size: 0.9rem;
-            color: var(--color-text-secondary);
-            font-weight: 500;
-            white-space: nowrap;
-        }
-
-        .sticky-jump-select {
-            padding: 0.35rem 0.65rem;
-            font-family: var(--font-body);
-            font-size: 0.85rem;
-            font-weight: 600;
-            border-radius: var(--radius-sm);
-            border: 1px solid var(--color-border-dark);
-            background: var(--color-surface-hover);
-            color: var(--color-text-primary);
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .sticky-jump-select:focus {
-            outline: none;
-            border-color: var(--color-accent);
-        }
-
-        .jump-section {
-            scroll-margin-top: calc(var(--sticky-bar-height) + 12px);
-        }
-
-        .screeve-title {
-            position: static;
-            background: transparent;
-            margin-top: 1.75rem;
-            border-bottom: 2px solid var(--color-border);
-            padding: 0.5rem 0 0.25rem 0;
-            color: var(--color-text-primary);
-            font-family: var(--font-heading);
-        }
-        
-         
-        table.paradigm-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 0.5rem;
-            table-layout: fixed;
-        }
-
-        table.paradigm-table th, 
-        table.paradigm-table td {
-            border: 1px solid var(--color-border);
-            padding: 0.5rem 0.25rem;
-            text-align: center;
-            vertical-align: middle;
-            word-wrap: break-word;
-        }
-
-        table.paradigm-table th { 
-            background: var(--color-surface-hover); 
-            font-size: 0.9em; 
-        }
-        .table-wrapper {
-            width: 100%;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            margin-top: 0.5rem;
-        }
-         
-        .table-wrapper table.paradigm-table {
-            table-layout: auto;
-            min-width: 550px;  
-        }
-        th[data-tooltip] {
-          position: relative;
-          cursor: help;
-          user-select: none;
-        }
-
-         
-        th[data-tooltip]::after {
-          content: attr(data-tooltip);
-          position: absolute;
-          top: 125%;  
-          left: 50%;
-          transform: translateX(-50%);
-          background-color: var(--color-border-dark, #333);
-          color: #fff;
-          padding: 4px 8px;
-          font-size: 0.75rem;
-          font-weight: normal;
-          border-radius: var(--radius-sm, 4px);
-          white-space: nowrap;
-          opacity: 0;
-          pointer-events: none;
-          transition: opacity 0.15s ease-in-out;
-          z-index: 1000;
-          box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-
-         
-        th[data-tooltip]::before {
-          content: '';
-          position: absolute;
-          top: 105%;
-          left: 50%;
-          transform: translateX(-50%);
-          border-width: 5px;
-          border-style: solid;
-          border-color: transparent transparent var(--color-border-dark, #333) transparent;
-          opacity: 0;
-          pointer-events: none;
-          transition: opacity 0.15s ease-in-out;
-          z-index: 1000;
-        }
-
-         
-        th[data-tooltip]:hover::after,
-        th[data-tooltip]:hover::before,
-        th[data-tooltip]:focus::after,
-        th[data-tooltip]:focus::before,
-        th[data-tooltip]:active::after,
-        th[data-tooltip]:active::before {
-          opacity: 1;
-        }
-
-        .col-subj   { width: 12%; }
-        .col-prefix { width: 12%; }
-        .col-person { width: 12%; }
-        .col-vers   { width: 12%; }
-        .col-root   { width: 22%; }
-        .col-pfsf   { width: 15%; }
-        .col-suffix { width: 15%; }
-        .col-single { width: 88%; }
-
-        .text-red, .text-blue, .text-purple { 
-            color: var(--color-accent); 
-            font-weight: 600; 
-        }
-
-        .legend-box { 
-            display: flex; 
-            gap: 1rem; 
-            font-size: 0.85rem; 
-            margin: 0.75rem 0; 
-            padding: 0.5rem 0.75rem; 
-            background: var(--color-bg); 
-            border: 1px solid var(--color-border); 
-            border-radius: var(--radius-sm); 
-            flex-wrap: wrap; 
-        }
-
-        .stats-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); 
-            gap: 1rem; 
-            margin: 1.25rem 0; 
-        }
-
-        .stat-card { 
-            background: var(--color-surface-hover); 
-            border: 1px solid var(--color-border);
-            padding: 1rem; 
-            border-radius: var(--radius-sm); 
-            text-align: center; 
-        }
-
-        .stat-number { 
-            font-family: var(--font-heading);
-            font-size: 1.8rem; 
-            font-weight: 800; 
-            color: var(--color-accent); 
-        }
-
-        .stat-label { 
-            font-size: 0.85rem; 
-            color: var(--color-text-secondary); 
-        }
-
-        .edit-item { 
-            border-bottom: 1px solid var(--color-border); 
-            padding: 0.6rem 0; 
-            font-size: 0.9em; 
-        }
-
-        .edit-meta { 
-            font-size: 0.8em; 
-            color: var(--color-text-secondary); 
-        }
-
-        .dupes-section { 
-            margin-top: 2rem; 
-            background: var(--color-warning-bg); 
-            padding: 0.75rem; 
-            border-radius: var(--radius-sm); 
-            border: 1px solid var(--color-border-dark);
-        }
-        
-        footer { 
-            margin-top: 2.5rem; 
-            text-align: center; 
-            font-size: 0.85em; 
-            color: var(--color-text-secondary); 
-            border-top: 1px solid var(--color-border); 
-            padding-top: 1rem; 
-        }
-
-        ul {
-            list-style: none;
-            padding-left: 0;  
-        }
-
-        @media (max-width: 600px) {
-            body {
-                padding: 0.5rem;
-            }
-            .container {
-                padding: 0.75rem;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
@@ -368,10 +35,12 @@
 
 
     <p>
-        <strong>verb</strong>
+        <strong>verb</strong>, class 1
     </p>
 
 
+
+    <p>sow, plant (imperfective)</p>
 
 
 
@@ -380,6 +49,336 @@
     
 
 <h2 class="jump-section">Forms</h2>
+
+    
+    <h3 id="screeve-aor" class="screeve-title jump-section" data-jump-title="Aorist">Aorist</h3>
+    <div class="table-wrapper">
+        <table class="paradigm-table">
+            <colgroup>
+                <col class="col-subj">
+                
+                    <col class="col-single">
+                
+            </colgroup>
+            <thead>
+            <tr>
+                <th class="col-subj" data-tooltip="Logical Subject">S</th>
+                
+                    <th class="col-single">Form</th>
+                
+            </tr>
+            </thead>
+            <tbody>
+                
+                <tr>
+                    <td class="col-subj"><strong>1s</strong></td>
+                    
+                        <td class="col-single">ვთესე</td>
+                    
+                </tr>
+                
+                <tr>
+                    <td class="col-subj"><strong>2s</strong></td>
+                    
+                        <td class="col-single">თესე</td>
+                    
+                </tr>
+                
+                <tr>
+                    <td class="col-subj"><strong>3s</strong></td>
+                    
+                        <td class="col-single">თესა</td>
+                    
+                </tr>
+                
+                <tr>
+                    <td class="col-subj"><strong>1p</strong></td>
+                    
+                        <td class="col-single">ვთესეთ</td>
+                    
+                </tr>
+                
+                <tr>
+                    <td class="col-subj"><strong>2p</strong></td>
+                    
+                        <td class="col-single">თესეთ</td>
+                    
+                </tr>
+                
+                <tr>
+                    <td class="col-subj"><strong>3p</strong></td>
+                    
+                        <td class="col-single">თესეს</td>
+                    
+                </tr>
+                
+            </tbody>
+        </table>
+    </div>
+
+    
+    <h3 id="screeve-opt" class="screeve-title jump-section" data-jump-title="Optative">Optative</h3>
+    <div class="table-wrapper">
+        <table class="paradigm-table">
+            <colgroup>
+                <col class="col-subj">
+                
+                    <col class="col-single">
+                
+            </colgroup>
+            <thead>
+            <tr>
+                <th class="col-subj" data-tooltip="Logical Subject">S</th>
+                
+                    <th class="col-single">Form</th>
+                
+            </tr>
+            </thead>
+            <tbody>
+                
+                <tr>
+                    <td class="col-subj"><strong>1s</strong></td>
+                    
+                        <td class="col-single">ვთესო</td>
+                    
+                </tr>
+                
+                <tr>
+                    <td class="col-subj"><strong>2s</strong></td>
+                    
+                        <td class="col-single">თესო</td>
+                    
+                </tr>
+                
+                <tr>
+                    <td class="col-subj"><strong>3s</strong></td>
+                    
+                        <td class="col-single">თესოს</td>
+                    
+                </tr>
+                
+                <tr>
+                    <td class="col-subj"><strong>1p</strong></td>
+                    
+                        <td class="col-single">ვთესოთ</td>
+                    
+                </tr>
+                
+                <tr>
+                    <td class="col-subj"><strong>2p</strong></td>
+                    
+                        <td class="col-single">თესოთ</td>
+                    
+                </tr>
+                
+                <tr>
+                    <td class="col-subj"><strong>3p</strong></td>
+                    
+                        <td class="col-single">თესონ</td>
+                    
+                </tr>
+                
+            </tbody>
+        </table>
+    </div>
+
+    
+    <h3 id="screeve-perf" class="screeve-title jump-section" data-jump-title="Perfect">Perfect</h3>
+    <div class="table-wrapper">
+        <table class="paradigm-table">
+            <colgroup>
+                <col class="col-subj">
+                
+                    <col class="col-single">
+                
+            </colgroup>
+            <thead>
+            <tr>
+                <th class="col-subj" data-tooltip="Logical Subject">S</th>
+                
+                    <th class="col-single">Form</th>
+                
+            </tr>
+            </thead>
+            <tbody>
+                
+                <tr>
+                    <td class="col-subj"><strong>1s</strong></td>
+                    
+                        <td class="col-single">მითესავს</td>
+                    
+                </tr>
+                
+                <tr>
+                    <td class="col-subj"><strong>2s</strong></td>
+                    
+                        <td class="col-single">გითესავს</td>
+                    
+                </tr>
+                
+                <tr>
+                    <td class="col-subj"><strong>3s</strong></td>
+                    
+                        <td class="col-single">უთესავს</td>
+                    
+                </tr>
+                
+                <tr>
+                    <td class="col-subj"><strong>1p</strong></td>
+                    
+                        <td class="col-single">გვითესავს</td>
+                    
+                </tr>
+                
+                <tr>
+                    <td class="col-subj"><strong>2p</strong></td>
+                    
+                        <td class="col-single">გითესავთ</td>
+                    
+                </tr>
+                
+                <tr>
+                    <td class="col-subj"><strong>3p</strong></td>
+                    
+                        <td class="col-single">უთესავთ</td>
+                    
+                </tr>
+                
+            </tbody>
+        </table>
+    </div>
+
+    
+    <h3 id="screeve-plu" class="screeve-title jump-section" data-jump-title="Pluperfect">Pluperfect</h3>
+    <div class="table-wrapper">
+        <table class="paradigm-table">
+            <colgroup>
+                <col class="col-subj">
+                
+                    <col class="col-single">
+                
+            </colgroup>
+            <thead>
+            <tr>
+                <th class="col-subj" data-tooltip="Logical Subject">S</th>
+                
+                    <th class="col-single">Form</th>
+                
+            </tr>
+            </thead>
+            <tbody>
+                
+                <tr>
+                    <td class="col-subj"><strong>1s</strong></td>
+                    
+                        <td class="col-single">მეთესა</td>
+                    
+                </tr>
+                
+                <tr>
+                    <td class="col-subj"><strong>2s</strong></td>
+                    
+                        <td class="col-single">გეთესა</td>
+                    
+                </tr>
+                
+                <tr>
+                    <td class="col-subj"><strong>3s</strong></td>
+                    
+                        <td class="col-single">ეთესა</td>
+                    
+                </tr>
+                
+                <tr>
+                    <td class="col-subj"><strong>1p</strong></td>
+                    
+                        <td class="col-single">გვეთესა</td>
+                    
+                </tr>
+                
+                <tr>
+                    <td class="col-subj"><strong>2p</strong></td>
+                    
+                        <td class="col-single">გეთესათ</td>
+                    
+                </tr>
+                
+                <tr>
+                    <td class="col-subj"><strong>3p</strong></td>
+                    
+                        <td class="col-single">ეთესათ</td>
+                    
+                </tr>
+                
+            </tbody>
+        </table>
+    </div>
+
+    
+    <h3 id="screeve-perf-subj" class="screeve-title jump-section" data-jump-title="Perfect Subjunctive">Perfect Subjunctive</h3>
+    <div class="table-wrapper">
+        <table class="paradigm-table">
+            <colgroup>
+                <col class="col-subj">
+                
+                    <col class="col-single">
+                
+            </colgroup>
+            <thead>
+            <tr>
+                <th class="col-subj" data-tooltip="Logical Subject">S</th>
+                
+                    <th class="col-single">Form</th>
+                
+            </tr>
+            </thead>
+            <tbody>
+                
+                <tr>
+                    <td class="col-subj"><strong>1s</strong></td>
+                    
+                        <td class="col-single">მეთესოს</td>
+                    
+                </tr>
+                
+                <tr>
+                    <td class="col-subj"><strong>2s</strong></td>
+                    
+                        <td class="col-single">გეთესოს</td>
+                    
+                </tr>
+                
+                <tr>
+                    <td class="col-subj"><strong>3s</strong></td>
+                    
+                        <td class="col-single">ეთესოს</td>
+                    
+                </tr>
+                
+                <tr>
+                    <td class="col-subj"><strong>1p</strong></td>
+                    
+                        <td class="col-single">გვეთესოს</td>
+                    
+                </tr>
+                
+                <tr>
+                    <td class="col-subj"><strong>2p</strong></td>
+                    
+                        <td class="col-single">გეთესოთ</td>
+                    
+                </tr>
+                
+                <tr>
+                    <td class="col-subj"><strong>3p</strong></td>
+                    
+                        <td class="col-single">ეთესოთ</td>
+                    
+                </tr>
+                
+            </tbody>
+        </table>
+    </div>
 
 
 
@@ -400,16 +399,210 @@
 
 <section style="margin-top: 32px;">
     <h2 id="edit-history" class="jump-section" data-jump-title="Edit History">
-        Edit History (0)
+        Edit History (32)
     </h2>
     
-        <p><em>No edit history found for this word.</em></p>
+        <div class="edits-list">
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/25/2026 11:19:57</strong> by kartupro.ge@gmail.com [form[a04a7095-28b0-47ac-8092-9e4699156ff3].word_id]</div>
+                <div>Changed: c2e6712f-bd87-4bef-bc23-0c6183bf1116 &rarr; dd539e75-19b5-4050-8016-ed17b8dc57f5</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/25/2026 11:19:57</strong> by kartupro.ge@gmail.com [form[38d6dbf3-f050-4a76-8abe-39ef18d74c25].word_id]</div>
+                <div>Changed: c2e6712f-bd87-4bef-bc23-0c6183bf1116 &rarr; dd539e75-19b5-4050-8016-ed17b8dc57f5</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/25/2026 11:19:57</strong> by kartupro.ge@gmail.com [form[808844ba-4614-4cd5-95ec-9e2b042c790b].word_id]</div>
+                <div>Changed: c2e6712f-bd87-4bef-bc23-0c6183bf1116 &rarr; dd539e75-19b5-4050-8016-ed17b8dc57f5</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/25/2026 11:19:57</strong> by kartupro.ge@gmail.com [form[c0771269-9b3d-43c2-b0ae-0bd08a2f2e98].word_id]</div>
+                <div>Changed: c2e6712f-bd87-4bef-bc23-0c6183bf1116 &rarr; dd539e75-19b5-4050-8016-ed17b8dc57f5</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/25/2026 11:19:57</strong> by kartupro.ge@gmail.com [form[731452f4-3b8d-418b-8dde-c40ea1b243d5].word_id]</div>
+                <div>Changed: c2e6712f-bd87-4bef-bc23-0c6183bf1116 &rarr; dd539e75-19b5-4050-8016-ed17b8dc57f5</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/25/2026 11:19:57</strong> by kartupro.ge@gmail.com [form[4026d463-57a7-4663-81bd-8fe09449265d].word_id]</div>
+                <div>Changed: c2e6712f-bd87-4bef-bc23-0c6183bf1116 &rarr; dd539e75-19b5-4050-8016-ed17b8dc57f5</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/25/2026 11:19:57</strong> by kartupro.ge@gmail.com [form[ecee619c-098a-4c1d-a396-e9b68bcd5097].word_id]</div>
+                <div>Changed: c2e6712f-bd87-4bef-bc23-0c6183bf1116 &rarr; dd539e75-19b5-4050-8016-ed17b8dc57f5</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/25/2026 11:19:57</strong> by kartupro.ge@gmail.com [form[45a7e71f-3ce4-47f5-9114-c1ed53dc02cf].word_id]</div>
+                <div>Changed: c2e6712f-bd87-4bef-bc23-0c6183bf1116 &rarr; dd539e75-19b5-4050-8016-ed17b8dc57f5</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/25/2026 11:19:57</strong> by kartupro.ge@gmail.com [form[abdc6f02-007a-425a-9bec-73a345542070].word_id]</div>
+                <div>Changed: c2e6712f-bd87-4bef-bc23-0c6183bf1116 &rarr; dd539e75-19b5-4050-8016-ed17b8dc57f5</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/25/2026 11:19:57</strong> by kartupro.ge@gmail.com [form[195c966d-4f8b-4a44-a45a-6a01f2e9a92a].word_id]</div>
+                <div>Changed: c2e6712f-bd87-4bef-bc23-0c6183bf1116 &rarr; dd539e75-19b5-4050-8016-ed17b8dc57f5</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/25/2026 11:19:57</strong> by kartupro.ge@gmail.com [form[0c78c8a5-23b9-405d-b640-9d88853358b1].word_id]</div>
+                <div>Changed: c2e6712f-bd87-4bef-bc23-0c6183bf1116 &rarr; dd539e75-19b5-4050-8016-ed17b8dc57f5</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/25/2026 11:19:57</strong> by kartupro.ge@gmail.com [form[a15aa2fe-0b19-4a39-94d5-cba99f4785d8].word_id]</div>
+                <div>Changed: c2e6712f-bd87-4bef-bc23-0c6183bf1116 &rarr; dd539e75-19b5-4050-8016-ed17b8dc57f5</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/25/2026 11:19:57</strong> by kartupro.ge@gmail.com [form[1ce60611-433a-46df-b543-1c6ceff7230b].word_id]</div>
+                <div>Changed: c2e6712f-bd87-4bef-bc23-0c6183bf1116 &rarr; dd539e75-19b5-4050-8016-ed17b8dc57f5</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/25/2026 11:19:57</strong> by kartupro.ge@gmail.com [form[22fb5e76-2029-4319-8e85-bbfccf9cc265].word_id]</div>
+                <div>Changed: c2e6712f-bd87-4bef-bc23-0c6183bf1116 &rarr; dd539e75-19b5-4050-8016-ed17b8dc57f5</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/25/2026 11:19:57</strong> by kartupro.ge@gmail.com [form[d8cbd1f1-6843-4448-99b9-4036c7e73c48].word_id]</div>
+                <div>Changed: c2e6712f-bd87-4bef-bc23-0c6183bf1116 &rarr; dd539e75-19b5-4050-8016-ed17b8dc57f5</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/25/2026 11:19:57</strong> by kartupro.ge@gmail.com [attributes]</div>
+                <div>Changed: {} &rarr; {&#34;verb_class&#34;:1,&#34;translation&#34;:&#34;sow, plant (imperfective)&#34;}</div>
+                <div><em>Comment: Pipeline word auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/25/2026 11:19:57</strong> by kartupro.ge@gmail.com [form[6d7f13ce-d8ab-4091-a84b-07c441996011].word_id]</div>
+                <div>Changed: c2e6712f-bd87-4bef-bc23-0c6183bf1116 &rarr; dd539e75-19b5-4050-8016-ed17b8dc57f5</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/25/2026 11:19:57</strong> by kartupro.ge@gmail.com [form[a01a250c-1e4a-45cc-820c-65c56c612db1].word_id]</div>
+                <div>Changed: c2e6712f-bd87-4bef-bc23-0c6183bf1116 &rarr; dd539e75-19b5-4050-8016-ed17b8dc57f5</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/25/2026 11:19:57</strong> by kartupro.ge@gmail.com [form[c43e7c67-5806-45e7-be6a-513e3eafe1db].word_id]</div>
+                <div>Changed: c2e6712f-bd87-4bef-bc23-0c6183bf1116 &rarr; dd539e75-19b5-4050-8016-ed17b8dc57f5</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/25/2026 11:19:57</strong> by kartupro.ge@gmail.com [form[b7158911-2d47-43c4-9d53-6ed54d205a26].word_id]</div>
+                <div>Changed: c2e6712f-bd87-4bef-bc23-0c6183bf1116 &rarr; dd539e75-19b5-4050-8016-ed17b8dc57f5</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/25/2026 11:19:57</strong> by kartupro.ge@gmail.com [form[b98f7041-5cd8-4982-8cf7-ffd26001d280].word_id]</div>
+                <div>Changed: c2e6712f-bd87-4bef-bc23-0c6183bf1116 &rarr; dd539e75-19b5-4050-8016-ed17b8dc57f5</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/25/2026 11:19:57</strong> by kartupro.ge@gmail.com [form[7de06fec-fd38-4f0f-b97b-839a0d08ecf8].word_id]</div>
+                <div>Changed: c2e6712f-bd87-4bef-bc23-0c6183bf1116 &rarr; dd539e75-19b5-4050-8016-ed17b8dc57f5</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/25/2026 11:19:57</strong> by kartupro.ge@gmail.com [form[c79c970a-ef4b-4614-948f-2c375f54d3d4].word_id]</div>
+                <div>Changed: c2e6712f-bd87-4bef-bc23-0c6183bf1116 &rarr; dd539e75-19b5-4050-8016-ed17b8dc57f5</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/25/2026 11:19:57</strong> by kartupro.ge@gmail.com [form[5fbc80e0-4ec5-4b1f-b7d0-0578b93909ff].word_id]</div>
+                <div>Changed: c2e6712f-bd87-4bef-bc23-0c6183bf1116 &rarr; dd539e75-19b5-4050-8016-ed17b8dc57f5</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/25/2026 11:19:57</strong> by kartupro.ge@gmail.com [form[c7320905-6bf0-4559-bdd5-29405c123f94].word_id]</div>
+                <div>Changed: c2e6712f-bd87-4bef-bc23-0c6183bf1116 &rarr; dd539e75-19b5-4050-8016-ed17b8dc57f5</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/25/2026 11:19:57</strong> by kartupro.ge@gmail.com [form[432d9dec-de0a-4fd4-bca9-b30dbedac1e2].word_id]</div>
+                <div>Changed: c2e6712f-bd87-4bef-bc23-0c6183bf1116 &rarr; dd539e75-19b5-4050-8016-ed17b8dc57f5</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/25/2026 11:19:57</strong> by kartupro.ge@gmail.com [form[c3ab31e1-9c4d-4f4d-bde7-8d96b2cf1b4a].word_id]</div>
+                <div>Changed: c2e6712f-bd87-4bef-bc23-0c6183bf1116 &rarr; dd539e75-19b5-4050-8016-ed17b8dc57f5</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/25/2026 11:19:57</strong> by kartupro.ge@gmail.com [form[acdcd151-978d-46a7-bc97-0d1f7e306aca].word_id]</div>
+                <div>Changed: c2e6712f-bd87-4bef-bc23-0c6183bf1116 &rarr; dd539e75-19b5-4050-8016-ed17b8dc57f5</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/25/2026 11:19:57</strong> by kartupro.ge@gmail.com [form[11e4194e-2542-45fe-a9e4-82476e811ec1].word_id]</div>
+                <div>Changed: c2e6712f-bd87-4bef-bc23-0c6183bf1116 &rarr; dd539e75-19b5-4050-8016-ed17b8dc57f5</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/25/2026 11:19:57</strong> by kartupro.ge@gmail.com [form[aae80e4a-bac8-494e-a262-90f75a0b9ed8].word_id]</div>
+                <div>Changed: c2e6712f-bd87-4bef-bc23-0c6183bf1116 &rarr; dd539e75-19b5-4050-8016-ed17b8dc57f5</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/25/2026 11:19:57</strong> by kartupro.ge@gmail.com [form[ca34571a-2fa4-4c8a-878a-69d23b019d84].word_id]</div>
+                <div>Changed: c2e6712f-bd87-4bef-bc23-0c6183bf1116 &rarr; dd539e75-19b5-4050-8016-ed17b8dc57f5</div>
+                <div><em>Comment: Pipeline form auto-merge</em></div>
+            </div>
+            
+            <div class="edit-item">
+                <div class="edit-meta"><strong>9/25/2026 11:16:41</strong> by kartupro.ge@gmail.com [form[808844ba-4614-4cd5-95ec-9e2b042c790b].word_id]</div>
+                <div>Changed: [unavailable] &rarr; c2e6712f-bd87-4bef-bc23-0c6183bf1116</div>
+                
+            </div>
+            
+        </div>
     
 </section>
 
 
         <footer>
-            <p>Page last generated at Fri, 25 Sep 2026 00:16:24 &#43;04.</p>
+            <p>Page last generated at Fri, 25 Sep 2026 13:24:40 &#43;04.</p>
         </footer>
     </div>
 
