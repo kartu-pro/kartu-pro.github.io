@@ -1,4 +1,4 @@
-:root {
+:root {style
     --sticky-bar-height: 48px;
 }
 
@@ -91,10 +91,58 @@ body {
     cursor: pointer; 
     border-bottom: 1px solid var(--color-border); 
     font-size: 0.9rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.dropdown-item:last-child {
+    border-bottom: none;
 }
 
 .dropdown-item:hover { 
     background: var(--color-surface-hover); 
+}
+
+.item-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.item-title {
+    display: flex;
+    align-items: baseline;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+}
+
+.matched-form {
+    font-weight: 600;
+}
+
+.lemma-ref {
+    font-size: 0.8em;
+    opacity: 0.75;
+}
+
+.pos-badge {
+    font-size: 0.75em;
+    background: var(--color-surface-hover);
+    border: 1px solid var(--color-border);
+    padding: 0.1rem 0.4rem;
+    border-radius: var(--radius-sm);
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.item-trans {
+    font-size: 0.85em;
+    opacity: 0.85;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* Sticky Context Bar */
@@ -108,7 +156,7 @@ body {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0 0.75rem;
+    padding: 0.75rem;
     box-shadow: 0 2px 4px rgba(0,0,0,0.03);
     margin-bottom: 1.25rem;
     -webkit-backface-visibility: hidden;
@@ -156,43 +204,100 @@ body {
 }
 
 /* Tables */
-table.paradigm-table {
+.table-wrapper {
     width: 100%;
-    border-collapse: collapse;
+    -webkit-overflow-scrolling: touch;
     margin-top: 0.5rem;
-    table-layout: fixed;
+    margin-bottom: 1.5rem;
+}
+
+table.paradigm-table {
+    width: auto; /* Fits content tightly without forced stretching */
+    border-collapse: collapse;
+    margin-top: 0.25rem;
+    table-layout: auto;
 }
 
 table.paradigm-table th, 
 table.paradigm-table td {
-    border: 1px solid var(--color-border);
+    border: none; /* Removes blocky table lines */
+    padding: 4px;
     text-align: center;
-    vertical-align: middle;
-    word-wrap: break-word;
+    vertical-align: baseline;
+    white-space: nowrap;
 }
 
+/* Align 2nd column to the right and last column to the left */
+table.paradigm-table th:nth-child(2),
+table.paradigm-table td:nth-child(2) {
+    text-align: right;
+}
+
+table.paradigm-table th:last-child,
+table.paradigm-table td:last-child {
+    text-align: left;
+}
+
+table.paradigm-table th.col-sg,
+table.paradigm-table th.col-pl {
+    text-align: center
+}
+
+/* Micro-Header Labels */
 table.paradigm-table th { 
-    background: var(--color-surface-hover); 
-    font-size: 0.9em; 
+    background: transparent; 
+    font-weight: 700;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--color-border);
 }
-.table-wrapper {
-    width: 100%;
-    max-width: 100%; /* Prevents wrapper from expanding parent width */
-    box-sizing: border-box; /* Includes borders/padding in width calculation */
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    margin-top: 0.5rem;
-}
-/* Remove fixed layout inside wrappers so cells fit content naturally */
-.table-wrapper table.paradigm-table {
-    table-layout: auto;
-    min-width: 550px; /* Ensures text won't cramp */
-}
+
+/* Tooltip alignment fix for micro-headers */
 th[data-tooltip] {
-  position: relative;
-  cursor: help;
-  user-select: none;
+    position: relative;
+    cursor: help;
+    user-select: none;
 }
+
+/* Subject Column (S) Styling */
+table.paradigm-table td.col-subj,
+table.paradigm-table th.col-subj {
+    padding-right: 14px; /* Distinct gap between Subject pronoun and Verb */
+    color: var(--color-text-secondary);
+    font-size: 0.9em;
+    text-align: right;
+}
+/* Tightens stem + ending so they look like one continuous word */
+.paradigm-table .col-stem {
+    margin-left: 1rem;
+    text-align: right;
+}
+
+.paradigm-table .col-end {
+    text-align: left;
+}
+
+/* Morpheme Exception Colors (replaces generic .text-red/blue) */
+td.text-red { 
+    color: var(--color-accent); /* Warm orange-red for root exceptions */
+    font-weight: 600; 
+}
+
+td.text-blue { 
+    color: var(--color-accent); /* Clear blue for suffix/PFSF shifts */
+    font-weight: 600; 
+}
+
+td.text-purple { 
+    color: #6b21a8; /* Purple for double shifts */
+    background-color: #f3e8ff;
+    border-radius: 4px;
+    font-weight: 700; 
+    display: inline-block;
+}
+
 
 /* Tooltip Popup Box (Opens downward) */
 th[data-tooltip]::after {
@@ -241,35 +346,6 @@ th[data-tooltip]:active::before {
   opacity: 1;
 }
 
-.col-subj   { width: 12%; }
-.col-prefix { width: 12%; }
-.col-person { width: 12%; }
-.col-vers   { width: 12%; }
-.col-root   { width: 22%; }
-.col-pfsf   { width: 15%; }
-.col-suffix { width: 15%; }
-.col-single { width: 88%; }
-
-.text-red, .text-blue, .text-purple { 
-    color: var(--color-accent); 
-    font-weight: 600; 
-}
-
-text-purple {
-    font-weight:bold;
-}
-
-.legend-box { 
-    display: flex; 
-    gap: 1rem; 
-    font-size: 0.85rem; 
-    margin: 0.75rem 0; 
-    padding: 0.5rem 0.75rem; 
-    background: var(--color-bg); 
-    border: 1px solid var(--color-border); 
-    border-radius: var(--radius-sm); 
-    flex-wrap: wrap; 
-}
 
 .stats-grid { 
     display: grid; 
@@ -326,9 +402,51 @@ footer {
     padding-top: 1rem; 
 }
 
-ul {
+/* Flexible Edit Logs */
+ul.edits-list {
     list-style: none;
-    padding-left: 0; /* Removes default left indent */
+    padding: 0;
+    margin: 0.75rem 0 0 0;
+    border-top: 1px solid var(--color-border);
+}
+
+li.edit-row {
+    padding: 0.5rem 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+    font-size: 0.85rem;
+    border-bottom: 1px dashed var(--color-border);
+    cursor: help;
+}
+
+.edit-meta {
+    color: var(--color-text-secondary);
+    font-size: 0.78em;
+    white-space: nowrap;
+}
+
+.edit-change {
+    color: var(--color-text-primary);
+    word-break: break-word;
+    overflow-wrap: anywhere;
+}
+
+.edit-change code {
+    font-size: 0.85em;
+    background: var(--color-surface-hover);
+    padding: 1px 5px;
+    border-radius: 3px;
+    border: 1px solid var(--color-border);
+}
+
+.val-new {
+    font-weight: 600;
+}
+
+ul {
+    list-style:none;
 }
 
 @media (max-width: 600px) {
@@ -338,17 +456,7 @@ ul {
     .container {
 	padding: 0.75rem;
     }
-    /* Allow tables to shrink naturally on smaller screens */
-    .table-wrapper table.paradigm-table {
-        min-width: 0; /* Remove forced minimum width */
-        width: 100%;
-        table-layout: auto;
-    }
-
-    /* Reset strict percentage column widths on mobile */
-    .col-subj, .col-prefix, .col-person, .col-vers, 
-    .col-root, .col-pfsf, .col-suffix, .col-single {
-        width: auto;
-        padding: 4px 6px; /* Keep cell padding tight for compact reading */
+    table.paradigm-table td.col-subj {
+        padding-right: 8px;
     }
 }

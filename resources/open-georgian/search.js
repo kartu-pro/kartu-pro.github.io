@@ -7,14 +7,68 @@ const dropdown = document.getElementById('dropdown');
 async function ensureIndex() {
     if (!searchIndex) {
         dropdown.style.display = 'block';
+        dropdown.innerHTML = '<div class="dropdown-item loading">Loading search index...</div>';
         try {
             const res = await fetch('search_index.json');
             searchIndex = await res.json();
+            dropdown.innerHTML = '';
         } catch (err) {
             dropdown.innerHTML = '<div class="dropdown-item">Failed to load index</div>';
         }
         if (!input.value.trim()) dropdown.style.display = 'none';
     }
+}
+
+function initStickyContextNav() {
+    const selectEl = document.getElementById('sticky-jump-select');
+    // Find all valid section headings that have an ID
+    const sections = Array.from(document.querySelectorAll('.jump-section[id]'));
+
+    if (!selectEl || sections.length === 0) return;
+
+    // 1. Populate dropdown options
+    selectEl.innerHTML = sections.map(sec => {
+        const id = sec.getAttribute('id');
+        const title = sec.getAttribute('data-jump-title') || sec.textContent.trim();
+        return `<option value="#${id}">${title}</option>`;
+    }).join('');
+
+    // 2. Handle dropdown selection jump
+    selectEl.addEventListener('change', (e) => {
+        const target = document.querySelector(e.target.value);
+        if (target) {
+            target.scrollIntoView({ behavior: 'smooth' });
+        }
+    });
+
+    // 3. Sync dropdown selection on scroll
+    const navHeight = 48;    // Matches --sticky-bar-height
+    const marginOffset = 12; // Matches scroll-margin-top offset
+    const tolerance = 5;     // Buffer for subpixel rendering
+    const triggerThreshold = navHeight + marginOffset + tolerance;
+
+    function updateActiveSection() {
+        let activeSection = sections[0];
+
+        for (const section of sections) {
+            const rect = section.getBoundingClientRect();
+            if (rect.top <= triggerThreshold) {
+                activeSection = section;
+            } else {
+                break;
+            }
+        }
+
+        const activeId = '#' + activeSection.getAttribute('id');
+
+        // Update dropdown option if changed
+        if (selectEl.value !== activeId) {
+            selectEl.value = activeId;
+        }
+    }
+
+    window.addEventListener('scroll', updateActiveSection, { passive: true });
+    updateActiveSection();
 }
 
 // Binary search to find lower bound index in sorted terms
@@ -77,64 +131,7 @@ function latinToGeorgian(str) {
     return s.split('').map(c => charMap[c] || c).join('').replace(/'/g, '');
 }
 
-function initStickyContextNav() {
-    const selectEl = document.getElementById('sticky-jump-select');
-    // Find all valid section headings that have an ID
-    const sections = Array.from(document.querySelectorAll('.jump-section[id]'));
 
-    if (!selectEl || sections.length === 0) return;
-
-    // 1. Populate dropdown options
-    selectEl.innerHTML = sections.map(sec => {
-        const id = sec.getAttribute('id');
-        const title = sec.getAttribute('data-jump-title') || sec.textContent.trim();
-        return `<option value="#${id}">${title}</option>`;
-    }).join('');
-
-    // 2. Handle dropdown selection jump
-    selectEl.addEventListener('change', (e) => {
-        const target = document.querySelector(e.target.value);
-        if (target) {
-            target.scrollIntoView({ behavior: 'smooth' });
-        }
-    });
-
-    // 3. Sync dropdown selection on scroll
-    const navHeight = 48;    // Matches --sticky-bar-height
-    const marginOffset = 12; // Matches scroll-margin-top offset
-    const tolerance = 5;     // Buffer for subpixel rendering
-    const triggerThreshold = navHeight + marginOffset + tolerance;
-
-    function updateActiveSection() {
-        let activeSection = sections[0];
-
-        for (const section of sections) {
-            const rect = section.getBoundingClientRect();
-            if (rect.top <= triggerThreshold) {
-                activeSection = section;
-            } else {
-                break;
-            }
-        }
-
-        const activeId = '#' + activeSection.getAttribute('id');
-
-        // Update dropdown option if changed
-        if (selectEl.value !== activeId) {
-            selectEl.value = activeId;
-        }
-    }
-
-    window.addEventListener('scroll', updateActiveSection, { passive: true });
-    updateActiveSection();
-}
-
-// Initialize on DOM ready
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initStickyContextNav);
-} else {
-    initStickyContextNav();
-}
 
 if (input) {
     input.addEventListener('focus', ensureIndex);
@@ -142,51 +139,128 @@ if (input) {
         clearTimeout(timer);
         timer = setTimeout(async () => {
             await ensureIndex();
-            const q = input.value.trim();
-            if (!q) { dropdown.style.display = 'none'; return; }
+            const rawQ = input.value.trim();
+            if (!rawQ) { dropdown.style.display = 'none'; return; }
 
-            // Include apostrophes in ASCII detection
-            const isAscii = /^[a-z0-9\s.,'-]+$/i.test(q);
-            const qLower = q.toLowerCase();
-            const qGeo = isAscii ? latinToGeorgian(q) : qLower;
+            const qLower = rawQ.toLowerCase();
+            // Preserve apostrophes (') and hyphens (-) within words, split on punctuation/spaces
+            const qClean = qLower
+                .replace(/[,;/]/g, ' ')
+                .replace(/[^\w\s\u0100-\uFFFF'-]/g, '')
+                .replace(/\s+/g, ' ')
+                .trim();
+            const qTokens = qClean.split(' ').filter(Boolean);
+
+            const isAscii = /^[a-z0-9\s.,''-]+$/i.test(rawQ);
+            const qGeo = isAscii ? latinToGeorgian(rawQ) : qLower;
             const matchesMap = new Map();
 
-            // Direct term match
-            collectMatches(qLower, matchesMap, 50);
-
-            // Transliterated Georgian match
+            // Collect match candidates for query tokens and transliteration
+            qTokens.forEach(token => collectMatches(token, matchesMap, 100));
             if (isAscii && qGeo !== qLower) {
-                collectMatches(qGeo, matchesMap, 50);
+                collectMatches(qGeo, matchesMap, 100);
             }
 
-            const candidates = Array.from(matchesMap.keys());
+            let candidates = Array.from(matchesMap.keys());
+
+            // Multi-token filter (e.g. "do, make"): require translation to contain all tokens
+            if (qTokens.length > 1) {
+                candidates = candidates.filter(id => {
+                    const w = searchIndex.w[id];
+                    if (!w) return false;
+                    const trans = (w[2] || '').toLowerCase();
+                    return qTokens.every(tok => trans.includes(tok));
+                });
+            }
+
             if (candidates.length === 0) {
                 dropdown.innerHTML = '<div class="dropdown-item">No results</div>';
             } else {
+                const parseGlosses = (transStr) => {
+                    if (!transStr) return [];
+                    return transStr
+                        .toLowerCase()
+                        .split(/[,;/]+/)
+                        .map(g => g.replace(/\([^)]*\)/g, '').trim())
+                        .filter(Boolean);
+                };
+
                 candidates.sort((a, b) => {
                     const wA = searchIndex.w[a], wB = searchIndex.w[b];
                     if (!wA || !wB) return 0;
-                    const lemmaA = wA[0], lemmaB = wB[0];
-                    const termA = matchesMap.get(a) || lemmaA, termB = matchesMap.get(b) || lemmaB;
-                    const isExactA = (termA === qLower || termA === qGeo), isExactB = (termB === qLower || termB === qGeo);
-                    if (isExactA && !isExactB) return -1;
-                    if (!isExactA && isExactB) return 1;
-                    return termA.length - termB.length;
+
+                    const lemmaA = wA[0].toLowerCase(), lemmaB = wB[0].toLowerCase();
+                    const transA = (wA[2] || '').toLowerCase();
+                    const transB = (wB[2] || '').toLowerCase();
+
+                    const termA = (matchesMap.get(a) || lemmaA).toLowerCase();
+                    const termB = (matchesMap.get(b) || lemmaB).toLowerCase();
+
+                    const glossesA = parseGlosses(transA);
+                    const glossesB = parseGlosses(transB);
+
+                    const getScore = (lemma, term, trans, glosses) => {
+                        const targets = [qLower, qClean, qGeo].filter(Boolean);
+
+                        // 0: Exact Lemma Match
+                        if (targets.includes(lemma)) return 0;
+
+                        // 10: Exact Inflected Form Match
+                        if (targets.includes(term)) return 10;
+
+                        // 15: Exact Gloss Match
+                        if (targets.some(t => glosses.includes(t) || trans === t)) return 15;
+
+                        // 20: Prefix Match on Lemma
+                        if (targets.some(t => lemma.startsWith(t))) return 20;
+
+                        // 25: Prefix Match on Translation Gloss
+                        if (targets.some(t => glosses.some(g => g.startsWith(t)))) return 25;
+
+                        // 30: Prefix Match on Inflected Form
+                        if (targets.some(t => term.startsWith(t))) return 30;
+
+                        // 35: Substring Match on Translation
+                        if (targets.some(t => trans.includes(t) || (qTokens.length > 0 && qTokens.every(tok => trans.includes(tok))))) return 35;
+
+                        return 40;
+                    };
+
+                    const scoreA = getScore(lemmaA, termA, transA, glossesA);
+                    const scoreB = getScore(lemmaB, termB, transB, glossesB);
+
+                    if (scoreA !== scoreB) return scoreA - scoreB;
+
+                    if (transA.length !== transB.length) {
+                        return transA.length - transB.length;
+                    }
+
+                    if (termA.length !== termB.length) {
+                        return termA.length - termB.length;
+                    }
+
+                    return lemmaA.localeCompare(lemmaB);
                 });
 
                 dropdown.innerHTML = candidates.slice(0, 15).map(id => {
-                    const w = searchIndex.w[id]; // [lemma, pos, trans, uuid]
+                    const w = searchIndex.w[id];
                     if (!w) return '';
-                    const lemma = w[0], pos = w[1], trans = w[2], uuid = w[3];
+                    const [lemma, pos, trans, uuid] = w;
                     const matchedForm = matchesMap.get(id) || lemma;
-                    const isLemmaMatch = lemma.toLowerCase().startsWith(qLower) || lemma.toLowerCase().startsWith(qGeo);
-                    const isTransMatch = !isLemmaMatch && trans && trans.toLowerCase().includes(qLower);
-                    
-                    let displayLabel = `<strong>${lemma}</strong>`;
-                    if (!isLemmaMatch && !isTransMatch) {
-                        displayLabel = `<strong>${matchedForm}</strong> <small style="color:#6c757d;">(form of ${lemma})</small>`;
-                    }
-                    return `<div class="dropdown-item" onclick="window.location='${uuid}/'">${displayLabel} | ${pos}${trans ? ' | ' + trans : ''}</div>`;
+                    const isSame = matchedForm.toLowerCase() === lemma.toLowerCase();
+
+                    return `
+                      <div class="dropdown-item" onclick="window.location='${uuid}/'">
+                        <div class="item-header">
+                          <div class="item-title">
+                            <span class="matched-form">${matchedForm}</span>
+                            ${!isSame ? `<span class="lemma-ref">(lemma: <em>${lemma}</em>)</span>` : ''}
+                          </div>
+                          <span class="pos-badge">${pos}</span>
+                        </div>
+                        ${trans ? `<div class="item-trans">${trans}</div>` : ''}
+                      </div>
+                    `;
                 }).join('');
             }
             dropdown.style.display = 'block';
@@ -197,3 +271,22 @@ if (input) {
 document.addEventListener('click', (e) => {
     if (!e.target.closest('.search-container')) dropdown.style.display = 'none';
 });
+
+document.addEventListener('copy', (e) => {
+    const selection = window.getSelection().toString();
+    if (!selection) return;
+    const cleanedText = selection.replace(/\t+/g, ''); // remove tabs
+    e.clipboardData.setData('text/plain', cleanedText);
+    e.preventDefault();
+});
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        ensureIndex();
+        initStickyContextNav();
+    });
+} else {
+    ensureIndex();
+    initStickyContextNav();
+}
+
