@@ -17,40 +17,44 @@ async function ensureIndex() {
     }
 }
 
-function findNodeWithPath(node, query, path = '') {
-    if (!node) return { node: null, path: '' };
-    // Fix: Return node when query reaches exact match
-    if (query === '') return { node: node, path: path };
-    if (!node.c) return { node: null, path: '' };
-
-    for (const edge in node.c) {
-        if (query.startsWith(edge)) {
-            return findNodeWithPath(node.c[edge], query.slice(edge.length), path + edge);
-        }
-        if (edge.startsWith(query)) {
-            return { node: node.c[edge], path: path + edge };
+// Binary search to find lower bound index in sorted terms
+function findLowerBound(terms, prefix) {
+    let low = 0, high = terms.length - 1;
+    let result = terms.length;
+    while (low <= high) {
+        const mid = (low + high) >> 1;
+        if (terms[mid] >= prefix) {
+            result = mid;
+            high = mid - 1;
+        } else {
+            low = mid + 1;
         }
     }
-    return { node: null, path: '' };
+    return result;
 }
 
-function collectMatches(node, path, matches = new Map(), limit = 50) {
-    if (!node || matches.size >= limit) return matches;
-    if (node.i) {
-        for (const id of node.i) {
-            if (!matches.has(id)) {
-                matches.set(id, path);
-                if (matches.size >= limit) return matches;
+// Collect matches using binary search + linear prefix scan
+function collectMatches(prefix, matchesMap, limit = 50) {
+    if (!prefix || !searchIndex || !searchIndex.t) return;
+    
+    const terms = searchIndex.t;
+    const startIdx = findLowerBound(terms, prefix);
+
+    for (let i = startIdx; i < terms.length; i++) {
+        const term = terms[i];
+        if (!term.startsWith(prefix)) break;
+
+        const ids = searchIndex.i[i];
+        if (Array.isArray(ids)) {
+            for (const id of ids) {
+                if (!matchesMap.has(id)) matchesMap.set(id, term);
             }
+        } else {
+            if (!matchesMap.has(ids)) matchesMap.set(ids, term);
         }
+
+        if (matchesMap.size >= limit) break;
     }
-    if (node.c) {
-        for (const edge in node.c) {
-            collectMatches(node.c[edge], path + edge, matches, limit);
-            if (matches.size >= limit) break;
-        }
-    }
-    return matches;
 }
 
 function latinToGeorgian(str) {
@@ -141,18 +145,18 @@ if (input) {
             const q = input.value.trim();
             if (!q) { dropdown.style.display = 'none'; return; }
 
-            // Fix: Include apostrophes in ASCII detection
+            // Include apostrophes in ASCII detection
             const isAscii = /^[a-z0-9\s.,'-]+$/i.test(q);
             const qLower = q.toLowerCase();
             const qGeo = isAscii ? latinToGeorgian(q) : qLower;
             const matchesMap = new Map();
 
-            const primaryMatch = findNodeWithPath(searchIndex.r, qLower);
-            if (primaryMatch.node) collectMatches(primaryMatch.node, primaryMatch.path, matchesMap, 50);
+            // Direct term match
+            collectMatches(qLower, matchesMap, 50);
 
+            // Transliterated Georgian match
             if (isAscii && qGeo !== qLower) {
-                const geoMatch = findNodeWithPath(searchIndex.r, qGeo);
-                if (geoMatch.node) collectMatches(geoMatch.node, geoMatch.path, matchesMap, 50);
+                collectMatches(qGeo, matchesMap, 50);
             }
 
             const candidates = Array.from(matchesMap.keys());
@@ -162,7 +166,8 @@ if (input) {
                 candidates.sort((a, b) => {
                     const wA = searchIndex.w[a], wB = searchIndex.w[b];
                     if (!wA || !wB) return 0;
-                    const termA = matchesMap.get(a) || wA.l, termB = matchesMap.get(b) || wB.l;
+                    const lemmaA = wA[0], lemmaB = wB[0];
+                    const termA = matchesMap.get(a) || lemmaA, termB = matchesMap.get(b) || lemmaB;
                     const isExactA = (termA === qLower || termA === qGeo), isExactB = (termB === qLower || termB === qGeo);
                     if (isExactA && !isExactB) return -1;
                     if (!isExactA && isExactB) return 1;
@@ -170,16 +175,18 @@ if (input) {
                 });
 
                 dropdown.innerHTML = candidates.slice(0, 15).map(id => {
-                    const w = searchIndex.w[id];
+                    const w = searchIndex.w[id]; // [lemma, pos, trans, uuid]
                     if (!w) return '';
-                    const matchedForm = matchesMap.get(id) || w.l;
-                    const isLemmaMatch = w.l.toLowerCase().startsWith(qLower) || w.l.toLowerCase().startsWith(qGeo);
-                    const isTransMatch = !isLemmaMatch && w.t && w.t.toLowerCase().includes(qLower);
-                    let displayLabel = `<strong>${w.l}</strong>`;
+                    const lemma = w[0], pos = w[1], trans = w[2], uuid = w[3];
+                    const matchedForm = matchesMap.get(id) || lemma;
+                    const isLemmaMatch = lemma.toLowerCase().startsWith(qLower) || lemma.toLowerCase().startsWith(qGeo);
+                    const isTransMatch = !isLemmaMatch && trans && trans.toLowerCase().includes(qLower);
+                    
+                    let displayLabel = `<strong>${lemma}</strong>`;
                     if (!isLemmaMatch && !isTransMatch) {
-                        displayLabel = `<strong>${matchedForm}</strong> <small style="color:#6c757d;">(form of ${w.l})</small>`;
+                        displayLabel = `<strong>${matchedForm}</strong> <small style="color:#6c757d;">(form of ${lemma})</small>`;
                     }
-                    return `<div class="dropdown-item" onclick="window.location='${id}/'">${displayLabel} | ${w.p}${w.t ? ' | ' + w.t : ''}</div>`;
+                    return `<div class="dropdown-item" onclick="window.location='${uuid}/'">${displayLabel} | ${pos}${trans ? ' | ' + trans : ''}</div>`;
                 }).join('');
             }
             dropdown.style.display = 'block';
