@@ -131,8 +131,6 @@ function latinToGeorgian(str) {
     return s.split('').map(c => charMap[c] || c).join('').replace(/'/g, '');
 }
 
-
-
 if (input) {
     input.addEventListener('focus', ensureIndex);
     input.addEventListener('input', () => {
@@ -155,7 +153,7 @@ if (input) {
             const qGeo = isAscii ? latinToGeorgian(rawQ) : qLower;
             const matchesMap = new Map();
 
-            // Collect match candidates for query tokens and transliteration
+            // Collect match candidates for query tokens and transliterationsear
             qTokens.forEach(token => collectMatches(token, matchesMap, 100));
             if (isAscii && qGeo !== qLower) {
                 collectMatches(qGeo, matchesMap, 100);
@@ -185,60 +183,84 @@ if (input) {
                         .filter(Boolean);
                 };
 
+                // =========================================================================
+                // CANDIDATE SORTING & PRIORITIZATION LOGIC
+                // =========================================================================
                 candidates.sort((a, b) => {
                     const wA = searchIndex.w[a], wB = searchIndex.w[b];
                     if (!wA || !wB) return 0;
 
                     const lemmaA = wA[0].toLowerCase(), lemmaB = wB[0].toLowerCase();
+                    const uuidA = wA[3], uuidB = wB[3];
                     const transA = (wA[2] || '').toLowerCase();
                     const transB = (wB[2] || '').toLowerCase();
+
+                    // Unpack form presence flag (index 5): "1" means it has forms, "0" means formless
+                    const hasFormsA = wA[5] === '1';
+                    const hasFormsB = wB[5] === '1';
 
                     const termA = (matchesMap.get(a) || lemmaA).toLowerCase();
                     const termB = (matchesMap.get(b) || lemmaB).toLowerCase();
 
+                    const formKeyA = `${uuidA}:${termA}`;
+                    const formKeyB = `${uuidB}:${termB}`;
+                    const freqA = (searchIndex.f && searchIndex.f[formKeyA]) || parseInt(wA[4], 10) || 999999;
+                    const freqB = (searchIndex.f && searchIndex.f[formKeyB]) || parseInt(wB[4], 10) || 999999;
+
                     const glossesA = parseGlosses(transA);
                     const glossesB = parseGlosses(transB);
 
-                    const getScore = (lemma, term, trans, glosses) => {
+                    const getScore = (lemma, term, trans, glosses, hasForms) => {
+                        // PRIORITY PENALTY: If a word page has no forms/paradigms, 
+                        // push it to a low-priority tier (Score 50) so it never buries fully-formed results,
+                        // but remains accessible for discovery and community contribution.
+                        if (!hasForms) return 50;
+
                         const targets = [qLower, qClean, qGeo].filter(Boolean);
 
-                        // 0: Exact Lemma Match
+                        // Tier 0 (Score 0): Exact Lemma match
                         if (targets.includes(lemma)) return 0;
 
-                        // 10: Exact Inflected Form Match
+                        // Tier 1 (Score 10): Exact Inflected Form match
                         if (targets.includes(term)) return 10;
 
-                        // 15: Exact Gloss Match
+                        // Tier 2 (Score 15): Exact Translation Gloss match
                         if (targets.some(t => glosses.includes(t) || trans === t)) return 15;
 
-                        // 20: Prefix Match on Lemma
+                        // Tier 3 (Score 20): Prefix match on Lemma
                         if (targets.some(t => lemma.startsWith(t))) return 20;
 
-                        // 25: Prefix Match on Translation Gloss
+                        // Tier 4 (Score 25): Prefix match on Translation Gloss
                         if (targets.some(t => glosses.some(g => g.startsWith(t)))) return 25;
 
-                        // 30: Prefix Match on Inflected Form
+                        // Tier 5 (Score 30): Prefix match on Inflected Form
                         if (targets.some(t => term.startsWith(t))) return 30;
 
-                        // 35: Substring Match on Translation
+                        // Tier 6 (Score 35): Substring match on Translation
                         if (targets.some(t => trans.includes(t) || (qTokens.length > 0 && qTokens.every(tok => trans.includes(tok))))) return 35;
 
+                        // Tier 7 (Score 40): General fallback match
                         return 40;
                     };
 
-                    const scoreA = getScore(lemmaA, termA, transA, glossesA);
-                    const scoreB = getScore(lemmaB, termB, transB, glossesB);
+                    const scoreA = getScore(lemmaA, termA, transA, glossesA, hasFormsA);
+                    const scoreB = getScore(lemmaB, termB, transB, glossesB, hasFormsB);
 
+                    // Rule 1: Relevance Score takes absolute priority (formless words naturally drop below 50)
                     if (scoreA !== scoreB) return scoreA - scoreB;
 
+                    // Rule 2: Smart Frequency Tie-Breaker
+                    if (freqA !== freqB) {
+                        return freqA - freqB;
+                    }
+
+                    // Rule 3: Secondary tie-breakers
                     if (transA.length !== transB.length) {
                         return transA.length - transB.length;
                     }
-
                     if (termA.length !== termB.length) {
                         return termA.length - termB.length;
                     }
-
                     return lemmaA.localeCompare(lemmaB);
                 });
 
@@ -289,4 +311,3 @@ if (document.readyState === 'loading') {
     ensureIndex();
     initStickyContextNav();
 }
-
